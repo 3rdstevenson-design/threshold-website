@@ -1,45 +1,65 @@
 const BOOKING_URL = 'https://threshold.clientsecure.me'
 
+// Logo mark path — the crossing curves only, for use in nav
+const MARK_PATH =
+  'M1674.35,464.18s-86.86-2.87-176.53,29.02c-44.21,15.72-129.8,51.59-240.99,129.98,0,0,77.76,68.47,187.49,96.12,0,0-93.91-19.04-194.32-90.68-100.41,71.64-194.32,90.68-194.32,90.68,109.73-27.66,187.49-96.12,187.49-96.12-111.19-78.39-196.79-114.26-240.99-129.98-89.68-31.89-176.53-29.02-176.53-29.02,0,0,62.16-1.99,150,31.13,135.87,51.24,231.21,131.61,231.21,131.61-152.65,109.2-358.85,123.04-368.63,123.64,132.46-7.72,210.87-23.73,283.35-46.38,72.55-22.67,128.42-51.54,128.42-51.54,0,0,55.87,28.87,128.42,51.54,72.48,22.65,150.89,38.66,283.35,46.38-9.78-.6-215.98-14.44-368.63-123.64,0,0,95.34-80.37,231.21-131.61,87.84-33.12,150-31.13,150-31.13Z'
+
 const crossCards = [
   {
     letter: 'C',
     title: 'Clinical Assessment',
     description:
-      "A systematic, joint-by-joint evaluation that finds what everyone else missed. Not where it hurts — why it broke down.",
+      'A systematic, joint-by-joint evaluation that finds what everyone else missed. Where it broke down, and why.',
   },
   {
     letter: 'R',
     title: 'Reconditioning',
     description:
-      "Hands-on treatment that addresses the actual system that failed. It starts session one. You don't wait three visits to feel a difference.",
+      "Hands-on treatment that addresses the actual system that failed. It starts session one. You don't wait 3 visits to feel a difference.",
   },
   {
     letter: 'O',
     title: 'Ownership',
     description:
-      "The layer most practitioners skip entirely. Addressing the beliefs and self-concept that keep people stuck just as much as the physical problem does.",
+      'The layer most practitioners skip. Addressing the beliefs and self-concept that keep people stuck just as much as the physical problem does.',
   },
   {
     letter: 'S',
     title: 'Systematic',
     description:
-      "A proven sequence behind everything. Nothing is random. You always understand why we're doing what we're doing and where we're going next.",
+      "A proven sequence behind everything. Nothing is random. You always know why we're doing what we're doing and where we're going next.",
   },
   {
     letter: 'S',
     title: 'Support',
     description:
-      "Ongoing presence through the entire crossing. Not a six-week fix. A real roadmap with someone who knows you as an individual and is invested in where you're going.",
+      "Ongoing presence through the entire crossing. A real roadmap with someone who knows you as an individual and is invested in where you're going.",
   },
 ]
+
+function LogoMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="826 460 848 295"
+      className={className}
+      aria-hidden="true"
+      fill="currentColor"
+    >
+      <path d={MARK_PATH} />
+    </svg>
+  )
+}
 
 function Nav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-sm border-b border-white/5">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <span className="font-montserrat text-xs font-semibold tracking-[0.2em] text-clinical-white uppercase">
-          Threshold
-        </span>
+        <a href="#hero" className="flex items-center gap-3 group">
+          <LogoMark className="h-7 w-auto text-clinical-white" />
+          <span className="font-montserrat text-xs font-semibold tracking-[0.2em] text-clinical-white uppercase">
+            Threshold
+          </span>
+        </a>
         <div className="hidden md:flex items-center gap-8">
           <a
             href="#method"
@@ -106,12 +126,22 @@ export default function Page() {
           id="hero"
           className="min-h-screen bg-obsidian flex flex-col justify-center pt-16"
         >
-          <div className="max-w-5xl mx-auto px-6 py-28 md:py-36">
+          <div className="max-w-5xl mx-auto px-6 py-24 md:py-32">
+
+            {/* Full logo */}
+            <div className="mb-14">
+              <img
+                src="/logo-dark.svg"
+                alt="Threshold Health and Performance"
+                className="w-72 md:w-96 h-auto"
+              />
+            </div>
+
             <p
-              className="font-montserrat text-xs tracking-[0.28em] text-sterling-silver uppercase mb-10"
+              className="font-montserrat text-xs tracking-[0.28em] text-sterling-silver uppercase mb-8"
               style={{ fontVariantCaps: 'small-caps' }}
             >
-              Threshold Health &amp; Performance · Reston, Virginia
+              Reston, Virginia
             </p>
 
             <h1 className="font-cormorant font-light text-clinical-white leading-[1.05] text-5xl md:text-7xl lg:text-[5.5rem] mb-8 max-w-4xl">
@@ -119,21 +149,25 @@ export default function Page() {
             </h1>
 
             <p className="font-montserrat text-base md:text-lg text-sterling-silver leading-relaxed max-w-2xl mb-10">
-              Physical therapy and performance coaching for serious people who
-              are done settling for partial answers.
+              Physical therapy and performance coaching for people who&apos;ve
+              already tried the system and are still not where they want to be.
             </p>
 
-            <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl mb-14">
-              Most people who find Threshold have already tried the system.
-              They&apos;ve done the exercises, sat through the appointments,
-              followed the protocol — and they&apos;re still limited. Still told
-              to manage it. Still not back to the sport, the activity, or the
-              version of themselves that made life worth living.
-              <br />
-              <br />
-              That&apos;s not a personal failure. That&apos;s a care gap. And
-              it&apos;s exactly what Threshold exists to close.
-            </p>
+            <div className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl mb-14 space-y-4">
+              <p>
+                Most people who find Threshold have already done the work. The
+                exercises. The appointments. 6 to 8 weeks of protocol, a
+                printout, and a handshake.
+              </p>
+              <p>
+                Still limited. Still told to manage it. Still not back to the
+                sport, the activity, or the version of themselves that made life
+                worth living.
+              </p>
+              <p>
+                That&apos;s a care gap. Threshold exists to close it.
+              </p>
+            </div>
 
             <a
               href={BOOKING_URL}
@@ -155,28 +189,27 @@ export default function Page() {
               </p>
 
               <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-10 max-w-3xl">
-                You weren&apos;t failed by your body. You were failed by the
-                approach.
+                The approach had a design problem. You were just the one who
+                felt it.
               </h2>
 
-              <div className="space-y-6 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
+              <div className="space-y-5 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
                 <p>
-                  Traditional PT operates on a model built around time
-                  constraints, diagnosis codes, and generic protocols. You get
-                  six to eight weeks, a printout, and a follow-up appointment —
-                  whether that&apos;s what you actually need or not.
+                  Traditional PT runs on time constraints, diagnosis codes, and
+                  generic protocols. You get 6 to 8 weeks, a printout, and a
+                  follow-up appointment, whether that&apos;s what you actually
+                  need or not.
                 </p>
                 <p>
-                  The problem isn&apos;t that you didn&apos;t try hard enough.
-                  The problem is that the approach never found what was actually
-                  driving your limitation in the first place.
+                  The approach rarely finds what&apos;s actually driving the
+                  limitation in the first place.
                 </p>
                 <p>
-                  When you treat the symptom without understanding the system
-                  behind it, you get temporary relief at best. At worst, you
-                  spend years managing something that should have been resolved
-                  — and quietly start to believe that&apos;s just how
-                  it&apos;s going to be.
+                  Treat the symptom without understanding the system behind it,
+                  and you get temporary relief at best. At worst, you spend
+                  years managing something that should have been resolved,
+                  quietly starting to believe that&apos;s just how it&apos;s
+                  going to be.
                 </p>
                 <p className="text-clinical-white font-semibold">
                   It isn&apos;t.
@@ -194,14 +227,13 @@ export default function Page() {
             </p>
 
             <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-6 max-w-3xl">
-              The CROSS. Five pillars. One crossing.
+              The CROSS. 5 pillars. One crossing.
             </h2>
 
             <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-16">
-              Every client at Threshold goes through the same five-pillar
-              process — built not just to reduce pain, but to restore function,
-              rebuild confidence, and return you to the life that limitation
-              interrupted.
+              Every client at Threshold goes through the same 5-pillar process.
+              Built to restore function, rebuild confidence, and return you to
+              the life that limitation interrupted.
             </p>
 
             {/* Row 1: C, R, O */}
@@ -233,13 +265,18 @@ export default function Page() {
 
             {/* Case study */}
             <div className="border-l-[3px] border-threshold-purple pl-8 md:pl-14 mb-16">
-              <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
-                A woman came in who hadn&apos;t run in ten years. She&apos;d
-                been through the system — multiple providers, multiple diagnoses,
-                no real resolution. Nine months later she was running again.
-                Playing soccer with her kids. Calmer at work. The physical
-                problem was one piece of it. We worked through all three.
-              </p>
+              <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
+                <p>
+                  A woman came in who hadn&apos;t run in 10 years. She&apos;d
+                  been through the system. Multiple providers, multiple
+                  diagnoses, no resolution.
+                </p>
+                <p>
+                  9 months later she was running again. Playing soccer with her
+                  kids. Calmer at work. The physical problem was one piece of
+                  it. We worked through all 3.
+                </p>
+              </div>
             </div>
 
             {/* Credentials */}
@@ -248,11 +285,11 @@ export default function Page() {
                 <span className="text-clinical-white font-semibold">
                   Lars Stevenson, PT, DPT, CSCS
                 </span>{' '}
-                has worked with athletes at every level — including Olympic
+                has worked with athletes at every level, including Olympic
                 sprinters preparing for the Tokyo Games. The same principles
                 that govern elite athletic development are the ones applied at
-                Threshold, regardless of whether you&apos;re competing
-                professionally or just trying to get back to what you love.
+                Threshold, whether you&apos;re competing professionally or just
+                trying to get back to what you love.
               </p>
             </div>
 
@@ -280,20 +317,20 @@ export default function Page() {
               Ready to find out what&apos;s actually going on?
             </h2>
 
-            <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-12">
-              Start with an Initial Evaluation. One session. A comprehensive
-              assessment, a clear explanation of what we find, hands-on
-              treatment, and a real plan — not a printout.
-              <br />
-              <br />
-              If Threshold Performance Care is the right fit, we&apos;ll talk
-              about what that looks like. If it isn&apos;t, you&apos;ll leave
-              with more clarity about your situation than any appointment
-              you&apos;ve had before.
-              <br />
-              <br />
-              No pressure. No protocol. Just the work.
-            </p>
+            <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-12">
+              <p>
+                Start with an Initial Evaluation. One session: a comprehensive
+                assessment, a clear explanation of what we find, hands-on
+                treatment, and a real plan.
+              </p>
+              <p>
+                If Threshold Performance Care is the right fit, we&apos;ll talk
+                about what that looks like. If it isn&apos;t, you&apos;ll leave
+                with more clarity about your situation than any appointment
+                you&apos;ve had before.
+              </p>
+              <p>No pressure. No protocol. Just the work.</p>
+            </div>
 
             {/* Pricing */}
             <div className="mb-12 space-y-3">
