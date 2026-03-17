@@ -283,13 +283,14 @@ export default function Page() {
             <div className="mb-20">
               <p className="font-montserrat text-sm md:text-base text-sterling-silver leading-relaxed max-w-3xl">
                 <span className="text-clinical-white font-semibold">
-                  Lars Stevenson, PT, DPT, CSCS
+                  Lars Stevenson, PT, DPT
                 </span>{' '}
-                has worked with athletes at every level, including Olympic
-                sprinters preparing for the Tokyo Games. The same principles
-                that govern elite athletic development are the ones applied at
-                Threshold, whether you&apos;re competing professionally or just
-                trying to get back to what you love.
+                has a background in Strength and Conditioning and has worked
+                with athletes at every level, including Olympic sprinters
+                preparing for the Tokyo Games. The same principles that govern
+                elite athletic development are the ones applied at Threshold,
+                whether you&apos;re competing professionally or just trying to
+                get back to what you love.
               </p>
             </div>
 
@@ -348,7 +349,7 @@ export default function Page() {
                 Be Good. Help Someone. Learn Lots.
               </p>
               <p className="font-montserrat text-xs tracking-widest text-sterling-silver uppercase">
-                Lars Stevenson, PT, DPT, CSCS &nbsp;·&nbsp; Threshold Health
+                Lars Stevenson, PT, DPT &nbsp;·&nbsp; Threshold Health
                 &amp; Performance &nbsp;·&nbsp; Reston, Virginia
               </p>
             </div>
