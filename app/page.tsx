@@ -283,7 +283,7 @@ export default function Page() {
             <div className="mb-20">
               <p className="font-montserrat text-sm md:text-base text-sterling-silver leading-relaxed max-w-3xl">
                 <span className="text-clinical-white font-semibold">
-                  Lars Stevenson, PT, DPT
+                  Dr. Lars Stevenson, PT, DPT
                 </span>{' '}
                 has a background in Strength and Conditioning and has worked
                 with athletes at every level, including Olympic sprinters
@@ -349,7 +349,7 @@ export default function Page() {
                 Be Good. Help Someone. Learn Lots.
               </p>
               <p className="font-montserrat text-xs tracking-widest text-sterling-silver uppercase">
-                Lars Stevenson, PT, DPT &nbsp;·&nbsp; Threshold Health
+                Dr. Lars Stevenson, PT, DPT &nbsp;·&nbsp; Threshold Health
                 &amp; Performance &nbsp;·&nbsp; Reston, Virginia
               </p>
             </div>
