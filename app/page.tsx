@@ -65,7 +65,7 @@ function Nav() {
             href="#method"
             className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
           >
-            The Method
+            The CROSS Method
           </a>
           <a
             href="#work"
@@ -223,11 +223,11 @@ export default function Page() {
         <section id="method" className="bg-obsidian py-24 md:py-36">
           <div className="max-w-5xl mx-auto px-6">
             <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
-              The Method
+              The CROSS Method
             </p>
 
             <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-6 max-w-3xl">
-              The CROSS. 5 pillars. One crossing.
+              5 pillars. One crossing.
             </h2>
 
             <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-16">
