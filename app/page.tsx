@@ -332,20 +332,6 @@ export default function Page() {
               <p>No pressure. No protocol. Just the work.</p>
             </div>
 
-            {/* Pricing */}
-            <div className="mb-12 space-y-3">
-              <p className="font-montserrat text-sm tracking-wide text-sterling-silver">
-                Initial Evaluation &nbsp;·&nbsp;{' '}
-                <span className="text-clinical-white font-medium">$149</span>
-              </p>
-              <p className="font-montserrat text-sm tracking-wide text-sterling-silver">
-                Threshold Performance Care — 12-Week Program &nbsp;·&nbsp;{' '}
-                <span className="text-clinical-white font-medium">
-                  from $1,599
-                </span>
-              </p>
-            </div>
-
             {/* CTA */}
             <a
               href={BOOKING_URL}
