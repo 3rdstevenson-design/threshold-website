@@ -359,10 +359,10 @@ export default function Page() {
           </div>
         </section>
 
-        {/* ─── Section 5: Meet Lars (NEW) ─── */}
+        {/* ─── Section 5: Meet Lars ─── */}
         <section id="lars" className="relative lars-spotlight py-24 md:py-36 overflow-hidden">
 
-          {/* Watermark logo mark — large, very faint, centered */}
+          {/* Watermark logo mark */}
           <div
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
             aria-hidden="true"
@@ -371,55 +371,95 @@ export default function Page() {
           </div>
 
           <div className="relative z-10 max-w-5xl mx-auto px-6">
-            <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
-              The Practitioner
-            </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-end">
 
-            <h2 className="font-cormorant font-light text-clinical-white leading-[1.0] text-4xl md:text-6xl lg:text-7xl mb-4">
-              Dr. Lars Stevenson
-            </h2>
-
-            <p className="font-montserrat text-xs tracking-[0.22em] text-threshold-purple uppercase mb-16">
-              PT, DPT &nbsp;·&nbsp; Strength &amp; Conditioning &nbsp;·&nbsp; Reston, Virginia
-            </p>
-
-            {/* Credential callout cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-16">
-              {larsCredentials.map((item) => (
+              {/* Image column */}
+              <div className="relative flex items-end justify-center order-2 lg:order-1">
+                {/* Glow behind the figures */}
                 <div
-                  key={item.label}
-                  className="border border-white/10 bg-white/[0.03] p-7 text-center"
-                >
-                  <p className="font-cormorant text-4xl md:text-5xl text-threshold-purple mb-2 stat-glow">
-                    {item.stat}
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(ellipse at 50% 80%, rgba(112,2,171,0.35) 0%, transparent 70%)',
+                    filter: 'blur(32px)',
+                  }}
+                  aria-hidden="true"
+                />
+                <img
+                  src="/lars-practitioner.png"
+                  alt="Dr. Lars Stevenson working with a patient"
+                  className="relative z-10 w-full max-w-md h-auto object-contain"
+                  style={{ maxHeight: '580px' }}
+                />
+              </div>
+
+              {/* Text column */}
+              <div className="order-1 lg:order-2">
+                <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
+                  The Practitioner
+                </p>
+
+                <h2 className="font-cormorant font-light text-clinical-white leading-[1.0] text-4xl md:text-6xl lg:text-7xl mb-4">
+                  Dr. Lars Stevenson
+                </h2>
+
+                <p className="font-montserrat text-xs tracking-[0.22em] text-threshold-purple uppercase mb-10">
+                  PT, DPT &nbsp;·&nbsp; Strength &amp; Conditioning &nbsp;·&nbsp; Reston, Virginia
+                </p>
+
+                {/* Credential callout cards */}
+                <div className="grid grid-cols-3 gap-3 mb-10">
+                  {larsCredentials.map((item) => (
+                    <div
+                      key={item.label}
+                      className="border border-white/10 bg-white/[0.03] p-4 text-center"
+                    >
+                      <p className="font-cormorant text-3xl md:text-4xl text-threshold-purple mb-1 stat-glow">
+                        {item.stat}
+                      </p>
+                      <p className="font-montserrat text-[10px] font-semibold tracking-widest text-clinical-white uppercase mb-1">
+                        {item.label}
+                      </p>
+                      <p className="font-nunito text-[10px] text-sterling-silver">
+                        {item.detail}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-lg mb-10">
+                  <p>
+                    Lars started interning under an Olympic performance coach as
+                    a teenager. He learned sprint mechanics, weight room
+                    technique, and injury rehab from the inside out.
                   </p>
-                  <p className="font-montserrat text-xs font-semibold tracking-widest text-clinical-white uppercase mb-1">
-                    {item.label}
+                  <p>
+                    By the time he finished his doctorate, he&apos;d worked with
+                    sprinters prepping for the Tokyo Games. That same process is
+                    what runs every session at Threshold.
                   </p>
-                  <p className="font-nunito text-xs text-sterling-silver">
-                    {item.detail}
+                  <p>
+                    His background is S&amp;C and physical therapy. What
+                    separates him is the system: a joint-by-joint evaluation
+                    that finds what everyone else missed, and a method for
+                    working through all 3 layers of why something isn&apos;t
+                    resolving.
+                  </p>
+                  <p className="text-clinical-white font-semibold">
+                    1:1 care only. No techs. No handoffs. Every session is him.
                   </p>
                 </div>
-              ))}
+
+                <a
+                  href={BOOKING_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block font-montserrat text-sm font-semibold tracking-wider text-clinical-white bg-threshold-purple px-9 py-4 hover:bg-purple-800 transition-all duration-200 btn-glow"
+                >
+                  Book With Dr. Stevenson →
+                </a>
+              </div>
+
             </div>
-
-            <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-12">
-              Dr. Stevenson has a background in Strength and Conditioning and
-              has worked with athletes at every level, including Olympic
-              sprinters preparing for the Tokyo Games. The same principles that
-              govern elite athletic development are the ones applied at
-              Threshold — whether you&apos;re competing professionally or just
-              trying to get back to what you love.
-            </p>
-
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block font-montserrat text-sm font-semibold tracking-wider text-clinical-white bg-threshold-purple px-9 py-4 hover:bg-purple-800 transition-all duration-200 btn-glow"
-            >
-              Book With Dr. Stevenson →
-            </a>
           </div>
         </section>
 

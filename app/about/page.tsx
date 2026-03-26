@@ -106,48 +106,50 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
               {/* Photo */}
-              <div className="relative">
-                <img
-                  src="/lars-about.jpg"
-                  alt="Dr. Lars Stevenson, PT, DPT"
-                  className="w-full h-auto object-cover photo-spotlight grayscale"
-                  style={{ maxHeight: '600px', objectPosition: 'top' }}
-                />
-                {/* Spotlight overlay at bottom of photo */}
+              <div className="relative flex items-end justify-center">
+                {/* Glow behind the figures */}
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-deep-navy to-transparent pointer-events-none"
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(ellipse at 50% 80%, rgba(112,2,171,0.35) 0%, transparent 70%)',
+                    filter: 'blur(32px)',
+                  }}
                   aria-hidden="true"
+                />
+                <img
+                  src="/lars-practitioner.png"
+                  alt="Dr. Lars Stevenson working with a patient"
+                  className="relative z-10 w-full h-auto object-contain"
+                  style={{ maxHeight: '600px' }}
                 />
               </div>
 
               {/* Bio */}
-              <div className="space-y-6 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85]">
+              <div className="space-y-5 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85]">
                 <p>
-                  Dr. Lars Stevenson is a Doctor of Physical Therapy and Strength
-                  &amp; Conditioning specialist based in Reston, Virginia. His
-                  clinical approach is built on a foundational belief that most
-                  people haven&apos;t been given the right answers — not because
-                  they didn&apos;t try hard enough, but because the system wasn&apos;t
-                  designed to find them.
+                  Lars started interning under an Olympic performance coach as a
+                  teenager. He learned sprint mechanics, weight room technique, and
+                  injury rehab from the inside out.
                 </p>
                 <p>
-                  Before founding Threshold, Lars worked at the highest levels of
-                  athletic performance — including preparing Olympic sprinters for
-                  the Tokyo Games. That experience sharpened a principle he now
-                  applies to every client: elite results come from elite
-                  <em> process</em>, not elite genetics.
+                  By the time he finished his doctorate, he&apos;d worked with
+                  sprinters prepping for the Tokyo Games. That same process is what
+                  runs every session at Threshold.
                 </p>
                 <p>
-                  The same systematic approach used to get athletes onto the Olympic
-                  podium is what drives his work with busy professionals, weekend
-                  athletes, and anyone who&apos;s been told to &ldquo;manage
-                  it&rdquo; — and refused to accept that answer.
+                  His background is S&amp;C and physical therapy. What separates him
+                  is the system: a joint-by-joint evaluation that finds what everyone
+                  else missed, and a method for working through all 3 layers of why
+                  something isn&apos;t resolving.
                 </p>
                 <p>
-                  At Threshold, there are no techs, no aides, and no generic
-                  protocols. Every session is one-on-one. Every plan is built around
-                  your system, your goals, and the specific place where things broke
-                  down.
+                  He grew up in a military household. Trained for close to 15 years.
+                  The gym has been the one constant through every era of his life,
+                  and that obsession with how the body works is what built the
+                  clinical eye he brings to Threshold.
+                </p>
+                <p className="text-clinical-white font-semibold">
+                  1:1 care only. No techs. No handoffs. Every session is him.
                 </p>
               </div>
             </div>
