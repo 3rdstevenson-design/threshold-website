@@ -106,13 +106,13 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
               {/* Photo */}
-              <div className="relative flex items-end justify-center">
+              <div className="relative flex items-center justify-center">
                 {/* Glow behind the figures */}
                 <div
-                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full pointer-events-none"
+                  className="absolute inset-0 pointer-events-none"
                   style={{
-                    background: 'radial-gradient(ellipse at 50% 80%, rgba(112,2,171,0.35) 0%, transparent 70%)',
-                    filter: 'blur(32px)',
+                    background: 'radial-gradient(ellipse at 50% 70%, rgba(112,2,171,0.4) 0%, transparent 65%)',
+                    filter: 'blur(40px)',
                   }}
                   aria-hidden="true"
                 />
@@ -120,7 +120,7 @@ export default function AboutPage() {
                   src="/lars-practitioner.png"
                   alt="Dr. Lars Stevenson working with a patient"
                   className="relative z-10 w-full h-auto object-contain"
-                  style={{ maxHeight: '600px' }}
+                  style={{ maxHeight: '680px' }}
                 />
               </div>
 
