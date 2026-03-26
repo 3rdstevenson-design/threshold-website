@@ -1,8 +1,32 @@
+import React from 'react'
+
 const BOOKING_URL = 'https://threshold.clientsecure.me'
 
-// Logo mark path — the crossing curves only, for use in nav
+// Logo mark path — the crossing curves only, for use in nav / watermark
 const MARK_PATH =
   'M1674.35,464.18s-86.86-2.87-176.53,29.02c-44.21,15.72-129.8,51.59-240.99,129.98,0,0,77.76,68.47,187.49,96.12,0,0-93.91-19.04-194.32-90.68-100.41,71.64-194.32,90.68-194.32,90.68,109.73-27.66,187.49-96.12,187.49-96.12-111.19-78.39-196.79-114.26-240.99-129.98-89.68-31.89-176.53-29.02-176.53-29.02,0,0,62.16-1.99,150,31.13,135.87,51.24,231.21,131.61,231.21,131.61-152.65,109.2-358.85,123.04-368.63,123.64,132.46-7.72,210.87-23.73,283.35-46.38,72.55-22.67,128.42-51.54,128.42-51.54,0,0,55.87,28.87,128.42,51.54,72.48,22.65,150.89,38.66,283.35,46.38-9.78-.6-215.98-14.44-368.63-123.64,0,0,95.34-80.37,231.21-131.61,87.84-33.12,150-31.13,150-31.13Z'
+
+// Floating light particle configuration
+const heroParticles = [
+  { x: '8%',  y: '88%', dur: '14s', del: '0s',    size: 3, drift: -22 },
+  { x: '18%', y: '80%', dur: '11s', del: '1.8s',  size: 2, drift:  16 },
+  { x: '28%', y: '94%', dur: '16s', del: '0.5s',  size: 4, drift: -32 },
+  { x: '38%', y: '86%', dur: '9s',  del: '3.2s',  size: 2, drift:  13 },
+  { x: '48%', y: '92%', dur: '13s', del: '1.5s',  size: 3, drift: -16 },
+  { x: '58%', y: '85%', dur: '12s', del: '4.0s',  size: 2, drift:  26 },
+  { x: '68%', y: '91%', dur: '15s', del: '0.8s',  size: 3, drift: -11 },
+  { x: '78%', y: '83%', dur: '10s', del: '2.8s',  size: 2, drift:  21 },
+  { x: '88%', y: '90%', dur: '14s', del: '5.5s',  size: 3, drift: -26 },
+  { x: '13%', y: '74%', dur: '11s', del: '6.2s',  size: 2, drift:  19 },
+  { x: '43%', y: '77%', dur: '13s', del: '0.3s',  size: 2, drift: -13 },
+  { x: '63%', y: '72%', dur: '12s', del: '3.5s',  size: 3, drift:  21 },
+  { x: '83%', y: '78%', dur: '10s', del: '7.1s',  size: 2, drift: -23 },
+  { x: '33%', y: '70%', dur: '16s', del: '2.2s',  size: 4, drift:  29 },
+  { x: '53%', y: '76%', dur: '9s',  del: '4.8s',  size: 2, drift:  -9 },
+  { x: '73%', y: '68%', dur: '15s', del: '1.2s',  size: 3, drift:  17 },
+  { x: '23%', y: '66%', dur: '12s', del: '8.1s',  size: 2, drift: -19 },
+  { x: '93%', y: '73%', dur: '11s', del: '3.9s',  size: 3, drift:  23 },
+]
 
 const crossCards = [
   {
@@ -37,6 +61,12 @@ const crossCards = [
   },
 ]
 
+const larsCredentials = [
+  { stat: 'Olympic',  label: 'Athlete Prep',            detail: 'Tokyo Games 2021' },
+  { stat: '1:1',      label: 'Direct Care Only',         detail: 'No techs. No aides.' },
+  { stat: 'DPT',      label: 'Doctor of Physical Therapy', detail: 'S&C background' },
+]
+
 function LogoMark({ className }: { className?: string }) {
   return (
     <svg
@@ -55,7 +85,7 @@ function Nav() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-sm border-b border-white/5">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <a href="#hero" className="flex items-center gap-3 group">
-          <LogoMark className="h-7 w-auto text-clinical-white" />
+          <LogoMark className="h-7 w-auto text-clinical-white group-hover:text-threshold-purple transition-colors duration-300" />
           <span className="font-montserrat text-xs font-semibold tracking-[0.2em] text-clinical-white uppercase">
             Threshold
           </span>
@@ -68,7 +98,7 @@ function Nav() {
             The CROSS Method
           </a>
           <a
-            href="#work"
+            href="#lars"
             className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
           >
             The Work
@@ -77,7 +107,7 @@ function Nav() {
             href={BOOKING_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-5 py-2.5 hover:bg-purple-800 transition-colors duration-200"
+            className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-5 py-2.5 hover:bg-purple-800 transition-all duration-200 btn-glow"
           >
             Book Now
           </a>
@@ -101,7 +131,7 @@ function CrossCard({
   card: { letter: string; title: string; description: string }
 }) {
   return (
-    <div className="bg-deep-navy border-t-2 border-threshold-purple p-7 md:p-8 flex flex-col gap-4">
+    <div className="cross-card-glow bg-deep-navy border-t-2 border-threshold-purple p-7 md:p-8 flex flex-col gap-4">
       <p className="font-montserrat text-xs font-bold tracking-[0.3em] text-threshold-purple uppercase">
         {card.letter}
       </p>
@@ -124,12 +154,37 @@ export default function Page() {
         {/* ─── Section 1: Hero ─── */}
         <section
           id="hero"
-          className="min-h-screen bg-obsidian flex flex-col justify-center pt-16"
+          className="relative min-h-screen hero-spotlight overflow-hidden flex flex-col justify-center pt-16"
         >
-          <div className="max-w-5xl mx-auto px-6 py-24 md:py-32">
+          {/* Drifting light beam */}
+          <div className="hero-beam" aria-hidden="true" />
 
-            {/* Full logo */}
-            <div className="mb-14">
+          {/* Floating light particles */}
+          <div
+            className="absolute inset-0 overflow-hidden pointer-events-none"
+            aria-hidden="true"
+          >
+            {heroParticles.map((p, i) => (
+              <span
+                key={i}
+                className="particle"
+                style={{
+                  left: p.x,
+                  top: p.y,
+                  width: `${p.size}px`,
+                  height: `${p.size}px`,
+                  animationDuration: p.dur,
+                  animationDelay: p.del,
+                  ['--drift' as string]: `${p.drift}px`,
+                } as React.CSSProperties}
+              />
+            ))}
+          </div>
+
+          <div className="relative z-10 max-w-5xl mx-auto px-6 py-24 md:py-32">
+
+            {/* Logo with glow */}
+            <div className="logo-glow mb-14">
               <img
                 src="/logo-dark.svg"
                 alt="Threshold Health and Performance"
@@ -173,16 +228,23 @@ export default function Page() {
               href={BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block font-montserrat text-sm font-semibold tracking-wider text-clinical-white bg-threshold-purple px-9 py-4 hover:bg-purple-800 transition-colors duration-200"
+              className="inline-block font-montserrat text-sm font-semibold tracking-wider text-clinical-white bg-threshold-purple px-9 py-4 hover:bg-purple-800 transition-all duration-200 btn-glow"
             >
               Book Your Initial Evaluation →
             </a>
           </div>
+
+          {/* Gradient fade into next section */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-deep-navy pointer-events-none"
+            aria-hidden="true"
+          />
         </section>
 
         {/* ─── Section 2: The Problem ─── */}
-        <section id="problem" className="bg-deep-navy py-24 md:py-36">
-          <div className="max-w-5xl mx-auto px-6">
+        <section id="problem" className="relative bg-deep-navy py-24 md:py-36">
+          <div className="section-glow-purple" aria-hidden="true" />
+          <div className="relative max-w-5xl mx-auto px-6">
             <div className="border-l-[3px] border-threshold-purple pl-8 md:pl-14">
               <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
                 Why You&apos;re Still Stuck
@@ -279,21 +341,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Credentials */}
-            <div className="mb-20">
-              <p className="font-montserrat text-sm md:text-base text-sterling-silver leading-relaxed max-w-3xl">
-                <span className="text-clinical-white font-semibold">
-                  Dr. Lars Stevenson, PT, DPT
-                </span>{' '}
-                has a background in Strength and Conditioning and has worked
-                with athletes at every level, including Olympic sprinters
-                preparing for the Tokyo Games. The same principles that govern
-                elite athletic development are the ones applied at Threshold,
-                whether you&apos;re competing professionally or just trying to
-                get back to what you love.
-              </p>
-            </div>
-
             {/* Pull quote */}
             <div className="border-t border-white/10 pt-14">
               <blockquote>
@@ -307,9 +354,77 @@ export default function Page() {
           </div>
         </section>
 
-        {/* ─── Section 5: Book Now ─── */}
-        <section id="book" className="bg-obsidian py-24 md:py-36">
-          <div className="max-w-5xl mx-auto px-6">
+        {/* ─── Section 5: Meet Lars (NEW) ─── */}
+        <section id="lars" className="relative lars-spotlight py-24 md:py-36 overflow-hidden">
+
+          {/* Watermark logo mark — large, very faint, centered */}
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            aria-hidden="true"
+          >
+            <LogoMark className="w-[700px] h-auto text-threshold-purple opacity-[0.055]" />
+          </div>
+
+          <div className="relative z-10 max-w-5xl mx-auto px-6">
+            <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
+              The Practitioner
+            </p>
+
+            <h2 className="font-cormorant font-light text-clinical-white leading-[1.0] text-4xl md:text-6xl lg:text-7xl mb-4">
+              Dr. Lars Stevenson
+            </h2>
+
+            <p className="font-montserrat text-xs tracking-[0.22em] text-threshold-purple uppercase mb-16">
+              PT, DPT &nbsp;·&nbsp; Strength &amp; Conditioning &nbsp;·&nbsp; Reston, Virginia
+            </p>
+
+            {/* Credential callout cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-16">
+              {larsCredentials.map((item) => (
+                <div
+                  key={item.label}
+                  className="border border-white/10 bg-white/[0.03] p-7 text-center"
+                >
+                  <p className="font-cormorant text-4xl md:text-5xl text-threshold-purple mb-2 stat-glow">
+                    {item.stat}
+                  </p>
+                  <p className="font-montserrat text-xs font-semibold tracking-widest text-clinical-white uppercase mb-1">
+                    {item.label}
+                  </p>
+                  <p className="font-nunito text-xs text-sterling-silver">
+                    {item.detail}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-12">
+              Dr. Stevenson has a background in Strength and Conditioning and
+              has worked with athletes at every level, including Olympic
+              sprinters preparing for the Tokyo Games. The same principles that
+              govern elite athletic development are the ones applied at
+              Threshold — whether you&apos;re competing professionally or just
+              trying to get back to what you love.
+            </p>
+
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block font-montserrat text-sm font-semibold tracking-wider text-clinical-white bg-threshold-purple px-9 py-4 hover:bg-purple-800 transition-all duration-200 btn-glow"
+            >
+              Book With Dr. Stevenson →
+            </a>
+          </div>
+        </section>
+
+        {/* ─── Section 6: Book Now ─── */}
+        <section id="book" className="relative bg-obsidian py-24 md:py-36 overflow-hidden">
+
+          {/* Ambient glow */}
+          <div className="book-glow absolute inset-0 pointer-events-none" aria-hidden="true" />
+
+          <div className="relative z-10 max-w-5xl mx-auto px-6">
             <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
               Start Here
             </p>
@@ -338,7 +453,7 @@ export default function Page() {
               href={BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block font-montserrat text-base font-semibold tracking-wider text-clinical-white bg-threshold-purple px-11 py-5 hover:bg-purple-800 transition-colors duration-200 mb-28"
+              className="inline-block font-montserrat text-base font-semibold tracking-wider text-clinical-white bg-threshold-purple px-11 py-5 hover:bg-purple-800 transition-all duration-200 btn-glow mb-28"
             >
               Book Your Evaluation →
             </a>
@@ -357,6 +472,32 @@ export default function Page() {
         </section>
 
       </main>
+
+      {/* ─── Footer ─── */}
+      <footer className="bg-obsidian border-t border-white/10 py-10">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <LogoMark className="h-5 w-auto text-threshold-purple" />
+            <span className="font-montserrat text-xs tracking-[0.18em] text-sterling-silver uppercase">
+              Threshold Health &amp; Performance
+            </span>
+          </div>
+          <p className="font-montserrat text-xs text-sterling-silver text-center">
+            Reston, Virginia &nbsp;·&nbsp;{' '}
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-clinical-white transition-colors duration-200"
+            >
+              Book an Appointment
+            </a>
+          </p>
+          <p className="font-montserrat text-xs text-white/30">
+            &copy; {new Date().getFullYear()} Threshold Health &amp; Performance
+          </p>
+        </div>
+      </footer>
     </>
   )
 }

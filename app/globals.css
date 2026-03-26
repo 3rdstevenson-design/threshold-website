@@ -16,3 +16,134 @@ body {
     font-variant-caps: small-caps;
   }
 }
+
+/* ── Hero spotlight background ── */
+.hero-spotlight {
+  background:
+    radial-gradient(ellipse 75% 85% at 50% -8%, rgba(112, 2, 171, 0.42) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 55% at 50% 0%, rgba(201, 168, 76, 0.06) 0%, transparent 55%),
+    #0D0D18;
+}
+
+/* ── Drifting light beam ── */
+.hero-beam {
+  position: absolute;
+  top: -5%;
+  left: 28%;
+  width: 44%;
+  height: 115%;
+  background: linear-gradient(
+    180deg,
+    rgba(112, 2, 171, 0.22) 0%,
+    rgba(201, 168, 76, 0.05) 28%,
+    transparent 72%
+  );
+  transform-origin: top center;
+  animation: beam-drift 22s ease-in-out infinite;
+  pointer-events: none;
+  filter: blur(28px);
+  z-index: 1;
+}
+
+@keyframes beam-drift {
+  0%   { transform: translateX(-10%) rotate(-4deg); opacity: 0.45; }
+  30%  { transform: translateX( 6%)  rotate( 2deg); opacity: 0.8;  }
+  65%  { transform: translateX(-4%)  rotate(-1deg); opacity: 0.6;  }
+  100% { transform: translateX(-10%) rotate(-4deg); opacity: 0.45; }
+}
+
+/* ── Floating light particles ── */
+@keyframes float-up {
+  0%   {
+    transform: translateY(0) translateX(0) scale(0.4);
+    opacity: 0;
+  }
+  8%   { opacity: 0.85; }
+  88%  { opacity: 0.2;  }
+  100% {
+    transform: translateY(-58vh) translateX(var(--drift, 0px)) scale(0);
+    opacity: 0;
+  }
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(230, 210, 255, 0.95) 0%,
+    rgba(112, 2, 171, 0.45)   50%,
+    transparent                100%
+  );
+  animation: float-up 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Logo glow pulse ── */
+@keyframes glow-pulse {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 8px  rgba(112, 2, 171, 0.50))
+      drop-shadow(0 0 22px rgba(112, 2, 171, 0.25));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 18px rgba(112, 2, 171, 0.90))
+      drop-shadow(0 0 45px rgba(112, 2, 171, 0.50))
+      drop-shadow(0 0 75px rgba(201, 168, 76, 0.18));
+  }
+}
+
+.logo-glow {
+  animation: glow-pulse 5s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* ── CTA button glow ── */
+.btn-glow {
+  box-shadow: 0 0 18px rgba(112, 2, 171, 0.48), 0 0 38px rgba(112, 2, 171, 0.22);
+  transition: box-shadow 0.3s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 28px rgba(112, 2, 171, 0.80), 0 0 60px rgba(112, 2, 171, 0.38);
+  transform: translateY(-1px);
+}
+
+/* ── CROSS card hover glow ── */
+.cross-card-glow {
+  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
+}
+.cross-card-glow:hover {
+  box-shadow: 0 0 28px rgba(112, 2, 171, 0.22), 0 0 55px rgba(112, 2, 171, 0.09);
+  border-color: rgba(112, 2, 171, 0.75);
+  transform: translateY(-3px);
+}
+
+/* ── Section ambient glow (problem section) ── */
+.section-glow-purple {
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(112, 2, 171, 0.10) 0%, transparent 70%);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ── Lars spotlight section ── */
+.lars-spotlight {
+  background:
+    radial-gradient(ellipse 65% 95% at 50% -12%, rgba(112, 2, 171, 0.38) 0%, transparent 62%),
+    radial-gradient(ellipse 100% 55% at 50% 110%, rgba(201, 168, 76, 0.04) 0%, transparent 65%),
+    #0D0D18;
+}
+
+/* ── Stat text glow ── */
+.stat-glow {
+  text-shadow:
+    0 0 22px rgba(112, 2, 171, 0.75),
+    0 0 48px rgba(112, 2, 171, 0.38);
+}
+
+/* ── Book section ambient glow ── */
+.book-glow {
+  background: radial-gradient(ellipse 75% 55% at 50% 50%, rgba(112, 2, 171, 0.08) 0%, transparent 70%);
+}
