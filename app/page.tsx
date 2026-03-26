@@ -330,6 +330,30 @@ export default function Page() {
               This is what it actually produces.
             </h2>
 
+            {/* Photo strip */}
+            <div className="grid grid-cols-2 gap-4 mb-16">
+              {[
+                { src: '/lars-work-1.png', alt: 'Dr. Stevenson assessing a patient' },
+                { src: '/lars-work-2.png', alt: 'Dr. Stevenson working on a wrist assessment' },
+              ].map((img) => (
+                <div key={img.src} className="relative overflow-hidden">
+                  <div
+                    className="absolute inset-0 pointer-events-none z-10"
+                    style={{
+                      background: 'radial-gradient(ellipse at 50% 80%, rgba(112,2,171,0.3) 0%, transparent 65%)',
+                    }}
+                    aria-hidden="true"
+                  />
+                  <img
+                    src={img.src}
+                    alt={img.alt}
+                    className="w-full h-auto object-contain"
+                    style={{ maxHeight: '480px' }}
+                  />
+                </div>
+              ))}
+            </div>
+
             {/* Case study */}
             <div className="border-l-[3px] border-threshold-purple pl-8 md:pl-14 mb-16">
               <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
