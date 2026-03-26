@@ -20,50 +20,69 @@ body {
 /* ── Hero spotlight background ── */
 .hero-spotlight {
   background:
-    radial-gradient(ellipse 75% 85% at 50% -8%, rgba(112, 2, 171, 0.42) 0%, transparent 65%),
-    radial-gradient(ellipse 45% 55% at 50% 0%, rgba(201, 168, 76, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 70% at 50% -5%, rgba(112, 2, 171, 0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 50% 5%,  rgba(201, 168, 76, 0.08) 0%, transparent 55%),
     #0D0D18;
 }
 
 /* ── Drifting light beam ── */
 .hero-beam {
   position: absolute;
-  top: -5%;
-  left: 28%;
-  width: 44%;
-  height: 115%;
+  top: -10%;
+  left: 25%;
+  width: 50%;
+  height: 120%;
   background: linear-gradient(
     180deg,
-    rgba(112, 2, 171, 0.22) 0%,
-    rgba(201, 168, 76, 0.05) 28%,
-    transparent 72%
+    rgba(130, 20, 200, 0.55) 0%,
+    rgba(112,  2, 171, 0.25) 25%,
+    rgba(201, 168, 76, 0.08) 45%,
+    transparent              75%
   );
   transform-origin: top center;
-  animation: beam-drift 22s ease-in-out infinite;
+  animation: beam-drift 18s ease-in-out infinite;
   pointer-events: none;
-  filter: blur(28px);
+  filter: blur(22px);
   z-index: 1;
 }
 
 @keyframes beam-drift {
-  0%   { transform: translateX(-10%) rotate(-4deg); opacity: 0.45; }
-  30%  { transform: translateX( 6%)  rotate( 2deg); opacity: 0.8;  }
-  65%  { transform: translateX(-4%)  rotate(-1deg); opacity: 0.6;  }
-  100% { transform: translateX(-10%) rotate(-4deg); opacity: 0.45; }
+  0%   { transform: translateX(-12%) rotate(-5deg); opacity: 0.6;  }
+  30%  { transform: translateX(  8%) rotate( 3deg); opacity: 1.0;  }
+  65%  { transform: translateX( -5%) rotate(-2deg); opacity: 0.75; }
+  100% { transform: translateX(-12%) rotate(-5deg); opacity: 0.6;  }
 }
 
-/* ── Floating light particles ── */
-@keyframes float-up {
-  0%   {
-    transform: translateY(0) translateX(0) scale(0.4);
-    opacity: 0;
-  }
-  8%   { opacity: 0.85; }
-  88%  { opacity: 0.2;  }
-  100% {
-    transform: translateY(-58vh) translateX(var(--drift, 0px)) scale(0);
-    opacity: 0;
-  }
+/* ── Floating light particles — 5 drift variants (no CSS custom props needed) ── */
+@keyframes float-far-left {
+  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
+  8%   {                                                            opacity: 0.9;  }
+  88%  {                                                            opacity: 0.25; }
+  100% { transform: translateY(-60vh) translateX(-35px) scale(0);  opacity: 0;    }
+}
+@keyframes float-left {
+  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
+  8%   {                                                            opacity: 0.9;  }
+  88%  {                                                            opacity: 0.25; }
+  100% { transform: translateY(-60vh) translateX(-18px) scale(0);  opacity: 0;    }
+}
+@keyframes float-center {
+  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
+  8%   {                                                            opacity: 0.9;  }
+  88%  {                                                            opacity: 0.25; }
+  100% { transform: translateY(-60vh) translateX(  4px) scale(0);  opacity: 0;    }
+}
+@keyframes float-right {
+  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
+  8%   {                                                            opacity: 0.9;  }
+  88%  {                                                            opacity: 0.25; }
+  100% { transform: translateY(-60vh) translateX( 20px) scale(0);  opacity: 0;    }
+}
+@keyframes float-far-right {
+  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
+  8%   {                                                            opacity: 0.9;  }
+  88%  {                                                            opacity: 0.25; }
+  100% { transform: translateY(-60vh) translateX( 38px) scale(0);  opacity: 0;    }
 }
 
 .particle {
@@ -71,42 +90,46 @@ body {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(230, 210, 255, 0.95) 0%,
-    rgba(112, 2, 171, 0.45)   50%,
-    transparent                100%
+    rgba(240, 220, 255, 1.0) 0%,
+    rgba(150,  60, 255, 0.6) 45%,
+    transparent               100%
   );
-  animation: float-up 12s ease-in-out infinite;
   pointer-events: none;
   z-index: 2;
 }
+.p-fl  { animation: float-far-left  var(--dur, 12s) ease-in-out infinite; }
+.p-l   { animation: float-left      var(--dur, 12s) ease-in-out infinite; }
+.p-c   { animation: float-center    var(--dur, 12s) ease-in-out infinite; }
+.p-r   { animation: float-right     var(--dur, 12s) ease-in-out infinite; }
+.p-fr  { animation: float-far-right var(--dur, 12s) ease-in-out infinite; }
 
 /* ── Logo glow pulse ── */
 @keyframes glow-pulse {
   0%, 100% {
     filter:
-      drop-shadow(0 0 8px  rgba(112, 2, 171, 0.50))
-      drop-shadow(0 0 22px rgba(112, 2, 171, 0.25));
+      drop-shadow(0 0 10px rgba(112, 2, 171, 0.70))
+      drop-shadow(0 0 28px rgba(112, 2, 171, 0.40));
   }
   50% {
     filter:
-      drop-shadow(0 0 18px rgba(112, 2, 171, 0.90))
-      drop-shadow(0 0 45px rgba(112, 2, 171, 0.50))
-      drop-shadow(0 0 75px rgba(201, 168, 76, 0.18));
+      drop-shadow(0 0 22px rgba(130,  20, 200, 1.00))
+      drop-shadow(0 0 55px rgba(112,   2, 171, 0.65))
+      drop-shadow(0 0 90px rgba(201, 168,  76, 0.22));
   }
 }
 
 .logo-glow {
-  animation: glow-pulse 5s ease-in-out infinite;
+  animation: glow-pulse 4s ease-in-out infinite;
   display: inline-block;
 }
 
 /* ── CTA button glow ── */
 .btn-glow {
-  box-shadow: 0 0 18px rgba(112, 2, 171, 0.48), 0 0 38px rgba(112, 2, 171, 0.22);
+  box-shadow: 0 0 20px rgba(112, 2, 171, 0.55), 0 0 42px rgba(112, 2, 171, 0.25);
   transition: box-shadow 0.3s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 .btn-glow:hover {
-  box-shadow: 0 0 28px rgba(112, 2, 171, 0.80), 0 0 60px rgba(112, 2, 171, 0.38);
+  box-shadow: 0 0 32px rgba(112, 2, 171, 0.90), 0 0 65px rgba(112, 2, 171, 0.45);
   transform: translateY(-1px);
 }
 
@@ -115,23 +138,23 @@ body {
   transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
 }
 .cross-card-glow:hover {
-  box-shadow: 0 0 28px rgba(112, 2, 171, 0.22), 0 0 55px rgba(112, 2, 171, 0.09);
-  border-color: rgba(112, 2, 171, 0.75);
+  box-shadow: 0 0 28px rgba(112, 2, 171, 0.25), 0 0 55px rgba(112, 2, 171, 0.10);
+  border-color: rgba(112, 2, 171, 0.80);
   transform: translateY(-3px);
 }
 
-/* ── Section ambient glow (problem section) ── */
+/* ── Section ambient glow ── */
 .section-glow-purple {
-  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(112, 2, 171, 0.10) 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(112, 2, 171, 0.12) 0%, transparent 70%);
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-/* ── Lars spotlight section ── */
+/* ── Lars / About spotlight section ── */
 .lars-spotlight {
   background:
-    radial-gradient(ellipse 65% 95% at 50% -12%, rgba(112, 2, 171, 0.38) 0%, transparent 62%),
+    radial-gradient(ellipse 65% 90% at 50% -10%, rgba(112, 2, 171, 0.45) 0%, transparent 62%),
     radial-gradient(ellipse 100% 55% at 50% 110%, rgba(201, 168, 76, 0.04) 0%, transparent 65%),
     #0D0D18;
 }
@@ -139,11 +162,26 @@ body {
 /* ── Stat text glow ── */
 .stat-glow {
   text-shadow:
-    0 0 22px rgba(112, 2, 171, 0.75),
-    0 0 48px rgba(112, 2, 171, 0.38);
+    0 0 22px rgba(112, 2, 171, 0.80),
+    0 0 50px rgba(112, 2, 171, 0.40);
 }
 
 /* ── Book section ambient glow ── */
 .book-glow {
-  background: radial-gradient(ellipse 75% 55% at 50% 50%, rgba(112, 2, 171, 0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse 75% 55% at 50% 50%, rgba(112, 2, 171, 0.10) 0%, transparent 70%);
+}
+
+/* ── About page hero ── */
+.about-hero {
+  background:
+    radial-gradient(ellipse 70% 80% at 50% -8%, rgba(112, 2, 171, 0.50) 0%, transparent 60%),
+    #0D0D18;
+}
+
+/* ── Photo spotlight frame ── */
+.photo-spotlight {
+  box-shadow:
+    0 0 0 1px rgba(112, 2, 171, 0.30),
+    0 0 40px rgba(112, 2, 171, 0.30),
+    0 0 80px rgba(112, 2, 171, 0.15);
 }

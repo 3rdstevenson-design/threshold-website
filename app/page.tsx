@@ -6,26 +6,26 @@ const BOOKING_URL = 'https://threshold.clientsecure.me'
 const MARK_PATH =
   'M1674.35,464.18s-86.86-2.87-176.53,29.02c-44.21,15.72-129.8,51.59-240.99,129.98,0,0,77.76,68.47,187.49,96.12,0,0-93.91-19.04-194.32-90.68-100.41,71.64-194.32,90.68-194.32,90.68,109.73-27.66,187.49-96.12,187.49-96.12-111.19-78.39-196.79-114.26-240.99-129.98-89.68-31.89-176.53-29.02-176.53-29.02,0,0,62.16-1.99,150,31.13,135.87,51.24,231.21,131.61,231.21,131.61-152.65,109.2-358.85,123.04-368.63,123.64,132.46-7.72,210.87-23.73,283.35-46.38,72.55-22.67,128.42-51.54,128.42-51.54,0,0,55.87,28.87,128.42,51.54,72.48,22.65,150.89,38.66,283.35,46.38-9.78-.6-215.98-14.44-368.63-123.64,0,0,95.34-80.37,231.21-131.61,87.84-33.12,150-31.13,150-31.13Z'
 
-// Floating light particle configuration
+// Floating light particles — drift class: fl=far-left, l=left, c=center, r=right, fr=far-right
 const heroParticles = [
-  { x: '8%',  y: '88%', dur: '14s', del: '0s',    size: 3, drift: -22 },
-  { x: '18%', y: '80%', dur: '11s', del: '1.8s',  size: 2, drift:  16 },
-  { x: '28%', y: '94%', dur: '16s', del: '0.5s',  size: 4, drift: -32 },
-  { x: '38%', y: '86%', dur: '9s',  del: '3.2s',  size: 2, drift:  13 },
-  { x: '48%', y: '92%', dur: '13s', del: '1.5s',  size: 3, drift: -16 },
-  { x: '58%', y: '85%', dur: '12s', del: '4.0s',  size: 2, drift:  26 },
-  { x: '68%', y: '91%', dur: '15s', del: '0.8s',  size: 3, drift: -11 },
-  { x: '78%', y: '83%', dur: '10s', del: '2.8s',  size: 2, drift:  21 },
-  { x: '88%', y: '90%', dur: '14s', del: '5.5s',  size: 3, drift: -26 },
-  { x: '13%', y: '74%', dur: '11s', del: '6.2s',  size: 2, drift:  19 },
-  { x: '43%', y: '77%', dur: '13s', del: '0.3s',  size: 2, drift: -13 },
-  { x: '63%', y: '72%', dur: '12s', del: '3.5s',  size: 3, drift:  21 },
-  { x: '83%', y: '78%', dur: '10s', del: '7.1s',  size: 2, drift: -23 },
-  { x: '33%', y: '70%', dur: '16s', del: '2.2s',  size: 4, drift:  29 },
-  { x: '53%', y: '76%', dur: '9s',  del: '4.8s',  size: 2, drift:  -9 },
-  { x: '73%', y: '68%', dur: '15s', del: '1.2s',  size: 3, drift:  17 },
-  { x: '23%', y: '66%', dur: '12s', del: '8.1s',  size: 2, drift: -19 },
-  { x: '93%', y: '73%', dur: '11s', del: '3.9s',  size: 3, drift:  23 },
+  { x: '6%',  y: '75%', dur: '14s', del: '0s',   size: 4, cls: 'p-fl' },
+  { x: '15%', y: '60%', dur: '11s', del: '1.8s', size: 3, cls: 'p-l'  },
+  { x: '24%', y: '80%', dur: '16s', del: '0.5s', size: 5, cls: 'p-fl' },
+  { x: '34%', y: '65%', dur: '9s',  del: '3.2s', size: 3, cls: 'p-r'  },
+  { x: '44%', y: '78%', dur: '13s', del: '1.5s', size: 4, cls: 'p-c'  },
+  { x: '54%', y: '62%', dur: '12s', del: '4.0s', size: 3, cls: 'p-r'  },
+  { x: '64%', y: '72%', dur: '15s', del: '0.8s', size: 4, cls: 'p-fr' },
+  { x: '74%', y: '58%', dur: '10s', del: '2.8s', size: 3, cls: 'p-r'  },
+  { x: '84%', y: '76%', dur: '14s', del: '5.5s', size: 4, cls: 'p-fr' },
+  { x: '92%', y: '63%', dur: '11s', del: '6.2s', size: 3, cls: 'p-fr' },
+  { x: '10%', y: '50%', dur: '13s', del: '0.3s', size: 3, cls: 'p-l'  },
+  { x: '42%', y: '55%', dur: '12s', del: '3.5s', size: 4, cls: 'p-c'  },
+  { x: '70%', y: '48%', dur: '10s', del: '7.1s', size: 3, cls: 'p-r'  },
+  { x: '30%', y: '45%', dur: '16s', del: '2.2s', size: 5, cls: 'p-l'  },
+  { x: '58%', y: '52%', dur: '9s',  del: '4.8s', size: 3, cls: 'p-fr' },
+  { x: '80%', y: '40%', dur: '15s', del: '1.2s', size: 4, cls: 'p-fr' },
+  { x: '20%', y: '42%', dur: '12s', del: '8.1s', size: 3, cls: 'p-fl' },
+  { x: '50%', y: '38%', dur: '11s', del: '3.9s', size: 4, cls: 'p-c'  },
 ]
 
 const crossCards = [
@@ -104,6 +104,12 @@ function Nav() {
             The Work
           </a>
           <a
+            href="/about"
+            className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
+          >
+            About
+          </a>
+          <a
             href={BOOKING_URL}
             target="_blank"
             rel="noopener noreferrer"
@@ -167,7 +173,7 @@ export default function Page() {
             {heroParticles.map((p, i) => (
               <span
                 key={i}
-                className="particle"
+                className={`particle ${p.cls}`}
                 style={{
                   left: p.x,
                   top: p.y,
@@ -175,8 +181,7 @@ export default function Page() {
                   height: `${p.size}px`,
                   animationDuration: p.dur,
                   animationDelay: p.del,
-                  ['--drift' as string]: `${p.drift}px`,
-                } as React.CSSProperties}
+                }}
               />
             ))}
           </div>
