@@ -117,7 +117,7 @@ export default function AboutPage() {
                   aria-hidden="true"
                 />
                 <img
-                  src="/lars-smile.png"
+                  src="/lars-about-new.png"
                   alt="Dr. Lars Stevenson"
                   className="relative z-10 w-full h-auto object-contain"
                   style={{ maxHeight: '680px' }}
