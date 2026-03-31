@@ -294,11 +294,11 @@ export default function Page() {
             </p>
 
             <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-6 max-w-3xl">
-              5 pillars. One crossing.
+              One crossing. No shortcuts.
             </h2>
 
             <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-16">
-              Every client at Threshold goes through the same 5-pillar process.
+              Every person I work with goes through the same proven sequence.
               Built to restore function, rebuild confidence, and return you to
               the life that limitation interrupted.
             </p>
