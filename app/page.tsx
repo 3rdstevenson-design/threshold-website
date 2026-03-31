@@ -210,22 +210,22 @@ export default function Page() {
 
             <p className="font-montserrat text-base md:text-lg text-sterling-silver leading-relaxed max-w-2xl mb-10">
               Physical therapy and performance coaching for people who&apos;ve
-              already tried the system and are still not where they want to be.
+              already done the work and still aren&apos;t where they need to be.
             </p>
 
             <div className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl mb-14 space-y-4">
               <p>
-                Most people who find Threshold have already done the work. The
-                exercises. The appointments. 6 to 8 weeks of protocol, a
-                printout, and a handshake.
+                Most people who find Threshold have been through the whole
+                thing. The exercises, the appointments, 6 to 8 weeks of
+                protocol, a printout, and a handshake.
               </p>
               <p>
-                Still limited. Still told to manage it. Still not back to the
-                sport, the activity, or the version of themselves that made life
-                worth living.
+                They&apos;re still limited. Still told to manage it. Still not
+                back to the sport, the activity, or the version of themselves
+                that made life worth living.
               </p>
               <p>
-                That&apos;s a care gap. Threshold exists to close it.
+                That&apos;s the Threshold. I&apos;m here to help them cross it.
               </p>
             </div>
 
