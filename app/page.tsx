@@ -438,11 +438,11 @@ export default function Page() {
                     process is what runs every session at Threshold.
                   </p>
                   <p>
-                    His background is strength and conditioning and physical
-                    therapy. What separates him is the system: a joint-by-joint
-                    evaluation that finds what everyone else missed, and a method
-                    for working through every layer of why something isn&apos;t
-                    resolving.
+                    He trained in strength and conditioning before PT school, and
+                    that combination is rare. The work reflects it: a
+                    joint-by-joint evaluation that finds what everyone else
+                    missed, and a method that works through every layer of why
+                    something won&apos;t resolve.
                   </p>
                   <p className="text-clinical-white font-semibold">
                     1:1 care only. No techs. No handoffs. You work with Lars,
