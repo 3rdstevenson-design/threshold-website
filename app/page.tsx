@@ -482,12 +482,12 @@ export default function Page() {
             <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-12">
               <p>
                 Start with a call. We&apos;ll go through your situation, what
-                you&apos;ve already tried, and whether I&apos;m the right fit.
+                you&apos;ve already tried, and build a clear picture of what
+                needs to happen next.
               </p>
               <p>
-                If it makes sense to work together, we&apos;ll schedule your
-                Initial Evaluation. If it doesn&apos;t, you&apos;ll leave with
-                more clarity than most appointments give you.
+                From there, we&apos;ll get your Initial Evaluation on the
+                calendar and get to work.
               </p>
               <p>No pitch. No pressure. Just 20 honest minutes.</p>
             </div>
