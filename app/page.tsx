@@ -235,7 +235,7 @@ export default function Page() {
               rel="noopener noreferrer"
               className="inline-block font-montserrat text-sm font-semibold tracking-wider text-clinical-white bg-threshold-purple px-9 py-4 hover:bg-purple-800 transition-all duration-200 btn-glow"
             >
-              Book Your Initial Evaluation →
+              Book Your Intro Call →
             </a>
           </div>
 
@@ -481,17 +481,15 @@ export default function Page() {
 
             <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-12">
               <p>
-                Start with an Initial Evaluation. One session: a comprehensive
-                assessment, a clear explanation of what we find, hands-on
-                treatment, and a real plan.
+                Start with a call. We&apos;ll go through your situation, what
+                you&apos;ve already tried, and whether I&apos;m the right fit.
               </p>
               <p>
-                If Threshold Performance Care is the right fit, we&apos;ll talk
-                about what that looks like. If it isn&apos;t, you&apos;ll leave
-                with more clarity about your situation than any appointment
-                you&apos;ve had before.
+                If it makes sense to work together, we&apos;ll schedule your
+                Initial Evaluation. If it doesn&apos;t, you&apos;ll leave with
+                more clarity than most appointments give you.
               </p>
-              <p>No pressure. No protocol. Just the work.</p>
+              <p>No pitch. No pressure. Just 20 honest minutes.</p>
             </div>
 
             {/* CTA */}
@@ -501,7 +499,7 @@ export default function Page() {
               rel="noopener noreferrer"
               className="inline-block font-montserrat text-base font-semibold tracking-wider text-clinical-white bg-threshold-purple px-11 py-5 hover:bg-purple-800 transition-all duration-200 btn-glow mb-28"
             >
-              Book Your Evaluation →
+              Book Your Intro Call →
             </a>
 
             {/* Signature */}
