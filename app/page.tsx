@@ -482,8 +482,9 @@ export default function Page() {
             <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-12">
               <p>
                 Start with a call. We&apos;ll go through your situation, what
-                you&apos;ve already tried, and build a clear picture of what
-                needs to happen next.
+                you&apos;ve already tried, and build a clear picture of the
+                steps you need to take to get back to the sport, the training,
+                and the life that limitation put on hold.
               </p>
               <p>
                 From there, we&apos;ll get your Initial Evaluation on the
