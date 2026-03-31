@@ -62,9 +62,9 @@ const crossCards = [
 ]
 
 const larsCredentials = [
-  { stat: 'Olympic',  label: 'Athlete Prep',            detail: 'Tokyo Games 2021' },
+  { stat: 'Olympic',  label: 'Athlete Prep',            detail: 'Tokyo & Paris Games' },
   { stat: '1:1',      label: 'Direct Care Only',         detail: 'No techs. No aides.' },
-  { stat: 'DPT',      label: 'Doctor of Physical Therapy', detail: 'S&C background' },
+  { stat: 'DPT',      label: 'Doctor of Physical Therapy', detail: 'Strength & Conditioning background' },
 ]
 
 function LogoMark({ className }: { className?: string }) {
@@ -428,24 +428,25 @@ export default function Page() {
 
                 <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-lg mb-10">
                   <p>
-                    Lars started interning under an Olympic performance coach as
-                    a teenager. He learned sprint mechanics, weight room
+                    Lars started his apprenticeship under an Olympic performance
+                    coach at 20. He learned sprint mechanics, weight room
                     technique, and injury rehab from the inside out.
                   </p>
                   <p>
                     By the time he finished his doctorate, he&apos;d worked with
-                    sprinters prepping for the Tokyo Games. That same process is
-                    what runs every session at Threshold.
+                    sprinters prepping for the Tokyo and Paris Games. That same
+                    process is what runs every session at Threshold.
                   </p>
                   <p>
-                    His background is S&amp;C and physical therapy. What
-                    separates him is the system: a joint-by-joint evaluation
-                    that finds what everyone else missed, and a method for
-                    working through all 3 layers of why something isn&apos;t
+                    His background is strength and conditioning and physical
+                    therapy. What separates him is the system: a joint-by-joint
+                    evaluation that finds what everyone else missed, and a method
+                    for working through every layer of why something isn&apos;t
                     resolving.
                   </p>
                   <p className="text-clinical-white font-semibold">
-                    1:1 care only. No techs. No handoffs. Every session is him.
+                    1:1 care only. No techs. No handoffs. You work with Lars,
+                    start to finish.
                   </p>
                 </div>
 
