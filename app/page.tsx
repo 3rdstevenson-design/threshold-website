@@ -209,20 +209,21 @@ export default function Page() {
             </h1>
 
             <p className="font-montserrat text-base md:text-lg text-sterling-silver leading-relaxed max-w-2xl mb-10">
-              Physical therapy and performance coaching for people who&apos;ve
-              already done the work and still aren&apos;t where they need to be.
+              Physical therapy and performance coaching for athletes who&apos;ve
+              done the work, followed the program, and still aren&apos;t back to
+              their sport.
             </p>
 
             <div className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl mb-14 space-y-4">
               <p>
-                If you found Threshold, you&apos;ve probably been through the
-                whole thing. The exercises, the appointments, 6 to 8 weeks of
-                protocol, a printout, and a handshake.
+                If you found Threshold, you&apos;ve already been through the
+                standard PT route. The appointments, the home exercise program,
+                6 to 8 weeks of protocol that wasn&apos;t designed for someone
+                trying to compete.
               </p>
               <p>
-                You&apos;re still limited. Still told to manage it. Still not
-                back to the sport, the activity, or the version of yourself
-                that made life worth living.
+                You&apos;re still not back. Still training around it, or
+                watching from the sideline, or just not the athlete you were.
               </p>
               <p>
                 That&apos;s the Threshold. I&apos;m here to help you cross it.
@@ -262,21 +263,19 @@ export default function Page() {
 
               <div className="space-y-5 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
                 <p>
-                  Traditional PT runs on time constraints, diagnosis codes, and
-                  generic protocols. You get 6 to 8 weeks, a printout, and a
-                  follow-up appointment, whether that&apos;s what you actually
-                  need or not.
+                  Standard rehab wasn&apos;t built for athletes. It runs on 6
+                  to 8 week protocols and diagnosis codes that have nothing to
+                  do with the demands of the sport you&apos;re trying to get
+                  back to.
                 </p>
                 <p>
-                  The approach rarely finds what&apos;s actually driving the
-                  limitation in the first place.
+                  It treats the diagnosis. Not the system that broke down
+                  behind it.
                 </p>
                 <p>
-                  Treat the symptom without understanding the system behind it,
-                  and you get temporary relief at best. At worst, you spend
-                  years managing something that should have been resolved,
-                  quietly starting to believe that&apos;s just how it&apos;s
-                  going to be.
+                  Manage the symptom long enough without resolving what&apos;s
+                  actually causing it, and the limitation stops feeling like a
+                  temporary setback. It starts feeling like your new ceiling.
                 </p>
                 <p className="text-clinical-white font-semibold">
                   It isn&apos;t.
@@ -340,8 +339,8 @@ export default function Page() {
                 </p>
                 <p>
                   9 months later she was running again. Playing soccer with her
-                  kids. Calmer at work. The physical problem was one piece of
-                  it. We worked through all 3.
+                  kids. The physical limitation was one piece of it. We worked
+                  through every layer.
                 </p>
               </div>
             </div>
