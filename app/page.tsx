@@ -215,17 +215,17 @@ export default function Page() {
 
             <div className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl mb-14 space-y-4">
               <p>
-                Most people who find Threshold have been through the whole
-                thing. The exercises, the appointments, 6 to 8 weeks of
+                If you found Threshold, you&apos;ve probably been through the
+                whole thing. The exercises, the appointments, 6 to 8 weeks of
                 protocol, a printout, and a handshake.
               </p>
               <p>
-                They&apos;re still limited. Still told to manage it. Still not
-                back to the sport, the activity, or the version of themselves
+                You&apos;re still limited. Still told to manage it. Still not
+                back to the sport, the activity, or the version of yourself
                 that made life worth living.
               </p>
               <p>
-                That&apos;s the Threshold. I&apos;m here to help them cross it.
+                That&apos;s the Threshold. I&apos;m here to help you cross it.
               </p>
             </div>
 
