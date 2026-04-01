@@ -334,18 +334,23 @@ export default function Page() {
             <div className="border-l-[3px] border-threshold-purple pl-8 md:pl-14 mb-16">
               <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
                 <p>
-                  A high school football player came in with debilitating hip
-                  tightness that was limiting his ability to train and compete.
-                  He&apos;d been dealing with it for years.
+                  A high school football player came in with hip tightness that
+                  had been limiting his training for years. He&apos;d been
+                  through the standard recommendations. Stretching programs,
+                  rest, the usual. None of it had moved the needle.
                 </p>
                 <p>
-                  In under six weeks he was pain-free. He went on to play
-                  Division I college football. Six weeks. For a problem that had
-                  been building for years.
+                  We ran a full evaluation, found where the system had actually
+                  broken down, and started working in session one. The work was
+                  specific to what his body needed and built around the demands
+                  of his sport. In under six weeks he was training without
+                  restriction. He went on to play Division I college football.
                 </p>
                 <p>
-                  The difference wasn&apos;t what he did. It was how we
-                  addressed the system behind it.
+                  That&apos;s what it looks like when the evaluation actually
+                  finds the problem and the work is designed around where
+                  you&apos;re trying to go. That&apos;s the difference between
+                  this and standard PT.
                 </p>
               </div>
             </div>
