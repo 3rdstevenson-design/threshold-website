@@ -455,7 +455,7 @@ export default function Page() {
                   Dr. Lars Stevenson
                 </h2>
 
-                <p className="font-montserrat text-xs tracking-[0.22em] text-threshold-purple uppercase mb-10">
+                <p className="font-montserrat text-xs tracking-[0.22em] text-threshold-purple uppercase mb-10 whitespace-nowrap">
                   PT, DPT &nbsp;·&nbsp; Strength &amp; Conditioning &nbsp;·&nbsp; Reston, Virginia
                 </p>
 
