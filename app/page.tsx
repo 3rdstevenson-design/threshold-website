@@ -335,22 +335,23 @@ export default function Page() {
               <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
                 <p>
                   A high school football player came in with hip tightness that
-                  had been limiting his training for years. He&apos;d been
-                  through the standard recommendations. Stretching programs,
-                  rest, the usual. None of it had moved the needle.
+                  had been limiting his training for years. He&apos;d followed
+                  the standard recommendations: stretching programs, rest
+                  periods, multiple rounds of the usual advice. None of it had
+                  resolved the problem.
                 </p>
                 <p>
-                  We ran a full evaluation, found where the system had actually
-                  broken down, and started working in session one. The work was
-                  specific to what his body needed and built around the demands
+                  We ran a full evaluation, found exactly where the system had
+                  broken down, and started working in session one. The treatment
+                  was built around what his body needed and the specific demands
                   of his sport. In under six weeks he was training without
-                  restriction. He went on to play Division I college football.
+                  restriction and went on to play Division I college football.
                 </p>
                 <p>
-                  That&apos;s what it looks like when the evaluation actually
-                  finds the problem and the work is designed around where
-                  you&apos;re trying to go. That&apos;s the difference between
-                  this and standard PT.
+                  That kind of outcome requires a practitioner who can identify
+                  the underlying problem rather than manage what&apos;s visible
+                  on the surface. When that happens, the results look completely
+                  different. That&apos;s what it means to cross the Threshold.
                 </p>
               </div>
             </div>
