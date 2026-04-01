@@ -334,14 +334,18 @@ export default function Page() {
             <div className="border-l-[3px] border-threshold-purple pl-8 md:pl-14 mb-16">
               <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
                 <p>
-                  A woman came in who hadn&apos;t run in 10 years. She&apos;d
-                  been through the system. Multiple providers, multiple
-                  diagnoses, no resolution.
+                  A high school football player came in with debilitating hip
+                  tightness that was limiting his ability to train and compete.
+                  He&apos;d been dealing with it for years.
                 </p>
                 <p>
-                  9 months later she was running again. Playing soccer with her
-                  kids. The physical limitation was one piece of it. We worked
-                  through every layer.
+                  In under six weeks he was pain-free. He went on to play
+                  Division I college football. Six weeks. For a problem that had
+                  been building for years.
+                </p>
+                <p>
+                  The difference wasn&apos;t what he did. It was how we
+                  addressed the system behind it.
                 </p>
               </div>
             </div>

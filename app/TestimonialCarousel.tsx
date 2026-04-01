@@ -35,64 +35,80 @@ const testimonials = [
   },
 ]
 
-const PER_PAGE = 3
-const PAGES = Math.ceil(testimonials.length / PER_PAGE)
 const INTERVAL = 10000
 
 export default function TestimonialCarousel() {
-  const [page, setPage] = useState(0)
+  const [index, setIndex] = useState(0)
   const [fading, setFading] = useState(false)
 
   const goTo = useCallback((next: number) => {
     setFading(true)
     setTimeout(() => {
-      setPage(next)
+      setIndex((next + testimonials.length) % testimonials.length)
       setFading(false)
-    }, 350)
+    }, 300)
   }, [])
 
   useEffect(() => {
     const timer = setInterval(() => {
-      goTo((page + 1) % PAGES)
+      goTo(index + 1)
     }, INTERVAL)
     return () => clearInterval(timer)
-  }, [page, goTo])
+  }, [index, goTo])
 
-  const visible = testimonials.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
+  const { quote, date } = testimonials[index]
 
   return (
-    <div>
-      <div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 transition-opacity duration-300"
-        style={{ opacity: fading ? 0 : 1 }}
-      >
-        {visible.map(({ quote, date }) => (
-          <div
-            key={quote.slice(0, 30)}
-            className="border border-white/10 bg-white/[0.03] p-7 flex flex-col"
-          >
-            <p className="font-cormorant text-3xl text-threshold-purple mb-4 leading-none">&ldquo;</p>
-            <p className="font-nunito text-sm md:text-base text-sterling-silver leading-[1.85] flex-1">
+    <div className="flex flex-col items-center">
+      {/* Card + arrows row */}
+      <div className="flex items-center gap-6 w-full">
+
+        {/* Prev arrow */}
+        <button
+          onClick={() => goTo(index - 1)}
+          aria-label="Previous testimonial"
+          className="shrink-0 w-10 h-10 flex items-center justify-center border border-white/10 text-sterling-silver hover:border-threshold-purple hover:text-threshold-purple transition-colors duration-200"
+        >
+          ←
+        </button>
+
+        {/* Card */}
+        <div
+          className="flex-1 border border-white/10 bg-white/[0.03] p-8 md:p-12 transition-opacity duration-300 min-h-[220px] flex flex-col justify-between"
+          style={{ opacity: fading ? 0 : 1 }}
+        >
+          <div>
+            <p className="font-cormorant text-3xl text-threshold-purple mb-5 leading-none">&ldquo;</p>
+            <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85]">
               {quote}
             </p>
-            <p className="font-montserrat text-[10px] tracking-widest text-white/30 uppercase mt-6">
-              Verified Patient &nbsp;·&nbsp; {date}
-            </p>
           </div>
-        ))}
+          <p className="font-montserrat text-[10px] tracking-widest text-white/30 uppercase mt-8">
+            Verified Patient &nbsp;·&nbsp; {date}
+          </p>
+        </div>
+
+        {/* Next arrow */}
+        <button
+          onClick={() => goTo(index + 1)}
+          aria-label="Next testimonial"
+          className="shrink-0 w-10 h-10 flex items-center justify-center border border-white/10 text-sterling-silver hover:border-threshold-purple hover:text-threshold-purple transition-colors duration-200"
+        >
+          →
+        </button>
       </div>
 
       {/* Dots */}
-      <div className="flex justify-center gap-3 mt-10">
-        {Array.from({ length: PAGES }).map((_, i) => (
+      <div className="flex justify-center gap-3 mt-8">
+        {testimonials.map((_, i) => (
           <button
             key={i}
             onClick={() => goTo(i)}
-            aria-label={`Go to page ${i + 1}`}
+            aria-label={`Go to testimonial ${i + 1}`}
             className="w-2 h-2 rounded-full transition-all duration-300"
             style={{
-              background: i === page ? 'rgba(112,2,171,1)' : 'rgba(255,255,255,0.2)',
-              transform: i === page ? 'scale(1.3)' : 'scale(1)',
+              background: i === index ? 'rgba(112,2,171,1)' : 'rgba(255,255,255,0.2)',
+              transform: i === index ? 'scale(1.3)' : 'scale(1)',
             }}
           />
         ))}
