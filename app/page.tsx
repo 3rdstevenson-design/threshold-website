@@ -335,10 +335,9 @@ export default function Page() {
               <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
                 <p>
                   A high school football player came in with hip tightness that
-                  had been limiting his training for years. He&apos;d followed
-                  the standard recommendations: stretching programs, rest
-                  periods, multiple rounds of the usual advice. None of it had
-                  resolved the problem.
+                  had been limiting his training for years. He&apos;d been
+                  through multiple providers and multiple rounds of treatment.
+                  None of it had resolved the problem.
                 </p>
                 <p>
                   We ran a full evaluation, found exactly where the system had
