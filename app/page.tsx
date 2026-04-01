@@ -358,7 +358,61 @@ export default function Page() {
           </div>
         </section>
 
-        {/* ─── Section 5: Meet Lars ─── */}
+        {/* ─── Section 5: Testimonials ─── */}
+        <section id="testimonials" className="bg-obsidian py-24 md:py-36">
+          <div className="max-w-5xl mx-auto px-6">
+            <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
+              From Patients
+            </p>
+            <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-16 max-w-3xl">
+              What the work produces.
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[
+                {
+                  quote: "Lars Stevenson is by far the best physical therapist I've ever worked with. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.",
+                  date: "January 2025",
+                },
+                {
+                  quote: "After one session I immediately felt relief from my back and hip pain. He was very detailed and clear, and gave me exercises to do at home before our next visit.",
+                  date: "January 2025",
+                },
+                {
+                  quote: "Every time I come to him in pain he knows exactly what to do to get everything working again. He gives me great instructions on how to manage my situation.",
+                  date: "January 2026",
+                },
+                {
+                  quote: "He has the exact right mix of treatment planning, diagnosis, communication skills, technical knowledge, and the ability to challenge patients to do their best.",
+                  date: "February 2025",
+                },
+                {
+                  quote: "Thanks to his treatment, my knees and legs have improved significantly. I feel fortunate to have been under his care and will gladly recommend him to my friends and family.",
+                  date: "August 2025",
+                },
+                {
+                  quote: "Lars went above and beyond. He explained everything thoroughly and answered all my questions with impressive detail. In addition to his mastery of the material, he was a pleasure to work with.",
+                  date: "October 2024",
+                },
+              ].map(({ quote, date }) => (
+                <div
+                  key={date + quote.slice(0, 20)}
+                  className="border border-white/10 bg-white/[0.03] p-7 flex flex-col"
+                >
+                  <p className="font-cormorant text-3xl text-threshold-purple mb-4 leading-none">&ldquo;</p>
+                  <p className="font-nunito text-sm md:text-base text-sterling-silver leading-[1.85] flex-1">
+                    {quote}
+                  </p>
+                  <p className="font-montserrat text-[10px] tracking-widest text-white/30 uppercase mt-6">
+                    Verified Patient &nbsp;·&nbsp; {date}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Section 6: Meet Lars ─── */}
         <section id="lars" className="relative lars-spotlight py-24 md:py-36 overflow-hidden">
 
           {/* Watermark logo mark */}
