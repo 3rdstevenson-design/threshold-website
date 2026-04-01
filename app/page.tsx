@@ -336,8 +336,8 @@ export default function Page() {
                 <p>
                   A high school football player came in with hip tightness that
                   had been limiting his training for years. He&apos;d been
-                  through multiple providers and multiple rounds of treatment.
-                  None of it had resolved the problem.
+                  managing it on his own, picked up advice from coaches and
+                  trainers along the way, but nothing had actually fixed it.
                 </p>
                 <p>
                   We ran a full evaluation, found exactly where the system had
