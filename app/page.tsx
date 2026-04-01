@@ -99,7 +99,7 @@ function Nav() {
             The CROSS Method
           </a>
           <a
-            href="#lars"
+            href="#work"
             className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
           >
             The Work
