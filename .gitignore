@@ -31,3 +31,6 @@ next-env.d.ts
 
 # Claude Code local settings
 .claude/
+
+# Local queue fallback (Vercel Blob is the real store)
+data/queue.json
