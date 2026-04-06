@@ -32,13 +32,11 @@ const BLOB_QUEUE_PATHNAME = 'queue/queue.json';
 // ── Vercel Blob helpers (dynamic import so the file works without token in local dev) ──
 
 async function readFromBlob(): Promise<QueuePost[]> {
-  const { list } = await import('@vercel/blob');
+  const { head } = await import('@vercel/blob');
   try {
-    // Find the queue blob by listing
-    const { blobs } = await list({ prefix: BLOB_QUEUE_PATHNAME });
-    if (blobs.length === 0) return [];
-    const blob = blobs[0];
-    const res = await fetch(blob.url);
+    // Use head() to get the live, non-cached URL for the queue file
+    const blob = await head(BLOB_QUEUE_PATHNAME);
+    const res = await fetch(blob.url + '?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) return [];
     return (await res.json()) as QueuePost[];
   } catch {

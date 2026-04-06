@@ -1,6 +1,6 @@
 import { QueuePost } from './queue';
 
-const BASE = 'https://graph.facebook.com/v19.0';
+const BASE = 'https://graph.instagram.com/v19.0';
 
 function igId() {
   const id = process.env.INSTAGRAM_ACCOUNT_ID;

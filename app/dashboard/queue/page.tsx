@@ -167,15 +167,162 @@ function Caption({ text }: { text: string }) {
 
 // ── Post card ──────────────────────────────────────────────────────────────────
 
+// ── Inline caption editor ──────────────────────────────────────────────────────
+
+function CaptionEditor({ post, onSaved }: { post: QueuePost; onSaved: (caption: string) => void }) {
+  const [editing, setEditing] = useState(post.caption.startsWith('✏️'));
+  const [value, setValue] = useState(post.caption.startsWith('✏️') ? '' : post.caption);
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    if (!value.trim()) return;
+    setSaving(true);
+    const res = await fetch('/api/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: post.id, caption: value.trim() }),
+    });
+    setSaving(false);
+    if (res.ok) { setEditing(false); onSaved(value.trim()); }
+  }
+
+  if (!editing) {
+    return (
+      <div style={{ position: 'relative' }}>
+        <Caption text={value} />
+        {post.status === 'pending' && (
+          <button onClick={() => setEditing(true)} style={{
+            background: 'none', border: 'none', color: C.silver, cursor: 'pointer',
+            fontSize: 11, padding: '2px 0', fontFamily: 'var(--font-nunito)',
+          }}>✏️ Edit caption</button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <textarea
+        autoFocus
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Write your caption + hashtags…"
+        rows={5}
+        style={{
+          width: '100%', background: '#0D0D18', color: C.white, border: `1px solid ${C.purple}`,
+          borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'var(--font-nunito)',
+          resize: 'vertical', lineHeight: 1.6, boxSizing: 'border-box',
+        }}
+      />
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button onClick={save} disabled={saving || !value.trim()} style={{
+          background: C.purple, color: C.white, border: 'none', borderRadius: 6,
+          padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-montserrat)',
+          fontWeight: 700, opacity: saving || !value.trim() ? 0.5 : 1,
+        }}>{saving ? 'Saving…' : 'Save'}</button>
+        {!post.caption.startsWith('✏️') && (
+          <button onClick={() => { setEditing(false); setValue(post.caption); }} style={{
+            background: 'none', border: `1px solid ${C.border}`, color: C.silver,
+            borderRadius: 6, padding: '6px 12px', fontSize: 12, cursor: 'pointer',
+            fontFamily: 'var(--font-montserrat)',
+          }}>Cancel</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Schedule picker (shown inline when approving) ──────────────────────────────
+
+function SchedulePicker({ post, onConfirm, onCancel }: {
+  post: QueuePost;
+  onConfirm: (scheduledTime: string) => void;
+  onCancel: () => void;
+}) {
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/suggest?pillar=${post.pillar}`)
+      .then(r => r.json())
+      .then((isos: string[]) => {
+        setSuggestions(isos);
+        setSelected(isos[0] ?? null);
+      })
+      .finally(() => setLoading(false));
+  }, [post.pillar]);
+
+  return (
+    <div style={{
+      background: '#0D0D18', border: `1px solid ${C.purple}`, borderRadius: 10,
+      padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10,
+    }}>
+      <div style={{ color: C.white, fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-montserrat)' }}>
+        Pick a posting time
+      </div>
+      {loading ? (
+        <div style={{ color: C.silver, fontSize: 12 }}>Loading suggestions…</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {suggestions.map(iso => (
+            <label key={iso} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <input
+                type="radio"
+                name={`time-${post.id}`}
+                checked={selected === iso}
+                onChange={() => setSelected(iso)}
+                style={{ accentColor: C.purple }}
+              />
+              <span style={{ color: selected === iso ? C.white : C.silver, fontSize: 13, fontFamily: 'var(--font-nunito)' }}>
+                {fmtDate(iso)}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => selected && onConfirm(selected)}
+          disabled={!selected}
+          style={{
+            flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+            background: C.green, color: '#fff', fontWeight: 700, fontSize: 13,
+            fontFamily: 'var(--font-montserrat)', opacity: !selected ? 0.5 : 1,
+          }}
+        >
+          Confirm
+        </button>
+        <button
+          onClick={onCancel}
+          style={{
+            padding: '8px 14px', borderRadius: 8, border: `1px solid ${C.border}`, cursor: 'pointer',
+            background: 'transparent', color: C.silver, fontSize: 12,
+            fontFamily: 'var(--font-montserrat)',
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Post card ──────────────────────────────────────────────────────────────────
+
 function PostCard({
   post,
   onApprove,
   onReject,
+  onUpdate,
 }: {
   post: QueuePost;
-  onApprove: (id: string) => void;
+  onApprove: (id: string, scheduledTime: string) => void;
   onReject: (id: string) => void;
+  onUpdate: (id: string, caption: string) => void;
 }) {
+  const [pickingTime, setPickingTime] = useState(false);
+
   return (
     <div style={{
       background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14,
@@ -191,7 +338,7 @@ function PostCard({
         )}
         {post.type === 'reel' && post.videoUrl && (
           <video
-            src={post.videoUrl}
+            src={post.videoUrl.startsWith('file://') ? `/api/media?url=${encodeURIComponent(post.videoUrl)}` : post.videoUrl}
             poster={post.coverImageUrl}
             controls
             style={{ width: '100%', aspectRatio: '9/16', background: '#000', display: 'block' }}
@@ -226,7 +373,10 @@ function PostCard({
         </div>
 
         {/* Caption */}
-        <Caption text={post.caption} />
+        {post.status === 'pending'
+          ? <CaptionEditor post={post} onSaved={(c) => onUpdate(post.id, c)} />
+          : <Caption text={post.caption} />
+        }
 
         {/* Notes */}
         {post.notes && (
@@ -245,34 +395,42 @@ function PostCard({
 
         {/* Actions */}
         {post.status === 'pending' && (
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button
-              onClick={() => onApprove(post.id)}
-              style={{
-                flex: 1, padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
-                background: C.green, color: '#fff', fontWeight: 700, fontSize: 13,
-                fontFamily: 'var(--font-montserrat)',
-              }}
-            >
-              Approve
-            </button>
-            <button
-              onClick={() => onReject(post.id)}
-              style={{
-                flex: 1, padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
-                background: C.red, color: '#fff', fontWeight: 700, fontSize: 13,
-                fontFamily: 'var(--font-montserrat)',
-              }}
-            >
-              Reject
-            </button>
-          </div>
+          pickingTime ? (
+            <SchedulePicker
+              post={post}
+              onConfirm={(t) => { setPickingTime(false); onApprove(post.id, t); }}
+              onCancel={() => setPickingTime(false)}
+            />
+          ) : (
+            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+              <button
+                onClick={() => setPickingTime(true)}
+                style={{
+                  flex: 1, padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: C.green, color: '#fff', fontWeight: 700, fontSize: 13,
+                  fontFamily: 'var(--font-montserrat)',
+                }}
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => onReject(post.id)}
+                style={{
+                  flex: 1, padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: C.red, color: '#fff', fontWeight: 700, fontSize: 13,
+                  fontFamily: 'var(--font-montserrat)',
+                }}
+              >
+                Reject
+              </button>
+            </div>
+          )
         )}
 
         {post.status === 'approved' && (
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
             <div style={{ flex: 1, color: C.green, fontSize: 12, fontFamily: 'var(--font-montserrat)', alignSelf: 'center' }}>
-              ✓ Approved · Publishing at scheduled time
+              ✓ Approved · {fmtDate(post.scheduledTime)}
             </div>
             <button
               onClick={() => onReject(post.id)}
@@ -362,32 +520,35 @@ export default function QueuePage() {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [fetchQueue]);
 
-  async function handleApprove(id: string) {
-    const res = await fetch('/api/approve', {
+  // Optimistic approve — update UI immediately, sync in background
+  function handleApprove(id: string, scheduledTime: string) {
+    setPosts(prev => prev.map(p =>
+      p.id === id ? { ...p, status: 'approved' as const, approvedAt: new Date().toISOString(), scheduledTime } : p
+    ));
+    setToast('✓ Approved');
+    setActiveTab('approved');
+    fetch('/api/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    if (res.ok) {
-      setToast('✓ Approved');
-      await fetchQueue();
-    } else {
-      setToast('❌ Failed to approve');
-    }
+      body: JSON.stringify({ id, scheduledTime }),
+    }).then(r => { if (!r.ok) fetchQueue(); }); // refetch only on error
   }
 
-  async function handleReject(id: string) {
-    const res = await fetch('/api/reject', {
+  function handleUpdate(id: string, caption: string) {
+    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, caption } : p));
+  }
+
+  // Optimistic reject — update UI immediately, sync in background
+  function handleReject(id: string) {
+    setPosts(prev => prev.map(p =>
+      p.id === id ? { ...p, status: 'rejected' as const } : p
+    ));
+    setToast('Rejected');
+    fetch('/api/reject', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
-    });
-    if (res.ok) {
-      setToast('Rejected');
-      await fetchQueue();
-    } else {
-      setToast('❌ Failed to reject');
-    }
+    }).then(r => { if (!r.ok) fetchQueue(); }); // refetch only on error
   }
 
   const counts = TABS.reduce((acc, tab) => {
@@ -437,6 +598,7 @@ export default function QueuePage() {
                   post={post}
                   onApprove={handleApprove}
                   onReject={handleReject}
+                  onUpdate={handleUpdate}
                 />
               ))}
             </div>

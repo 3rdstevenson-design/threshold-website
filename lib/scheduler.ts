@@ -26,6 +26,23 @@ const PILLAR_WINDOWS: Record<ContentPillar, { days: number[]; slots: TimeSlot[] 
 
 const CONFLICT_BUFFER_MS = 2 * 60 * 60 * 1000; // ±2 hours
 
+/**
+ * Add a small random offset so the minute never ends in 0.
+ * e.g. 9:00 → 9:07, 18:00 → 18:03, 12:00 → 12:11
+ * Uses a seeded-ish offset based on the date so the same slot
+ * always gets the same offset (stable across suggestions).
+ */
+function naturalizeMinutes(date: Date): Date {
+  const result = new Date(date);
+  const existing = result.getMinutes();
+  if (existing % 10 !== 0) return result; // already natural
+  // Pick a non-zero last digit: 1-9, biased away from 5 too (no :05, :15, :25...)
+  const offsets = [3, 7, 11, 13, 17, 19, 23]; // prime-ish, all non-zero last digit
+  const offset = offsets[result.getDate() % offsets.length];
+  result.setMinutes(existing + offset);
+  return result;
+}
+
 function hasConflict(candidate: Date, existing: QueuePost[]): boolean {
   return existing.some((post) => {
     if (post.status === 'rejected' || post.status === 'published') return false;
@@ -60,7 +77,7 @@ export function suggestScheduleTimes(pillar: ContentPillar, existingPosts: Queue
       candidate.setHours(slot.hour, slot.minute, 0, 0);
       if (candidate <= now) continue;
       if (!hasConflict(candidate, existingPosts)) {
-        suggestions.push(candidate);
+        suggestions.push(naturalizeMinutes(candidate));
       }
     }
   }
@@ -71,7 +88,7 @@ export function suggestScheduleTimes(pillar: ContentPillar, existingPosts: Queue
       const fallback = new Date(now);
       fallback.setDate(now.getDate() + d);
       fallback.setHours(9, 0, 0, 0);
-      if (!hasConflict(fallback, existingPosts)) suggestions.push(fallback);
+      if (!hasConflict(fallback, existingPosts)) suggestions.push(naturalizeMinutes(fallback));
     }
   }
 

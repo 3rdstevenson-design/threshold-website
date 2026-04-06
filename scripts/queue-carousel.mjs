@@ -49,10 +49,10 @@ function writeQueueLocal(posts) {
 async function readQueue() {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return readQueueLocal();
   try {
-    const { list } = await import('@vercel/blob');
-    const { blobs } = await list({ prefix: 'queue/queue.json' });
-    if (blobs.length === 0) return [];
-    const res = await fetch(blobs[0].url + '?t=' + Date.now());
+    const { head } = await import('@vercel/blob');
+    const blob = await head('queue/queue.json');
+    
+    const res = await fetch(blob.url + '?t=' + Date.now(), { cache: 'no-store' });
     return res.ok ? await res.json() : [];
   } catch { return readQueueLocal(); }
 }
