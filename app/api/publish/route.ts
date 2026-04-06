@@ -33,13 +33,12 @@ export async function POST(req: NextRequest) {
   for (const post of due) {
     try {
       let mediaId: string;
-      const schedTime = new Date(post.scheduledTime);
       if (post.type === 'image') {
-        mediaId = await publishImagePost(post, schedTime);
+        mediaId = await publishImagePost(post);
       } else if (post.type === 'carousel') {
-        mediaId = await publishCarouselPost(post, schedTime);
+        mediaId = await publishCarouselPost(post);
       } else {
-        mediaId = await publishReelPost(post, schedTime);
+        mediaId = await publishReelPost(post);
       }
       await updatePost(post.id, {
         status: 'published',

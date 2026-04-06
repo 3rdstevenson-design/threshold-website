@@ -1,6 +1,6 @@
 import { QueuePost } from './queue';
 
-const BASE = 'https://graph.instagram.com/v19.0';
+const BASE = 'https://graph.facebook.com/v19.0';
 
 function igId() {
   const id = process.env.INSTAGRAM_ACCOUNT_ID;
@@ -56,25 +56,21 @@ async function pollContainerStatus(containerId: string, maxMs = 180_000): Promis
 }
 
 // ── Public publish functions ───────────────────────────────────────────────────
-// scheduledTime: when to publish. Instagram requires it to be 10+ minutes in
-// the future and at most 75 days out. The post will appear as "Scheduled" in
-// the Instagram app and Meta Business Suite immediately after calling these.
+// These publish immediately. The cron at /api/publish calls them only when
+// the post's scheduledTime has passed.
 
-export async function publishImagePost(post: QueuePost, scheduledTime: Date): Promise<string> {
+export async function publishImagePost(post: QueuePost): Promise<string> {
   if (!post.imageUrl) throw new Error('imageUrl is required for image posts');
   const containerId = await createMediaContainer({
     image_url: post.imageUrl,
     caption: post.caption,
-    published: false,
-    scheduled_publish_time: Math.floor(scheduledTime.getTime() / 1000),
   });
   return publishContainer(containerId);
 }
 
-export async function publishCarouselPost(post: QueuePost, scheduledTime: Date): Promise<string> {
+export async function publishCarouselPost(post: QueuePost): Promise<string> {
   if (!post.imageUrls?.length) throw new Error('imageUrls is required for carousel posts');
 
-  // Item containers have no published/scheduled_publish_time — only the parent does
   const itemIds = await Promise.all(
     post.imageUrls.map((url) =>
       createMediaContainer({ image_url: url, is_carousel_item: true })
@@ -85,28 +81,21 @@ export async function publishCarouselPost(post: QueuePost, scheduledTime: Date):
     media_type: 'CAROUSEL',
     caption: post.caption,
     children: itemIds.join(','),
-    published: false,
-    scheduled_publish_time: Math.floor(scheduledTime.getTime() / 1000),
   });
 
   return publishContainer(carouselId);
 }
 
-export async function publishReelPost(post: QueuePost, scheduledTime: Date): Promise<string> {
+export async function publishReelPost(post: QueuePost): Promise<string> {
   if (!post.videoUrl) throw new Error('videoUrl is required for reel posts');
   const params: Record<string, unknown> = {
     media_type: 'REELS',
     video_url: post.videoUrl,
     caption: post.caption,
-    published: false,
-    scheduled_publish_time: Math.floor(scheduledTime.getTime() / 1000),
   };
   if (post.coverImageUrl) params.cover_url = post.coverImageUrl;
 
   const containerId = await createMediaContainer(params);
-
-  // Poll until video is processed before confirming schedule
   await pollContainerStatus(containerId);
-
   return publishContainer(containerId);
 }

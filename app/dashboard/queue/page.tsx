@@ -429,9 +429,8 @@ function PostCard({
 
         {post.status === 'approved' && (
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <div style={{ flex: 1, fontSize: 12, fontFamily: 'var(--font-montserrat)', alignSelf: 'center',
-              color: post.metaPublishId ? C.green : C.gold }}>
-              {post.metaPublishId ? '📅 Scheduled in Instagram' : '⚠️ Locally approved'} · {fmtDate(post.scheduledTime)}
+            <div style={{ flex: 1, color: C.green, fontSize: 12, fontFamily: 'var(--font-montserrat)', alignSelf: 'center' }}>
+              ✓ Scheduled · {fmtDate(post.scheduledTime)}
             </div>
             <button
               onClick={() => onReject(post.id)}
@@ -521,32 +520,18 @@ export default function QueuePage() {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [fetchQueue]);
 
-  // Optimistic approve — update UI immediately, then push to Instagram
-  async function handleApprove(id: string, scheduledTime: string) {
+  // Optimistic approve — update UI immediately, sync in background
+  function handleApprove(id: string, scheduledTime: string) {
     setPosts(prev => prev.map(p =>
       p.id === id ? { ...p, status: 'approved' as const, approvedAt: new Date().toISOString(), scheduledTime } : p
     ));
+    setToast('✓ Scheduled');
     setActiveTab('approved');
-    try {
-      const res = await fetch('/api/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, scheduledTime }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        fetchQueue();
-        setToast('✗ Failed to schedule');
-      } else if (data.metaPublishId) {
-        setPosts(prev => prev.map(p => p.id === id ? { ...p, metaPublishId: data.metaPublishId } : p));
-        setToast('📅 Scheduled in Instagram');
-      } else if (data.warning) {
-        setToast('⚠️ Approved locally — IG scheduling failed');
-      }
-    } catch {
-      fetchQueue();
-      setToast('✗ Network error');
-    }
+    fetch('/api/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, scheduledTime }),
+    }).then(r => { if (!r.ok) fetchQueue(); });
   }
 
   function handleUpdate(id: string, caption: string) {
