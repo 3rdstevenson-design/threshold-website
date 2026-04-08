@@ -9,6 +9,18 @@ type PostStatus = 'pending' | 'approved' | 'rejected' | 'published';
 type PostType = 'image' | 'carousel' | 'reel';
 type ContentPillar = 'clinic_case' | 'exercise' | 'philosophy' | 'story';
 
+interface LocalFile {
+  id: string;
+  type: 'reel' | 'carousel';
+  name: string;
+  filePath: string;
+  previewUrl: string;
+  slideCount?: number;
+  slidePaths?: string[];
+  captionHint?: string;
+  sizeMB?: number;
+}
+
 interface QueuePost {
   id: string;
   status: PostStatus;
@@ -693,7 +705,9 @@ export default function QueuePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<QueuePost[]>([]);
   const [activeTab, setActiveTab] = useState<PostStatus>('pending');
-  const [calView, setCalView] = useState<'queue' | 'month' | 'week'>('queue');
+  const [calView, setCalView] = useState<'queue' | 'month' | 'week' | 'local'>('queue');
+  const [localFiles, setLocalFiles] = useState<LocalFile[]>([]);
+  const [queuingIds, setQueuingIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(true);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -712,11 +726,51 @@ export default function QueuePage() {
     }
   }, []);
 
+  const fetchLocalFiles = useCallback(async () => {
+    try {
+      const res = await fetch('/api/local-scan');
+      if (res.ok) setLocalFiles(await res.json());
+    } catch {}
+  }, []);
+
+  async function handleQueueLocal(file: LocalFile) {
+    setQueuingIds(prev => new Set(prev).add(file.id));
+    try {
+      const res = await fetch('/api/local-scan/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: file.type,
+          filePath: file.filePath,
+          slidePaths: file.slidePaths,
+          name: file.name,
+          captionHint: file.captionHint,
+        }),
+      });
+      if (res.ok) {
+        const post = await res.json();
+        setPosts(prev => [...prev, post]);
+        setLocalFiles(prev => prev.filter(f => f.id !== file.id));
+        setToast('✓ Added to queue');
+        setCalView('queue');
+        setActiveTab('pending');
+      } else {
+        const { error } = await res.json();
+        setToast(`✗ ${error}`);
+      }
+    } catch (e: any) {
+      setToast(`✗ ${e.message}`);
+    } finally {
+      setQueuingIds(prev => { const s = new Set(prev); s.delete(file.id); return s; });
+    }
+  }
+
   useEffect(() => {
     fetchQueue();
+    fetchLocalFiles();
     pollRef.current = setInterval(fetchQueue, 30_000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [fetchQueue]);
+  }, [fetchQueue, fetchLocalFiles]);
 
   // Optimistic approve — update UI immediately, sync in background
   function handleApprove(id: string, scheduledTime: string) {
@@ -772,14 +826,23 @@ export default function QueuePage() {
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* View toggle */}
           <div style={{ display: 'flex', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, overflow: 'hidden' }}>
-            {(['queue', 'month', 'week'] as const).map(v => (
-              <button key={v} onClick={() => setCalView(v)} style={{
+            {(['queue', 'month', 'week', 'local'] as const).map(v => (
+              <button key={v} onClick={() => { setCalView(v); if (v === 'local') fetchLocalFiles(); }} style={{
                 background: calView === v ? C.purple : 'transparent',
                 color: calView === v ? C.white : C.silver,
                 border: 'none', padding: '5px 12px', cursor: 'pointer',
                 fontFamily: 'var(--font-montserrat)', fontWeight: 600, fontSize: 11,
-                textTransform: 'capitalize',
-              }}>{v === 'queue' ? 'Queue' : v === 'month' ? 'Month' : 'Week'}</button>
+                textTransform: 'capitalize', position: 'relative',
+              }}>
+                {v === 'queue' ? 'Queue' : v === 'month' ? 'Month' : v === 'week' ? 'Week' : 'Local'}
+                {v === 'local' && localFiles.length > 0 && (
+                  <span style={{
+                    position: 'absolute', top: 2, right: 2, background: C.gold, color: '#000',
+                    borderRadius: 999, width: 14, height: 14, fontSize: 9, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>{localFiles.length}</span>
+                )}
+              </button>
             ))}
           </div>
           <span style={{ color: C.silver, fontSize: 12 }}>{loading ? 'Loading…' : `${posts.length} posts`}</span>
@@ -791,6 +854,78 @@ export default function QueuePage() {
           <MonthCalendar posts={posts} />
         ) : calView === 'week' ? (
           <WeekCalendar posts={posts} />
+        ) : calView === 'local' ? (
+          <div>
+            <p style={{ color: C.silver, fontSize: 13, fontFamily: 'var(--font-nunito)', marginBottom: 20 }}>
+              Local files from your Mac. Click <strong style={{ color: C.white }}>Add to Queue</strong> to upload to R2 and create a pending post.
+            </p>
+            {localFiles.length === 0 ? (
+              <p style={{ color: C.silver, textAlign: 'center', padding: 40 }}>
+                No local files found. Only works when running the dashboard locally.
+              </p>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+                {localFiles.map(file => {
+                  const queuing = queuingIds.has(file.id);
+                  return (
+                    <div key={file.id} style={{
+                      background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden',
+                    }}>
+                      {/* Preview */}
+                      {file.type === 'reel' ? (
+                        <video
+                          src={file.previewUrl}
+                          controls
+                          style={{ width: '100%', aspectRatio: '9/16', background: '#000', display: 'block', maxHeight: 320, objectFit: 'contain' }}
+                        />
+                      ) : (
+                        <img
+                          src={file.previewUrl}
+                          alt="Slide 1"
+                          style={{ width: '100%', aspectRatio: '4/5', objectFit: 'cover', display: 'block' }}
+                        />
+                      )}
+                      {/* Info */}
+                      <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <span style={{
+                            background: '#ffffff1a', color: C.silver, borderRadius: 6,
+                            padding: '2px 8px', fontSize: 11, fontFamily: 'var(--font-montserrat)', textTransform: 'capitalize',
+                          }}>{file.type}</span>
+                          {file.slideCount && (
+                            <span style={{ color: C.silver, fontSize: 11 }}>{file.slideCount} slides</span>
+                          )}
+                          {file.sizeMB && (
+                            <span style={{ color: C.silver, fontSize: 11 }}>{file.sizeMB} MB</span>
+                          )}
+                        </div>
+                        <div style={{ color: C.white, fontSize: 13, fontFamily: 'var(--font-nunito)', wordBreak: 'break-all' }}>
+                          {file.name}
+                        </div>
+                        {file.captionHint && (
+                          <div style={{ color: C.silver, fontSize: 12, fontFamily: 'var(--font-nunito)', fontStyle: 'italic' }}>
+                            {file.captionHint.slice(0, 80)}{file.captionHint.length > 80 ? '…' : ''}
+                          </div>
+                        )}
+                        <button
+                          onClick={() => handleQueueLocal(file)}
+                          disabled={queuing}
+                          style={{
+                            marginTop: 4, padding: '9px 0', borderRadius: 8, border: 'none',
+                            background: queuing ? '#333' : C.purple, color: C.white,
+                            fontWeight: 700, fontSize: 13, fontFamily: 'var(--font-montserrat)',
+                            cursor: queuing ? 'default' : 'pointer',
+                          }}
+                        >
+                          {queuing ? 'Uploading…' : 'Add to Queue'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         ) : (
           <>
             <TabBar active={activeTab} counts={counts} onSelect={setActiveTab} />
