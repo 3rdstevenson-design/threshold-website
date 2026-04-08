@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { r2, R2_BUCKET, useR2 } from './r2';
 
 export type ContentPillar = 'clinic_case' | 'exercise' | 'philosophy' | 'story';
 export type PostStatus = 'pending' | 'approved' | 'rejected' | 'published';
@@ -27,34 +29,34 @@ export interface QueuePost {
 }
 
 const LOCAL_QUEUE_PATH = path.join(process.cwd(), 'data', 'queue.json');
-const BLOB_QUEUE_PATHNAME = 'queue/queue.json';
+const R2_QUEUE_KEY = 'queue/queue.json';
 
-// ── Vercel Blob helpers (dynamic import so the file works without token in local dev) ──
+// ── R2 helpers ────────────────────────────────────────────────────────────────
 
-async function readFromBlob(): Promise<QueuePost[]> {
-  const { head } = await import('@vercel/blob');
+async function readFromR2(): Promise<QueuePost[]> {
   try {
-    // Use head() to get the live, non-cached URL for the queue file
-    const blob = await head(BLOB_QUEUE_PATHNAME);
-    const res = await fetch(blob.url + '?t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) return [];
-    return (await res.json()) as QueuePost[];
-  } catch {
-    return [];
+    const res = await r2.send(new GetObjectCommand({
+      Bucket: R2_BUCKET(),
+      Key: R2_QUEUE_KEY,
+    }));
+    const body = await res.Body?.transformToString();
+    return body ? JSON.parse(body) : [];
+  } catch (e: any) {
+    if (e.name === 'NoSuchKey') return [];
+    throw e;
   }
 }
 
-async function writeToBlob(posts: QueuePost[]): Promise<void> {
-  const { put } = await import('@vercel/blob');
-  await put(BLOB_QUEUE_PATHNAME, JSON.stringify(posts, null, 2), {
-    access: 'public',
-    allowOverwrite: true,
-    contentType: 'application/json',
-    addRandomSuffix: false,
-  });
+async function writeToR2(posts: QueuePost[]): Promise<void> {
+  await r2.send(new PutObjectCommand({
+    Bucket: R2_BUCKET(),
+    Key: R2_QUEUE_KEY,
+    Body: JSON.stringify(posts, null, 2),
+    ContentType: 'application/json',
+  }));
 }
 
-// ── Local file fallback ──
+// ── Local file fallback ───────────────────────────────────────────────────────
 
 function readFromFile(): QueuePost[] {
   try {
@@ -71,19 +73,15 @@ function writeToFile(posts: QueuePost[]): void {
   fs.writeFileSync(LOCAL_QUEUE_PATH, JSON.stringify(posts, null, 2));
 }
 
-// ── Public API ──
-
-function useBlob(): boolean {
-  return !!process.env.BLOB_READ_WRITE_TOKEN;
-}
+// ── Public API ────────────────────────────────────────────────────────────────
 
 export async function readQueue(): Promise<QueuePost[]> {
-  return useBlob() ? readFromBlob() : readFromFile();
+  return useR2() ? readFromR2() : readFromFile();
 }
 
 export async function writeQueue(posts: QueuePost[]): Promise<void> {
-  if (useBlob()) {
-    await writeToBlob(posts);
+  if (useR2()) {
+    await writeToR2(posts);
   } else {
     writeToFile(posts);
   }

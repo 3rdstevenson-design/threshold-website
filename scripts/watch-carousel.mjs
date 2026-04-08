@@ -45,31 +45,66 @@ function loadEnv() {
   }
 }
 
-async function readQueue() {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return [];
-  try {
-    const { head } = await import('@vercel/blob');
-    const blob = await head('queue/queue.json');
-    const res = await fetch(blob.url + '?t=' + Date.now(), { cache: 'no-store' });
-    return res.ok ? await res.json() : [];
-  } catch { return []; }
+function useR2() {
+  return !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID &&
+    process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
 }
 
-async function writeQueue(posts) {
-  const { put } = await import('@vercel/blob');
-  await put('queue/queue.json', JSON.stringify(posts, null, 2), {
-    access: 'public', allowOverwrite: true, contentType: 'application/json', addRandomSuffix: false,
+function r2PublicUrl(key) {
+  return `${process.env.R2_PUBLIC_URL}/${key}`;
+}
+
+async function getR2Client() {
+  const { S3Client } = await import('@aws-sdk/client-s3');
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    },
   });
 }
 
+async function readQueue() {
+  if (!useR2()) return [];
+  try {
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    const r2 = await getR2Client();
+    const res = await r2.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: 'queue/queue.json' }));
+    const body = await res.Body?.transformToString();
+    return body ? JSON.parse(body) : [];
+  } catch (e) {
+    if (e.name === 'NoSuchKey') return [];
+    return [];
+  }
+}
+
+async function writeQueue(posts) {
+  if (!useR2()) return;
+  const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+  const r2 = await getR2Client();
+  await r2.send(new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME,
+    Key: 'queue/queue.json',
+    Body: JSON.stringify(posts, null, 2),
+    ContentType: 'application/json',
+  }));
+}
+
 async function uploadFiles(filePaths, folderName) {
-  const { put } = await import('@vercel/blob');
+  const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+  const r2 = await getR2Client();
   return Promise.all(filePaths.map(async (filePath) => {
     const filename = path.basename(filePath);
-    const blob = await put(`instagram/${folderName}-${filename}`, fs.readFileSync(filePath), {
-      access: 'public', contentType: 'image/png', addRandomSuffix: true,
-    });
-    return blob.url;
+    const key = `instagram/${Date.now()}-${folderName}-${filename}`;
+    await r2.send(new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: key,
+      Body: fs.readFileSync(filePath),
+      ContentType: 'image/png',
+    }));
+    return r2PublicUrl(key);
   }));
 }
 

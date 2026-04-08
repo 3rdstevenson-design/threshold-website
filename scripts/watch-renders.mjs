@@ -47,34 +47,65 @@ function writeQueueLocal(posts) {
   fs.writeFileSync(path.join(dir, 'queue.json'), JSON.stringify(posts, null, 2));
 }
 
+function useR2() {
+  return !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID &&
+    process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
+}
+
+function r2PublicUrl(key) {
+  return `${process.env.R2_PUBLIC_URL}/${key}`;
+}
+
+async function getR2Client() {
+  const { S3Client } = await import('@aws-sdk/client-s3');
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    },
+  });
+}
+
 async function readQueue() {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return readQueueLocal();
+  if (!useR2()) return readQueueLocal();
   try {
-    const { head } = await import('@vercel/blob');
-    const blob = await head('queue/queue.json');
-    
-    const res = await fetch(blob.url + '?t=' + Date.now(), { cache: 'no-store' });
-    return res.ok ? await res.json() : [];
-  } catch { return readQueueLocal(); }
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    const r2 = await getR2Client();
+    const res = await r2.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: 'queue/queue.json' }));
+    const body = await res.Body?.transformToString();
+    return body ? JSON.parse(body) : [];
+  } catch (e) {
+    if (e.name === 'NoSuchKey') return [];
+    return readQueueLocal();
+  }
 }
 
 async function writeQueue(posts) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) { writeQueueLocal(posts); return; }
-  const { put } = await import('@vercel/blob');
-  await put('queue/queue.json', JSON.stringify(posts, null, 2), {
-    access: 'public', allowOverwrite: true, contentType: 'application/json', addRandomSuffix: false,
-  });
+  if (!useR2()) { writeQueueLocal(posts); return; }
+  const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+  const r2 = await getR2Client();
+  await r2.send(new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME,
+    Key: 'queue/queue.json',
+    Body: JSON.stringify(posts, null, 2),
+    ContentType: 'application/json',
+  }));
 }
 
 async function uploadFile(filePath, filename) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) throw new Error('BLOB_READ_WRITE_TOKEN not set');
-  const { put } = await import('@vercel/blob');
-  const sizeMB = fs.statSync(filePath).size / 1024 / 1024;
-  if (sizeMB > 500) console.warn(`⚠️  ${filename} is ${sizeMB.toFixed(0)}MB — Vercel Blob limit is 500MB`);
-  const blob = await put(`instagram/${filename}`, fs.readFileSync(filePath), {
-    access: 'public', contentType: 'video/mp4', addRandomSuffix: true,
-  });
-  return blob.url;
+  if (!useR2()) throw new Error('R2 env vars not set');
+  const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+  const r2 = await getR2Client();
+  const key = `instagram/${Date.now()}-${filename}`;
+  await r2.send(new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME,
+    Key: key,
+    Body: fs.readFileSync(filePath),
+    ContentType: 'video/mp4',
+  }));
+  return r2PublicUrl(key);
 }
 
 // ── Pillar auto-detection ──────────────────────────────────────────────────────
@@ -163,7 +194,7 @@ async function autoQueue(filePath) {
   console.log(`    Pillar: ${pillar}`);
   console.log(`    Scheduled: ${fmt(scheduledTime)}`);
 
-  console.log('    Uploading to Vercel Blob…');
+  console.log('    Uploading to R2…');
   const videoUrl = await uploadFile(filePath, filename);
 
   const post = {

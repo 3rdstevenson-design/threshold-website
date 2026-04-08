@@ -1,37 +1,31 @@
 import fs from 'fs';
 import path from 'path';
-import { put } from '@vercel/blob';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { r2, R2_BUCKET, r2PublicUrl } from './r2';
 
-/**
- * Upload a single local file to Vercel Blob and return its public URL.
- */
-export async function uploadFile(filePath: string, filename: string): Promise<string> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    throw new Error('BLOB_READ_WRITE_TOKEN is not set. Check your .env.local file.');
-  }
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`File not found: ${filePath}`);
-  }
-
-  const fileBuffer = fs.readFileSync(filePath);
-  const ext = path.extname(filename).toLowerCase();
-  const contentType = ext === '.mp4' ? 'video/mp4'
-    : ext === '.png' ? 'image/png'
-    : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg'
-    : 'application/octet-stream';
-
-  const blob = await put(`instagram/${filename}`, fileBuffer, {
-    access: 'public',
-    contentType,
-    addRandomSuffix: true,
-  });
-
-  return blob.url;
+function contentTypeFor(ext: string): string {
+  if (ext === '.mp4') return 'video/mp4';
+  if (ext === '.png') return 'image/png';
+  if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg';
+  return 'application/octet-stream';
 }
 
-/**
- * Upload multiple files in parallel. Returns URLs in the same order as input.
- */
+export async function uploadFile(filePath: string, filename: string): Promise<string> {
+  if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
+
+  const ext = path.extname(filename).toLowerCase();
+  const key = `instagram/${Date.now()}-${filename}`;
+
+  await r2.send(new PutObjectCommand({
+    Bucket: R2_BUCKET(),
+    Key: key,
+    Body: fs.readFileSync(filePath),
+    ContentType: contentTypeFor(ext),
+  }));
+
+  return r2PublicUrl(key);
+}
+
 export async function uploadFiles(filePaths: string[]): Promise<string[]> {
   return Promise.all(
     filePaths.map((filePath) => uploadFile(filePath, path.basename(filePath)))
