@@ -449,6 +449,203 @@ function PostCard({
   );
 }
 
+// ── Calendar helpers ───────────────────────────────────────────────────────────
+
+const PILLAR_DOT: Record<ContentPillar, string> = {
+  exercise: '#7002AB',
+  clinic_case: '#C9A84C',
+  philosophy: '#3b82f6',
+  story: '#22c55e',
+};
+
+const STATUS_DOT: Record<PostStatus, string> = {
+  pending: '#C0C0C0',
+  approved: '#22c55e',
+  rejected: '#ef4444',
+  published: '#C9A84C',
+};
+
+function startOfWeek(d: Date) {
+  const r = new Date(d);
+  r.setHours(0, 0, 0, 0);
+  r.setDate(r.getDate() - r.getDay());
+  return r;
+}
+
+function addDays(d: Date, n: number) {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
+}
+
+function sameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+// ── Month calendar ─────────────────────────────────────────────────────────────
+
+function MonthCalendar({ posts, onToday }: { posts: QueuePost[]; onToday?: () => void }) {
+  const [current, setCurrent] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
+  const today = new Date();
+
+  const year = current.getFullYear();
+  const month = current.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells: (Date | null)[] = [
+    ...Array(firstDay).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1)),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  return (
+    <div style={{ fontFamily: 'var(--font-nunito)' }}>
+      {/* Nav */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <button onClick={() => setCurrent(new Date(year, month - 1, 1))} style={{ background: 'none', border: `1px solid ${C.border}`, color: C.silver, borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>‹</button>
+        <span
+          onClick={() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); setCurrent(d); }}
+          style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: 15, color: C.white, cursor: 'pointer', flex: 1, textAlign: 'center' }}
+        >
+          {MONTH_NAMES[month]} {year}
+        </span>
+        <button onClick={() => setCurrent(new Date(year, month + 1, 1))} style={{ background: 'none', border: `1px solid ${C.border}`, color: C.silver, borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>›</button>
+      </div>
+
+      {/* Day headers */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 4 }}>
+        {DAY_NAMES.map(d => (
+          <div key={d} style={{ textAlign: 'center', fontSize: 11, color: C.silver, fontFamily: 'var(--font-montserrat)', fontWeight: 600, padding: '4px 0' }}>{d}</div>
+        ))}
+      </div>
+
+      {/* Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+        {cells.map((day, i) => {
+          if (!day) return <div key={i} style={{ minHeight: 80, background: '#ffffff05', borderRadius: 6 }} />;
+          const isToday = sameDay(day, today);
+          const dayPosts = posts.filter(p => {
+            if (!p.scheduledTime) return false;
+            return sameDay(new Date(p.scheduledTime), day);
+          });
+          const shown = dayPosts.slice(0, 3);
+          const extra = dayPosts.length - 3;
+          return (
+            <div key={i} style={{
+              minHeight: 80, background: isToday ? '#7002AB22' : C.surface,
+              borderRadius: 6, padding: '6px', border: isToday ? `1px solid ${C.purple}` : `1px solid ${C.border}`,
+              display: 'flex', flexDirection: 'column', gap: 3,
+            }}>
+              <span style={{ fontSize: 11, fontWeight: isToday ? 700 : 400, color: isToday ? C.purple : C.silver, fontFamily: 'var(--font-montserrat)' }}>
+                {day.getDate()}
+              </span>
+              {shown.map(p => (
+                <div key={p.id} title={`${p.caption.slice(0,60)} — ${fmtDate(p.scheduledTime)}`} style={{
+                  background: STATUS_DOT[p.status] + '33',
+                  borderLeft: `3px solid ${PILLAR_DOT[p.pillar]}`,
+                  borderRadius: 3, padding: '2px 5px', fontSize: 10,
+                  color: C.white, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+                  cursor: 'default',
+                }}>
+                  {p.caption.replace(/^✏️.*/, '[no caption]').slice(0, 22)}
+                </div>
+              ))}
+              {extra > 0 && <span style={{ fontSize: 10, color: C.silver }}>+{extra} more</span>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div style={{ display: 'flex', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
+        {([['Pending', STATUS_DOT.pending], ['Scheduled', STATUS_DOT.approved], ['Published', STATUS_DOT.published], ['Rejected', STATUS_DOT.rejected]] as [string, string][]).map(([label, color]) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: C.silver }}>
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: color + '66', border: `1px solid ${color}` }} />
+            {label}
+          </div>
+        ))}
+        <div style={{ borderLeft: `1px solid ${C.border}`, margin: '0 4px' }} />
+        {(Object.entries(PILLAR_LABELS) as [ContentPillar, string][]).map(([pillar, label]) => (
+          <div key={pillar} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: C.silver }}>
+            <div style={{ width: 3, height: 10, borderRadius: 2, background: PILLAR_DOT[pillar] }} />
+            {label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Week calendar ──────────────────────────────────────────────────────────────
+
+function WeekCalendar({ posts }: { posts: QueuePost[] }) {
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  const today = new Date();
+  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  return (
+    <div style={{ fontFamily: 'var(--font-nunito)' }}>
+      {/* Nav */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <button onClick={() => setWeekStart(d => addDays(d, -7))} style={{ background: 'none', border: `1px solid ${C.border}`, color: C.silver, borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>‹</button>
+        <span style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: 15, color: C.white, flex: 1, textAlign: 'center' }}>
+          {weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – {addDays(weekStart, 6).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+        </span>
+        <button onClick={() => setWeekStart(startOfWeek(new Date()))} style={{ background: 'none', border: `1px solid ${C.border}`, color: C.silver, borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 11, fontFamily: 'var(--font-montserrat)' }}>Today</button>
+        <button onClick={() => setWeekStart(d => addDays(d, 7))} style={{ background: 'none', border: `1px solid ${C.border}`, color: C.silver, borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>›</button>
+      </div>
+
+      {/* Columns */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+        {days.map((day, i) => {
+          const isToday = sameDay(day, today);
+          const dayPosts = posts.filter(p => p.scheduledTime && sameDay(new Date(p.scheduledTime), day))
+            .sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime());
+          return (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {/* Day header */}
+              <div style={{
+                textAlign: 'center', padding: '6px 0', borderRadius: 6,
+                background: isToday ? C.purple : C.surface,
+                border: `1px solid ${isToday ? C.purple : C.border}`,
+              }}>
+                <div style={{ fontSize: 10, color: isToday ? '#fff' : C.silver, fontFamily: 'var(--font-montserrat)', fontWeight: 600 }}>{DAY_NAMES[i]}</div>
+                <div style={{ fontSize: 14, color: isToday ? '#fff' : C.white, fontWeight: 700, fontFamily: 'var(--font-montserrat)' }}>{day.getDate()}</div>
+              </div>
+              {/* Posts */}
+              {dayPosts.map(p => (
+                <div key={p.id} style={{
+                  background: C.surface, border: `1px solid ${C.border}`,
+                  borderLeft: `3px solid ${PILLAR_DOT[p.pillar]}`,
+                  borderRadius: 6, padding: '8px',
+                  display: 'flex', flexDirection: 'column', gap: 4,
+                }}>
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    <span style={{ fontSize: 9, background: STATUS_DOT[p.status] + '33', color: STATUS_DOT[p.status], borderRadius: 4, padding: '1px 5px', fontFamily: 'var(--font-montserrat)', fontWeight: 700, textTransform: 'capitalize' }}>
+                      {p.status === 'approved' ? 'scheduled' : p.status}
+                    </span>
+                    <span style={{ fontSize: 9, color: C.silver, textTransform: 'capitalize' }}>{p.type}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: C.white, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>
+                    {p.caption.replace(/^✏️.*/, '[no caption]')}
+                  </div>
+                  <div style={{ fontSize: 10, color: C.gold, fontFamily: 'var(--font-montserrat)' }}>
+                    {new Date(p.scheduledTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Tab bar ────────────────────────────────────────────────────────────────────
 
 const TABS: PostStatus[] = ['pending', 'approved', 'rejected', 'published'];
@@ -496,6 +693,7 @@ export default function QueuePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<QueuePost[]>([]);
   const [activeTab, setActiveTab] = useState<PostStatus>('pending');
+  const [calView, setCalView] = useState<'queue' | 'month' | 'week'>('queue');
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(true);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -571,39 +769,58 @@ export default function QueuePage() {
         <span style={{ color: C.purple, fontFamily: 'var(--font-montserrat)', fontWeight: 600, fontSize: 13 }}>
           Instagram Queue
         </span>
-        <div style={{ marginLeft: 'auto', color: C.silver, fontSize: 12 }}>
-          {loading ? 'Loading…' : `${posts.length} posts`}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* View toggle */}
+          <div style={{ display: 'flex', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, overflow: 'hidden' }}>
+            {(['queue', 'month', 'week'] as const).map(v => (
+              <button key={v} onClick={() => setCalView(v)} style={{
+                background: calView === v ? C.purple : 'transparent',
+                color: calView === v ? C.white : C.silver,
+                border: 'none', padding: '5px 12px', cursor: 'pointer',
+                fontFamily: 'var(--font-montserrat)', fontWeight: 600, fontSize: 11,
+                textTransform: 'capitalize',
+              }}>{v === 'queue' ? 'Queue' : v === 'month' ? 'Month' : 'Week'}</button>
+            ))}
+          </div>
+          <span style={{ color: C.silver, fontSize: 12 }}>{loading ? 'Loading…' : `${posts.length} posts`}</span>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px' }}>
-        <TabBar active={activeTab} counts={counts} onSelect={setActiveTab} />
-
-        <div style={{ marginTop: 24 }}>
-          {loading ? (
-            <p style={{ color: C.silver, textAlign: 'center', padding: 40 }}>Loading queue…</p>
-          ) : visible.length === 0 ? (
-            <p style={{ color: C.silver, textAlign: 'center', padding: 40 }}>
-              No {TAB_LABELS[activeTab].toLowerCase()} posts.
-            </p>
-          ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: 20,
-            }}>
-              {visible.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                  onUpdate={handleUpdate}
-                />
-              ))}
+      <div style={{ maxWidth: calView === 'queue' ? 1200 : 1400, margin: '0 auto', padding: '24px 24px' }}>
+        {calView === 'month' ? (
+          <MonthCalendar posts={posts} />
+        ) : calView === 'week' ? (
+          <WeekCalendar posts={posts} />
+        ) : (
+          <>
+            <TabBar active={activeTab} counts={counts} onSelect={setActiveTab} />
+            <div style={{ marginTop: 24 }}>
+              {loading ? (
+                <p style={{ color: C.silver, textAlign: 'center', padding: 40 }}>Loading queue…</p>
+              ) : visible.length === 0 ? (
+                <p style={{ color: C.silver, textAlign: 'center', padding: 40 }}>
+                  No {TAB_LABELS[activeTab].toLowerCase()} posts.
+                </p>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  gap: 20,
+                }}>
+                  {visible.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      onApprove={handleApprove}
+                      onReject={handleReject}
+                      onUpdate={handleUpdate}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {toast && <Toast message={toast} onDone={() => setToast('')} />}
