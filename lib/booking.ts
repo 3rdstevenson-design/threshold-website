@@ -1,5 +1,6 @@
 // Single source of truth for the public booking URL.
-// Active Practice Better booking page as of 2026-05-13.
-// The old SimplePractice URL (https://threshold.clientsecure.me) was retired
-// during the May 2026 migration to Practice Better.
-export const BOOKING_URL = 'https://my.practicebetter.io/#/6a0502bf701f5e74531dd463/bookings'
+// Routes to /book on thresholdhp.com — that page embeds Practice Better's
+// official booking widget in Threshold-branded chrome so users never leave
+// the site. Submissions create real PB appointments same as the standalone
+// PB booking page.
+export const BOOKING_URL = '/book'
