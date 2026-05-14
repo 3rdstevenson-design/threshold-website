@@ -1,7 +1,6 @@
 import React from 'react'
 import TestimonialCarousel from './TestimonialCarousel'
-
-const BOOKING_URL = 'https://threshold.clientsecure.me'
+import { BOOKING_URL } from '@/lib/booking'
 
 // Logo mark path — the crossing curves only, for use in nav / watermark
 const MARK_PATH =
