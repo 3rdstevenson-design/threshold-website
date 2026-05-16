@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, Montserrat, Nunito_Sans } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -38,6 +39,15 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${montserrat.variable} ${nunitoSans.variable} scroll-smooth`}
     >
+      <head>
+        <Script id="plausible-init" strategy="afterInteractive">
+          {`window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()`}
+        </Script>
+        <Script
+          src="https://plausible.io/js/pa-4_yHKKOxSlVBwo3HrbU-W.js"
+          strategy="afterInteractive"
+        />
+      </head>
       <body>{children}</body>
     </html>
   )
