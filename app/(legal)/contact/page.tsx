@@ -22,6 +22,27 @@ export default function ContactPage() {
         appointment reminders, follow-ups, and the occasional offer. I read these myself.
       </p>
       <ContactForm />
+
+      <div className="mt-12 pt-8 border-t border-deep-navy/10">
+        <p className="font-montserrat text-xs font-semibold tracking-wide text-deep-navy uppercase mb-3">
+          Other ways to reach me
+        </p>
+        <ul className="font-nunito text-sm text-deep-navy/80 space-y-1">
+          <li>
+            Phone:{' '}
+            <a href="tel:+12408015342" className="text-threshold-purple">
+              (240) 801-5342
+            </a>
+          </li>
+          <li>
+            Email:{' '}
+            <a href="mailto:dr.lars@thresholdhp.com" className="text-threshold-purple">
+              dr.lars@thresholdhp.com
+            </a>
+          </li>
+          <li>Threshold Health &amp; Performance, 1908 Reston Metro Plaza, Reston, VA 20190</li>
+        </ul>
+      </div>
     </div>
   )
 }
