@@ -563,6 +563,21 @@ export default function Page() {
             &copy; {new Date().getFullYear()} Threshold Health &amp; Performance
           </p>
         </div>
+        <div className="max-w-6xl mx-auto px-6 mt-6 pt-6 border-t border-white/5">
+          <nav className="font-montserrat text-xs text-sterling-silver flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            <a href="/privacy-policy" className="hover:text-clinical-white transition-colors duration-200">
+              Privacy Policy
+            </a>
+            <span className="text-white/20">·</span>
+            <a href="/terms-and-conditions" className="hover:text-clinical-white transition-colors duration-200">
+              Terms &amp; Conditions
+            </a>
+            <span className="text-white/20">·</span>
+            <a href="/sms-policy" className="hover:text-clinical-white transition-colors duration-200">
+              SMS Policy
+            </a>
+          </nav>
+        </div>
       </footer>
     </>
   )
