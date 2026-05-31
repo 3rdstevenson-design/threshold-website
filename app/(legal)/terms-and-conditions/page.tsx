@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;font-family:Nunito Sans,Helvetica,Arial,sans-serif;color:#1a1a2e;line-height:1.6">
 <h1 style="font-family:Cormorant Garamond,Georgia,serif;font-size:2.4rem;color:#7002AB">Terms &amp; Conditions</h1>
-<p><strong>Effective date:</strong> [INSERT DATE]</p>
+<p><strong>Effective date:</strong> May 30, 2026</p>
 <h2>1. Acceptance of Terms</h2>
 <p>These Terms &amp; Conditions ("Terms") govern your access to and use of thresholdhp.com (the "Site") and the services provided by Threshold Health &amp; Performance, operated by Dr. Lars Health Consulting Inc. ("Threshold," "we," "us," or "our"). By accessing the Site, communicating with us, or using our services, you agree to these Terms. If you do not agree, do not use the Site or our services.</p>
 <h2>2. Services Offered</h2>

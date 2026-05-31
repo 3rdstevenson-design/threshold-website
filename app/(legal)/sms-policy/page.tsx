@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;font-family:Nunito Sans,Helvetica,Arial,sans-serif;color:#1a1a2e;line-height:1.6">
 <h1 style="font-family:Cormorant Garamond,Georgia,serif;font-size:2.4rem;color:#7002AB">SMS Communications &amp; Consent Policy</h1>
-<p><strong>Effective date:</strong> [INSERT DATE]</p>
+<p><strong>Effective date:</strong> May 30, 2026</p>
 <h2>1. Program Description</h2>
 <p>This SMS Communications and Consent Policy describes the text-messaging program operated by Threshold Health &amp; Performance ("Threshold," "we," "us," or "our"), operated by Dr. Lars Health Consulting Inc., a physical therapy and performance practice in Virginia. Our messaging program supports client care and communication, including coordination of appointments and services and the delivery of relevant updates and offers to individuals who have opted in.</p>
 <h2>2. Types of Messages We Send</h2>

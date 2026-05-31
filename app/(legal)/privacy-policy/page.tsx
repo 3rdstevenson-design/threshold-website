@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;font-family:Nunito Sans,Helvetica,Arial,sans-serif;color:#1a1a2e;line-height:1.6">
 <h1 style="font-family:Cormorant Garamond,Georgia,serif;font-size:2.4rem;color:#7002AB">Privacy Policy</h1>
-<p><strong>Effective date:</strong> [INSERT DATE]</p>
+<p><strong>Effective date:</strong> May 30, 2026</p>
 <h2>1. Introduction</h2>
 <p>Threshold Health &amp; Performance ("Threshold," "we," "us," or "our"), operated by Dr. Lars Health Consulting Inc., is a premium physical therapy and performance practice based in Virginia. We provide clinical care, remote coaching, performance consulting, strength and conditioning guidance, mobility and recovery programming, and educational content to clients and prospective clients across the United States.</p>
 <p>This Privacy Policy explains what information we collect, how we collect it, how we use and protect it, and the choices you have. It applies to thresholdhp.com (the "Site"), our intake and scheduling tools, and our email and text-message communications. By using the Site or providing your information to us, you agree to the practices described here.</p>
