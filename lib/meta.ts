@@ -55,6 +55,31 @@ async function pollContainerStatus(containerId: string, maxMs = 180_000): Promis
   throw new Error('Reel container timed out after 3 minutes');
 }
 
+// ── Async reel helpers (two-step, non-blocking) ───────────────────────────────
+
+export async function createReelContainer(post: QueuePost): Promise<string> {
+  if (!post.videoUrl) throw new Error('videoUrl is required for reel posts');
+  const params: Record<string, unknown> = {
+    media_type: 'REELS',
+    video_url: post.videoUrl,
+    caption: post.caption,
+  };
+  if (post.coverImageUrl) params.cover_url = post.coverImageUrl;
+  return createMediaContainer(params);
+}
+
+export async function checkContainerStatus(containerId: string): Promise<'FINISHED' | 'IN_PROGRESS' | 'ERROR'> {
+  const res = await fetch(
+    `${BASE}/${containerId}?fields=status_code&access_token=${token()}`
+  );
+  const json = await res.json();
+  if (json.status_code === 'FINISHED') return 'FINISHED';
+  if (json.status_code === 'ERROR') return 'ERROR';
+  return 'IN_PROGRESS';
+}
+
+export { publishContainer };
+
 // ── Public publish functions ───────────────────────────────────────────────────
 // These publish immediately. The cron at /api/publish calls them only when
 // the post's scheduledTime has passed.

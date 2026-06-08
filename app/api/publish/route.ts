@@ -3,8 +3,8 @@ import { readQueue, updatePost, QueuePost } from '@/lib/queue';
 
 // Lazy import meta publisher to avoid errors when META env vars aren't set yet
 async function getPublisher() {
-  const { publishImagePost, publishCarouselPost, publishReelPost } = await import('@/lib/meta');
-  return { publishImagePost, publishCarouselPost, publishReelPost };
+  const { publishImagePost, publishCarouselPost, createReelContainer } = await import('@/lib/meta');
+  return { publishImagePost, publishCarouselPost, createReelContainer };
 }
 
 export async function POST(req: NextRequest) {
@@ -25,27 +25,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ published: 0, errors: [] });
   }
 
-  const { publishImagePost, publishCarouselPost, publishReelPost } = await getPublisher();
+  const { publishImagePost, publishCarouselPost, createReelContainer } = await getPublisher();
 
   let published = 0;
+  let processing = 0;
   const errors: string[] = [];
 
   for (const post of due) {
     try {
-      let mediaId: string;
-      if (post.type === 'image') {
-        mediaId = await publishImagePost(post);
-      } else if (post.type === 'carousel') {
-        mediaId = await publishCarouselPost(post);
+      if (post.type === 'reel') {
+        // Step 1 only: create container and return. Step 2 (finalize) is handled
+        // by /api/cron/publish-pending-containers once Meta finishes processing.
+        const containerId = await createReelContainer(post);
+        await updatePost(post.id, {
+          status: 'processing',
+          metaContainerId: containerId,
+          publishError: undefined,
+        });
+        processing++;
       } else {
-        mediaId = await publishReelPost(post);
+        let mediaId: string;
+        if (post.type === 'image') {
+          mediaId = await publishImagePost(post);
+        } else {
+          mediaId = await publishCarouselPost(post);
+        }
+        await updatePost(post.id, {
+          status: 'published',
+          publishedAt: new Date().toISOString(),
+          metaPublishId: mediaId,
+        });
+        published++;
       }
-      await updatePost(post.id, {
-        status: 'published',
-        publishedAt: new Date().toISOString(),
-        metaPublishId: mediaId,
-      });
-      published++;
     } catch (err: any) {
       const msg = `Post ${post.id} (${post.type}): ${err.message}`;
       console.error(msg);
@@ -53,5 +64,5 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ published, errors });
+  return NextResponse.json({ published, processing, errors });
 }

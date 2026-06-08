@@ -4,7 +4,7 @@ import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { r2, R2_BUCKET, useR2 } from './r2';
 
 export type ContentPillar = 'clinic_case' | 'exercise' | 'philosophy' | 'story';
-export type PostStatus = 'pending' | 'approved' | 'rejected' | 'published';
+export type PostStatus = 'pending' | 'approved' | 'rejected' | 'published' | 'processing';
 export type PostType = 'image' | 'carousel' | 'reel';
 
 export interface QueuePost {
@@ -25,6 +25,8 @@ export interface QueuePost {
   approvedAt: string | null;
   publishedAt: string | null;
   metaPublishId: string | null;
+  metaContainerId?: string;
+  publishError?: string;
   notes?: string;
 }
 
