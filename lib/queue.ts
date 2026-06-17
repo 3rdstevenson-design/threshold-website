@@ -4,7 +4,7 @@ import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { r2, R2_BUCKET, useR2 } from './r2';
 
 export type ContentPillar = 'clinic_case' | 'exercise' | 'philosophy' | 'story';
-export type PostStatus = 'pending' | 'approved' | 'rejected' | 'published' | 'processing';
+export type PostStatus = 'pending' | 'approved' | 'rejected' | 'published' | 'processing' | 'sent_to_telegram';
 export type PostType = 'image' | 'carousel' | 'reel';
 
 export interface QueuePost {
@@ -27,6 +27,10 @@ export interface QueuePost {
   metaPublishId: string | null;
   metaContainerId?: string;
   publishError?: string;
+  /** Set when a carousel was handed off to Telegram for manual posting in the
+   *  IG app (native music can't be attached via the Content Publishing API).
+   *  The post is intentionally NOT published to Instagram. */
+  telegramSentAt?: string;
   notes?: string;
 }
 
