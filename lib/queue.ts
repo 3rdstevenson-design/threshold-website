@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { r2, R2_BUCKET, useR2 } from './r2';
+import { lintVoiceDna, type VoiceViolation } from './voice/voiceDnaLint';
 
 export type ContentPillar = 'clinic_case' | 'exercise' | 'philosophy' | 'story';
 export type PostStatus = 'pending' | 'approved' | 'rejected' | 'published' | 'processing' | 'sent_to_telegram';
@@ -32,6 +33,36 @@ export interface QueuePost {
    *  The post is intentionally NOT published to Instagram. */
   telegramSentAt?: string;
   notes?: string;
+  /** Explicit bypass of the Voice-DNA lint gate on queue writes. Set for
+   *  human-written sidecar captions or manual dashboard overrides. */
+  voiceOverride?: boolean;
+}
+
+/** Placeholder captions the dashboard uses before a real caption exists. */
+const CAPTION_PLACEHOLDER_RE = /add caption before approving/i;
+
+export class VoiceDnaViolationError extends Error {
+  readonly violations: VoiceViolation[];
+  constructor(violations: VoiceViolation[]) {
+    super(
+      `Caption failed Voice DNA lint: ${violations
+        .map((v) => `[${v.category}] "${v.match}"`)
+        .join('; ')}`,
+    );
+    this.name = 'VoiceDnaViolationError';
+    this.violations = violations;
+  }
+}
+
+/**
+ * The Voice-DNA gate. Every caption entering the queue passes this unless the
+ * post carries `voiceOverride: true`. Soft violations never block.
+ */
+function assertCaptionVoiceDna(caption: string | undefined, voiceOverride?: boolean): void {
+  if (!caption || voiceOverride) return;
+  if (CAPTION_PLACEHOLDER_RE.test(caption)) return;
+  const hard = lintVoiceDna(caption).violations.filter((v) => v.hard);
+  if (hard.length > 0) throw new VoiceDnaViolationError(hard);
 }
 
 const LOCAL_QUEUE_PATH = path.join(process.cwd(), 'data', 'queue.json');
@@ -94,6 +125,7 @@ export async function writeQueue(posts: QueuePost[]): Promise<void> {
 }
 
 export async function appendPost(post: QueuePost): Promise<void> {
+  assertCaptionVoiceDna(post.caption, post.voiceOverride);
   const posts = await readQueue();
   posts.push(post);
   await writeQueue(posts);
@@ -103,6 +135,12 @@ export async function updatePost(id: string, updates: Partial<QueuePost>): Promi
   const posts = await readQueue();
   const idx = posts.findIndex((p) => p.id === id);
   if (idx === -1) throw new Error(`Post ${id} not found`);
-  posts[idx] = { ...posts[idx], ...updates };
+  const merged = { ...posts[idx], ...updates };
+  // Gate only when the caption itself is changing; status/scheduling updates
+  // on an existing (possibly pre-gate) caption must not be blocked.
+  if (updates.caption !== undefined && updates.caption !== posts[idx].caption) {
+    assertCaptionVoiceDna(merged.caption, merged.voiceOverride);
+  }
+  posts[idx] = merged;
   await writeQueue(posts);
 }
