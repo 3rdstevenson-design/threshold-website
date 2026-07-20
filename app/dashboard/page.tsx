@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button, Input, FieldLabel, Alert } from './_ui';
 
 const SESSION_KEY = 'dashboard_authed';
 const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -11,6 +12,7 @@ export default function DashboardPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(SESSION_KEY);
@@ -27,56 +29,112 @@ export default function DashboardPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitting(true);
     const res = await fetch('/api/auth/dashboard', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
     });
     if (res.ok) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ expiry: Date.now() + SESSION_TTL }));
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ expiry: Date.now() + SESSION_TTL, password }));
       router.replace('/dashboard/queue');
     } else {
       setError('Incorrect password.');
       setPassword('');
+      setSubmitting(false);
     }
   }
 
   if (checking) return null;
 
   return (
-    <main className="min-h-screen flex items-center justify-center" style={{ background: '#0D0D18' }}>
-      <div className="w-full max-w-sm px-8 py-10 rounded-2xl" style={{ background: '#1A1A2E' }}>
+    <main
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 400,
+          padding: '40px 36px 36px',
+          background: 'var(--bg-elevated)',
+          borderTop: '2px solid var(--threshold-purple)',
+          boxShadow: 'var(--glow-md)',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--font-ui)',
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.35em',
+            textTransform: 'uppercase',
+            color: 'var(--threshold-purple)',
+            textAlign: 'center',
+            marginBottom: 12,
+          }}
+        >
+          Internal · Restricted
+        </div>
         <h1
-          className="text-2xl font-bold mb-1 text-center"
-          style={{ color: '#F5F5F5', fontFamily: 'var(--font-montserrat)' }}
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 300,
+            fontSize: 32,
+            color: 'var(--clinical-white)',
+            textAlign: 'center',
+            margin: 0,
+            lineHeight: 1.1,
+          }}
         >
           Threshold Dashboard
         </h1>
-        <p className="text-center mb-8 text-sm" style={{ color: '#C0C0C0' }}>
-          Internal use only
+        <p
+          style={{
+            textAlign: 'center',
+            marginTop: 10,
+            marginBottom: 28,
+            fontFamily: 'var(--font-body)',
+            fontSize: 13,
+            color: 'var(--fg-secondary)',
+            lineHeight: 1.5,
+          }}
+        >
+          Reston, Virginia · Internal use only
         </p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            autoFocus
-            className="w-full px-4 py-3 rounded-lg text-sm outline-none"
-            style={{
-              background: '#0D0D18',
-              color: '#F5F5F5',
-              border: '1px solid #333',
-            }}
-          />
-          {error && <p className="text-sm text-center" style={{ color: '#ef4444' }}>{error}</p>}
-          <button
-            type="submit"
-            className="w-full py-3 rounded-lg font-semibold text-sm transition-opacity hover:opacity-90"
-            style={{ background: '#7002AB', color: '#F5F5F5', fontFamily: 'var(--font-montserrat)' }}
-          >
-            Enter
-          </button>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              autoFocus
+              errored={!!error}
+              autoComplete="current-password"
+            />
+          </div>
+
+          {error && (
+            <Alert kind="error" title="Couldn't sign in">
+              {error}
+            </Alert>
+          )}
+
+          <Button type="submit" disabled={submitting || !password} style={{ width: '100%', justifyContent: 'center' }}>
+            {submitting ? 'Signing in…' : 'Enter →'}
+          </Button>
         </form>
       </div>
     </main>

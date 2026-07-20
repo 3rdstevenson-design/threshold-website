@@ -1,0 +1,92 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "CLINICAL PATTERN",
+      "headline": "When the knee clicks, three tissues usually hurt at once.",
+      "body": "Patellofemoral joint, patellar tendon, medial retinaculum. They live next door to each other. When one starts complaining, the others tend to chime in."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "WHAT THE PATIENT FEELS",
+      "headline": "They describe it like furniture sliding.",
+      "body": "Pain with flexion, audible or palpable clicking, and a sense that the bone moves where it should not. The patient is describing real input from three structures reporting at once.",
+      "pills": [
+        "PF joint",
+        "Patellar tendon",
+        "Medial retinaculum"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "details",
+      "tag": "THE TRACKING STORY",
+      "headline": "The patella does not glide on rails.",
+      "body": "Patellar tracking is a balance problem. Quad pull, IT band tension, hip rotation, foot mechanics, all of it shapes where the kneecap rides. When the balance shifts, the cap drifts, and the surrounding tissues protest.",
+      "goldAccent": "The clicking is the patella telling you where it actually wants to go.",
+      "pills": [
+        "Quad pull",
+        "Hip rotation",
+        "Foot mechanics"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "comparison",
+      "tag": "TWO WAYS TO READ THE KNEE",
+      "headline": "One-tissue thinking versus three-tissue thinking.",
+      "comparisonLeft": {
+        "heading": "One-tissue",
+        "items": [
+          "Probably patellar tendinitis",
+          "Stretch the quads",
+          "Ice and rest",
+          "Wait it out"
+        ]
+      },
+      "comparisonRight": {
+        "heading": "Three-tissue",
+        "items": [
+          "Map all three tender points",
+          "Test patella glide and tilt",
+          "Treat the chain controlling tracking",
+          "Reload the knee on purpose"
+        ]
+      }
+    },
+    {
+      "idx": 5,
+      "type": "solution",
+      "tag": "HOW I READ IT",
+      "headline": "I palpate all three on the first visit.",
+      "body": "PF joint, patellar tendon, medial retinaculum. If two or more are tender and the patient reports clicking, the diagnosis is a tracking complex affecting the whole joint. The work changes immediately.",
+      "quoteLabel": "WHAT THEY SAY",
+      "quoteText": "Like the bone is sliding."
+    },
+    {
+      "idx": 6,
+      "type": "details",
+      "tag": "WHY ONE-TISSUE CARE STALLS",
+      "headline": "Three tissues, one pattern, one plan.",
+      "body": "Treating only the patellar tendon ignores the joint surface and the retinaculum. Treating only the joint misses the tendon load. The patient gets short relief and the clicking comes back. The whole tracking system has to be addressed.",
+      "goldAccent": "The kneecap moves through the system that holds it.",
+      "pills": [
+        "Map all three",
+        "Treat the chain",
+        "Reload safely"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "Your threshold is higher than they told you.",
+      "body": "If your knee clicks, hurts in two or three spots, and the standard care keeps stalling, send me a DM and let's map the tracking story together.",
+      "tagline": "Be Good. Help Someone. Learn Lots.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Knee pain at the front of the knee is rarely one tissue.\n\nWhen patients walk in describing pain at the kneecap with clicking on flexion, three tissues usually share the load: patellofemoral joint, patellar tendon, medial retinaculum. They live next door to each other. When one starts complaining, the others tend to chime in.\n\nThe patella does not glide on rails. Tracking is a balance problem driven by quad pull, IT band tension, hip rotation, and foot mechanics. When the balance shifts, the cap drifts, and the surrounding tissues protest. The clicking the patient feels is real, and it is good information.\n\nI palpate all three structures on the first visit. If two or more are tender and the patient reports clicking, the diagnosis is a tracking complex. The treatment changes immediately. Map all three tender points, test glide and tilt, treat the chain that controls tracking, and reload the knee on purpose.\n\nIf your knee clicks, hurts in two or three spots at once, and the standard care keeps stalling, send me a DM and let's map the tracking story.\n\nBe Good. Help Someone. Learn Lots.\n\n#KneePain #PhysicalTherapy #ClinicalReasoning #ThresholdHealth"
+}

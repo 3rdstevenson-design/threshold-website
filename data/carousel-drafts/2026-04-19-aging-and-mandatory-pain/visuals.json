@@ -1,0 +1,175 @@
+{
+  "presets": {
+    "clinical-editorial": {
+      "preset": "clinical-editorial",
+      "label": "Clinical Editorial",
+      "status": "error",
+      "updatedAt": "2026-04-25T10:55:57.005Z",
+      "slides": {
+        "1": {
+          "idx": 1,
+          "slideIdx": 1,
+          "file": "slide-01.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Clinical editorial design, premium sports medicine publication, subtle anatomy-inspired abstraction, precise linework, refined Threshold purple and warm gold accents, clean negative space, sophisticated lighting, calm authority.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 1 of 7. Slide type: hero.\nSlide headline for context only: Your Pain Is Not a Sentence.\nSlide body context: A surgeon told my patient his shoulder pain was just aging. His older sister, pain-free, was sitting right there..\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "2": {
+          "idx": 2,
+          "slideIdx": 2,
+          "file": "slide-02.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Clinical editorial design, premium sports medicine publication, subtle anatomy-inspired abstraction, precise linework, refined Threshold purple and warm gold accents, clean negative space, sophisticated lighting, calm authority.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 2 of 7. Slide type: dialogue.\nSlide headline for context only: What Was Said Versus What Was True.\nSlide body context: Same room. Same conversation. Two completely different realities sitting side by side..\nSupporting context: The Surgeon's Verdict and The Evidence in the Room.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "3": {
+          "idx": 3,
+          "slideIdx": 3,
+          "file": "slide-03.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Clinical editorial design, premium sports medicine publication, subtle anatomy-inspired abstraction, precise linework, refined Threshold purple and warm gold accents, clean negative space, sophisticated lighting, calm authority.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 3 of 7. Slide type: problem.\nSlide headline for context only: Aging Gets Blamed for Everything.\nSlide body context: When the answer is \"you're just getting older,\" it shuts down every question worth asking. The real issue is almost never age itself..\nSupporting context: Age caused the pain, Nothing left to work with, Decline is inevitable, Accept and move on.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "4": {
+          "idx": 4,
+          "slideIdx": 4,
+          "file": "slide-04.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Clinical editorial design, premium sports medicine publication, subtle anatomy-inspired abstraction, precise linework, refined Threshold purple and warm gold accents, clean negative space, sophisticated lighting, calm authority.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 4 of 7. Slide type: diagram.\nSlide headline for context only: What Actually Creates Pain Over Time.\nSlide body context: Age changes tissue. But tissue responds to load, movement, and training. The link between aging and pain is not direct, it runs through something fixable..\nSupporting context: TISSUE CHANGE → CAPACITY GAP → PAIN & LIMIT.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "5": {
+          "idx": 5,
+          "slideIdx": 5,
+          "file": "slide-05.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Clinical editorial design, premium sports medicine publication, subtle anatomy-inspired abstraction, precise linework, refined Threshold purple and warm gold accents, clean negative space, sophisticated lighting, calm authority.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 5 of 7. Slide type: timeline.\nSlide headline for context only: From Frustrated to Moving Again.\nSlide body context: This is what the process looked like for my patient with the shoulder MRI and the dismissive verdict..\nSupporting context: Told to accept it -> Movement assessed -> Load & range restored -> Weeks later, lifting again.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "6": {
+          "idx": 6,
+          "slideIdx": 6,
+          "file": "slide-06.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Clinical editorial design, premium sports medicine publication, subtle anatomy-inspired abstraction, precise linework, refined Threshold purple and warm gold accents, clean negative space, sophisticated lighting, calm authority.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 6 of 7. Slide type: solution.\nSlide headline for context only: Older Means More Adaptable Than You Think.\nSlide body context: Aging shifts what it takes to reach your ceiling. It does not lower the ceiling. With the right approach, people move better at 55 than they did at 40..\nSupporting context: The Threshold Principle: Your body keeps adapting at any age, it just needs the right demand placed on it..\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "7": {
+          "idx": 7,
+          "slideIdx": 7,
+          "file": "slide-07.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Clinical editorial design, premium sports medicine publication, subtle anatomy-inspired abstraction, precise linework, refined Threshold purple and warm gold accents, clean negative space, sophisticated lighting, calm authority.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 7 of 7. Slide type: cta.\nSlide headline for context only: (none).\nSlide body context: If someone has told you to accept the pain, send me a DM and let's find out what's actually possible..\nSupporting context: Book a free call.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        }
+      }
+    },
+    "athletic-cinematic": {
+      "preset": "athletic-cinematic",
+      "label": "Athletic Cinematic",
+      "status": "error",
+      "updatedAt": "2026-04-25T10:56:44.486Z",
+      "slides": {
+        "1": {
+          "idx": 1,
+          "slideIdx": 1,
+          "file": "slide-01.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Athletic cinematic design, high-contrast performance environment, directional light, controlled motion energy, graphite shadows, purple rim lighting, gold highlights, powerful but refined, premium training facility mood.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 1 of 7. Slide type: hero.\nSlide headline for context only: Your Pain Is Not a Sentence.\nSlide body context: A surgeon told my patient his shoulder pain was just aging. His older sister, pain-free, was sitting right there..\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "2": {
+          "idx": 2,
+          "slideIdx": 2,
+          "file": "slide-02.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Athletic cinematic design, high-contrast performance environment, directional light, controlled motion energy, graphite shadows, purple rim lighting, gold highlights, powerful but refined, premium training facility mood.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 2 of 7. Slide type: dialogue.\nSlide headline for context only: What Was Said Versus What Was True.\nSlide body context: Same room. Same conversation. Two completely different realities sitting side by side..\nSupporting context: The Surgeon's Verdict and The Evidence in the Room.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "3": {
+          "idx": 3,
+          "slideIdx": 3,
+          "file": "slide-03.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Athletic cinematic design, high-contrast performance environment, directional light, controlled motion energy, graphite shadows, purple rim lighting, gold highlights, powerful but refined, premium training facility mood.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 3 of 7. Slide type: problem.\nSlide headline for context only: Aging Gets Blamed for Everything.\nSlide body context: When the answer is \"you're just getting older,\" it shuts down every question worth asking. The real issue is almost never age itself..\nSupporting context: Age caused the pain, Nothing left to work with, Decline is inevitable, Accept and move on.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "4": {
+          "idx": 4,
+          "slideIdx": 4,
+          "file": "slide-04.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Athletic cinematic design, high-contrast performance environment, directional light, controlled motion energy, graphite shadows, purple rim lighting, gold highlights, powerful but refined, premium training facility mood.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 4 of 7. Slide type: diagram.\nSlide headline for context only: What Actually Creates Pain Over Time.\nSlide body context: Age changes tissue. But tissue responds to load, movement, and training. The link between aging and pain is not direct, it runs through something fixable..\nSupporting context: TISSUE CHANGE → CAPACITY GAP → PAIN & LIMIT.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "5": {
+          "idx": 5,
+          "slideIdx": 5,
+          "file": "slide-05.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Athletic cinematic design, high-contrast performance environment, directional light, controlled motion energy, graphite shadows, purple rim lighting, gold highlights, powerful but refined, premium training facility mood.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 5 of 7. Slide type: timeline.\nSlide headline for context only: From Frustrated to Moving Again.\nSlide body context: This is what the process looked like for my patient with the shoulder MRI and the dismissive verdict..\nSupporting context: Told to accept it -> Movement assessed -> Load & range restored -> Weeks later, lifting again.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "6": {
+          "idx": 6,
+          "slideIdx": 6,
+          "file": "slide-06.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Athletic cinematic design, high-contrast performance environment, directional light, controlled motion energy, graphite shadows, purple rim lighting, gold highlights, powerful but refined, premium training facility mood.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 6 of 7. Slide type: solution.\nSlide headline for context only: Older Means More Adaptable Than You Think.\nSlide body context: Aging shifts what it takes to reach your ceiling. It does not lower the ceiling. With the right approach, people move better at 55 than they did at 40..\nSupporting context: The Threshold Principle: Your body keeps adapting at any age, it just needs the right demand placed on it..\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        },
+        "7": {
+          "idx": 7,
+          "slideIdx": 7,
+          "file": "slide-07.png",
+          "prompt": "Create a portrait 4:5 background illustration for a Threshold Health & Performance Instagram carousel slide.\nUse this visual preset: Athletic cinematic design, high-contrast performance environment, directional light, controlled motion energy, graphite shadows, purple rim lighting, gold highlights, powerful but refined, premium training facility mood.\nCarousel topic: aging and mandatory pain. Content pillar: clinic case.\nSlide 7 of 7. Slide type: cta.\nSlide headline for context only: (none).\nSlide body context: If someone has told you to accept the pain, send me a DM and let's find out what's actually possible..\nSupporting context: Book a free call.\nThis image is only the design layer behind separately-rendered HTML typography.\nDo not include any readable text, letters, words, numbers, captions, UI, charts with labels, logos, watermarks, signatures, or brand marks. Also no faces, people, hands, bodies, gore, or medical procedures.\nLeave generous low-detail negative space through the lower half and center-left so existing carousel copy remains legible.\nUse refined abstract graphics, lighting, shapes, textures, and clinical-performance symbolism instead of literal typography.\nFinal image should feel cohesive with the Threshold palette: deep black, white, Threshold purple #7002AB, and warm gold #C9A84C.",
+          "status": "error",
+          "model": "gpt-image-2",
+          "size": "1088x1360",
+          "quality": "medium",
+          "error": "403 Your organization must be verified to use the model `gpt-image-2`. Please go to: https://platform.openai.com/settings/organization/general and click on Verify Organization. If you just verified, it can take up to 15 minutes for access to propagate."
+        }
+      }
+    }
+  },
+  "activePreset": "athletic-cinematic"
+}

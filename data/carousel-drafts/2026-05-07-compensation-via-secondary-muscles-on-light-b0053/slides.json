@@ -1,0 +1,92 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "CLINICAL PATTERN",
+      "headline": "Light bench, sharp shoulder pain.",
+      "body": "Ninety-five pounds and the front of your shoulder lights up. Light weight should feel easy at warm-up. When the shoulder bites this early, the wrong tissue is doing the lift."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "THE PRESENTATION",
+      "headline": "Familiar pattern in active lifters.",
+      "body": "Bench press starts hurting at warm-up weights. Pain at the front of the shoulder, sometimes the bicep tendon. No injury history. Lifts that used to feel clean now grind.",
+      "pills": [
+        "Light weight",
+        "Sharp front pain",
+        "No injury history"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "details",
+      "tag": "THE CASCADE",
+      "headline": "When the prime movers go quiet, the shoulder fills in.",
+      "body": "A bench press should be driven by the pec major, with the lat stabilizing the shoulder. When those go offline, the front of the shoulder, the bicep, and the upper traps step in. They were never built for the job.",
+      "goldAccent": "The first muscles to compensate are the first ones to break.",
+      "pills": [
+        "Pec quiet",
+        "Lat quiet",
+        "Shoulder fills in"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "comparison",
+      "tag": "TWO WAYS TO READ IT",
+      "headline": "Symptom lens versus cascade lens.",
+      "comparisonLeft": {
+        "heading": "Symptom lens",
+        "items": [
+          "Probably rotator cuff",
+          "Rest and ice",
+          "Lighter weight",
+          "Stop benching"
+        ]
+      },
+      "comparisonRight": {
+        "heading": "Cascade lens",
+        "items": [
+          "Test pec and lat firing",
+          "Reset the prime mover",
+          "Reload the bench under control",
+          "Keep training"
+        ]
+      }
+    },
+    {
+      "idx": 5,
+      "type": "solution",
+      "tag": "HOW I CHECK IT",
+      "headline": "Find out who is firing before you chase what hurts.",
+      "body": "A simple manual test on the pec and lat reveals whether they are doing their job. If they are quiet, the cascade is real. The work is to wake the prime movers, then earn back the lift.",
+      "quoteLabel": "WHAT I TELL THEM",
+      "quoteText": "The pain shows up downstream. The job that is missing lives upstream."
+    },
+    {
+      "idx": 6,
+      "type": "details",
+      "tag": "WHY GOING LIGHTER BACKFIRES",
+      "headline": "Light load with bad firing teaches the wrong job.",
+      "body": "Stripping plates without resetting the prime movers tells the shoulder it is the new bench-presser. The body engraves the compensation deeper. The way out is to wake the right muscles and earn the load back.",
+      "goldAccent": "Compensation is a habit, and habits get rehearsed.",
+      "pills": [
+        "Wake the pec",
+        "Wake the lat",
+        "Reload smart"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "Your threshold is higher than they told you.",
+      "body": "If your bench keeps biting at light weight and stripping plates buys you nothing, send me a DM and let's wake the right muscles.",
+      "tagline": "Be Good. Help Someone. Learn Lots.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Light bench, sharp shoulder pain.\n\nNinety-five pounds and the front of the shoulder lights up. The lifter has no injury, no clear moment of trauma. The bench just started biting at warm-up weights and never stopped. Light weight should feel easy at warm-up. When the shoulder bites this early, the wrong tissue is doing the lift.\n\nA bench press should be driven by the pec major with the lat stabilizing. When those go quiet, the front of the shoulder, the bicep tendon, and the upper traps step in. They were never built for the job. The first muscles to compensate are the first ones to break.\n\nI run a simple manual test on the pec and lat before I chase the painful tissue. If they are quiet, the cascade is real. Wake the prime movers first, then earn the lift back under control.\n\nIf your bench keeps biting at light weight and stripping plates buys you nothing, send me a DM and let's wake the right muscles.\n\nBe Good. Help Someone. Learn Lots.\n\n#ShoulderPain #BenchPress #StrengthTraining #ThresholdHealth"
+}

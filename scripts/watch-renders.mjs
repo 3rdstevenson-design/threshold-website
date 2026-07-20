@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * watch-renders.js — Watches my-video-projects/out/ for new MP4 files
- * and auto-queues them to the Instagram queue with sensible defaults.
+ * watch-renders.js — Watches ~/Code/Social Media/Reels/Final/ for new
+ * MP4 files and auto-queues them to the Instagram queue with sensible
+ * defaults.
  *
  * Run from threshold-website:
  *   node scripts/watch-renders.js
@@ -14,14 +15,18 @@
  */
 
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
-const VIDEO_OUT_DIR = path.resolve(ROOT, '../my-video-projects/out');
+const VIDEO_OUT_DIR = path.join(os.homedir(), 'Code', 'Social Media', 'Reels', 'Final');
 const POLL_INTERVAL_MS = 4000;
+// The always-on dashboard is the SINGLE writer of the queue. watch-renders
+// hands new reels to it instead of writing the queue itself (see autoQueue).
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'http://localhost:3000';
 
 // ── Helpers (same as other queue scripts) ──────────────────────────────────────
 
@@ -39,12 +44,6 @@ function loadEnv() {
 function readQueueLocal() {
   const p = path.join(ROOT, 'data', 'queue.json');
   try { return JSON.parse(fs.readFileSync(p, 'utf-8')); } catch { return []; }
-}
-
-function writeQueueLocal(posts) {
-  const dir = path.join(ROOT, 'data');
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'queue.json'), JSON.stringify(posts, null, 2));
 }
 
 function useR2() {
@@ -82,31 +81,9 @@ async function readQueue() {
   }
 }
 
-async function writeQueue(posts) {
-  if (!useR2()) { writeQueueLocal(posts); return; }
-  const { PutObjectCommand } = await import('@aws-sdk/client-s3');
-  const r2 = await getR2Client();
-  await r2.send(new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME,
-    Key: 'queue/queue.json',
-    Body: JSON.stringify(posts, null, 2),
-    ContentType: 'application/json',
-  }));
-}
-
-async function uploadFile(filePath, filename) {
-  if (!useR2()) throw new Error('R2 env vars not set');
-  const { PutObjectCommand } = await import('@aws-sdk/client-s3');
-  const r2 = await getR2Client();
-  const key = `instagram/${Date.now()}-${filename}`;
-  await r2.send(new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME,
-    Key: key,
-    Body: fs.readFileSync(filePath),
-    ContentType: 'video/mp4',
-  }));
-  return r2PublicUrl(key);
-}
+// NOTE: watch-renders no longer writes the queue or uploads to R2 directly.
+// The dashboard's /api/local-scan/upload endpoint owns all of that now, so
+// there is exactly one writer of the queue (see autoQueue).
 
 // ── Pillar auto-detection ──────────────────────────────────────────────────────
 
@@ -163,9 +140,43 @@ function fmt(date) {
   });
 }
 
-// ── Already-queued tracking (in-memory, resets on restart) ────────────────────
+// ── Already-handled tracking (persisted across restarts) ──────────────────────
+//
+// Two sets, both persisted to data/watch-renders-state.json:
+//   queued     — filenames successfully handed to the dashboard
+//   knownFiles — name:mtime keys seen on disk (mtime change = re-render = new)
+// Persisting them is what lets a restart distinguish "file I already handled"
+// from "file that landed while I was down". Before this, startup seeded EVERY
+// pre-existing file as handled, so anything that arrived during downtime was
+// silently never queued.
+
+const STATE_PATH = path.join(ROOT, 'data', 'watch-renders-state.json');
+const MAX_STATE_ENTRIES = 1000;
 
 const queued = new Set();
+
+function loadState() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(STATE_PATH, 'utf-8'));
+    if (!Array.isArray(parsed?.known) || !Array.isArray(parsed?.queued)) return null;
+    return parsed;
+  } catch {
+    return null; // no state file yet (first run) or unreadable
+  }
+}
+
+function saveState() {
+  try {
+    fs.mkdirSync(path.dirname(STATE_PATH), { recursive: true });
+    const state = {
+      known: [...knownFiles].slice(-MAX_STATE_ENTRIES),
+      queued: [...queued].slice(-MAX_STATE_ENTRIES),
+    };
+    fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2));
+  } catch (err) {
+    console.error(`    ⚠️  could not persist watcher state: ${err.message}`);
+  }
+}
 
 async function initQueued() {
   const posts = await readQueue();
@@ -180,45 +191,36 @@ async function initQueued() {
 
 // ── Auto-queue a single file ───────────────────────────────────────────────────
 
+// Hand the file to the always-on dashboard, which is the SINGLE writer of the
+// queue. This removes the cross-process race where watch-renders and the
+// dashboard both read-modify-wrote the shared queue.json and clobbered each
+// other (e.g. wiping freshly-generated captions). The dashboard endpoint does
+// the R2 upload, caption generation, pillar/scheduling, and the
+// mutex-serialized queue write — and dedupes by filename, so re-sends are
+// harmless no-ops.
 async function autoQueue(filePath) {
   const filename = path.basename(filePath);
   const sizeMB = (fs.statSync(filePath).size / 1024 / 1024).toFixed(1);
 
   console.log(`\n🎬  New render detected: ${filename} (${sizeMB} MB)`);
-  console.log('    Auto-queuing…');
+  console.log(`    Handing off to the dashboard at ${DASHBOARD_URL}…`);
 
-  const pillar = detectPillar(filename);
-  const existing = await readQueue();
-  const scheduledTime = nextAvailableSlot(pillar, existing);
-
-  console.log(`    Pillar: ${pillar}`);
-  console.log(`    Scheduled: ${fmt(scheduledTime)}`);
-
-  console.log('    Uploading to R2…');
-  const videoUrl = await uploadFile(filePath, filename);
-
-  const post = {
-    id: uuidv4(),
-    status: 'pending',
-    type: 'reel',
-    pillar,
-    caption: '✏️ Add caption before approving',
-    videoUrl,
-    scheduledTime: scheduledTime.toISOString(),
-    createdAt: new Date().toISOString(),
-    approvedAt: null,
-    publishedAt: null,
-    metaPublishId: null,
-    notes: filename, // store filename so we can track it
-  };
-
-  const posts = await readQueue();
-  posts.push(post);
-  await writeQueue(posts);
-
+  const res = await fetch(`${DASHBOARD_URL}/api/local-scan/upload`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'reel', filePath, name: filename }),
+    // Caption generation (Whisper + Claude) runs server-side; give it room.
+    signal: AbortSignal.timeout(180_000),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`dashboard upload failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+  const post = await res.json();
   queued.add(filename);
+  saveState();
 
-  console.log(`    ✅ Queued! Edit caption at: http://localhost:3001/dashboard/queue`);
+  console.log(`    ✅ Queued via dashboard. Edit caption at: ${DASHBOARD_URL}/dashboard/queue`);
   console.log(`    Post ID: ${post.id}\n`);
 }
 
@@ -241,6 +243,10 @@ async function poll() {
     const fullPath = path.join(VIDEO_OUT_DIR, name);
     // New file = not in knownFiles set, or mtime changed significantly (re-render)
     const key = `${name}:${Math.floor(mtime / 1000)}`; // 1s precision
+    // Re-render of an already-handled name (fresh mtime key): hand it to the
+    // dashboard again — the upload endpoint dedupes on name+size, so an
+    // unchanged file is a no-op while genuinely new content gets a new post.
+    if (!knownFiles.has(key) && queued.has(name)) queued.delete(name);
     if (!knownFiles.has(key) && !queued.has(name)) {
       knownFiles.add(key);
       // Small delay to ensure the file is fully written
@@ -249,6 +255,7 @@ async function poll() {
         await autoQueue(fullPath);
       } catch (err) {
         console.error(`    ❌ Failed to queue ${name}:`, err.message);
+        knownFiles.delete(key); // let it retry on the next poll
       }
     } else {
       knownFiles.add(key);
@@ -270,15 +277,33 @@ async function main() {
   console.log(`    ${VIDEO_OUT_DIR}`);
   console.log(`    Polling every ${POLL_INTERVAL_MS / 1000}s — Ctrl+C to stop\n`);
 
-  // Seed known files (don't auto-queue things already there)
+  // Seed handled files. Restarts load the persisted state, so a file that
+  // landed while the watcher was DOWN is not in it and gets queued by the
+  // first poll. Only the very first run (no state file yet) falls back to
+  // treating everything already on disk as handled — otherwise years of old,
+  // long-deleted-from-queue renders would flood in.
   await initQueued();
-  const existing = scanDir() || [];
-  for (const { name, mtime } of existing) {
-    knownFiles.add(`${name}:${Math.floor(mtime / 1000)}`);
-    queued.add(name); // treat pre-existing files as already handled
+  const state = loadState();
+  if (state) {
+    for (const k of state.known) knownFiles.add(k);
+    for (const n of state.queued) queued.add(n);
+    const existing = scanDir() || [];
+    const backlog = existing.filter(
+      ({ name, mtime }) => !knownFiles.has(`${name}:${Math.floor(mtime / 1000)}`) && !queued.has(name),
+    );
+    console.log(
+      `    Restored state (${queued.size} handled). ` +
+        `${backlog.length} file(s) arrived while down — queueing on first poll…\n`,
+    );
+  } else {
+    const existing = scanDir() || [];
+    for (const { name, mtime } of existing) {
+      knownFiles.add(`${name}:${Math.floor(mtime / 1000)}`);
+      queued.add(name); // first run ever: treat pre-existing files as already handled
+    }
+    saveState();
+    console.log(`    First run: ignoring ${existing.length} existing file(s). Watching for new ones…\n`);
   }
-
-  console.log(`    Ignoring ${existing.length} existing file(s). Watching for new ones…\n`);
 
   setInterval(poll, POLL_INTERVAL_MS);
 }

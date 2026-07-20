@@ -1,0 +1,92 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "CLINICAL PATTERN",
+      "headline": "Pickleball back pain often starts at the core.",
+      "body": "When you swing a backhand, the core delivers the force through the fascia to the racket. When the core cannot transmit, the lumbar muscles take the job. The lumbar pays for it."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "THE PRESENTATION",
+      "headline": "Active adult, sore low back, no clear injury.",
+      "body": "Patient comes in after weeks of pickleball with a low back that grumbles every time they rotate. No fall, no tweak, no obvious moment of injury. Just gradual ache that the back rub keeps failing to fix.",
+      "pills": [
+        "No injury moment",
+        "Worse with rotation",
+        "Worse the day after"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "details",
+      "tag": "THE FASCIAL CHAIN",
+      "headline": "Power runs through the fascia layer.",
+      "body": "The thoracolumbar fascia ties the lat to the contralateral glute through the lumbar spine. Power for a backhand travels along that line. When the core cannot lock the trunk, the line slips and the lumbar segments shear.",
+      "goldAccent": "Where the power gets stuck is where the pain shows up.",
+      "pills": [
+        "Lat to glute",
+        "Through the low back",
+        "Core locks the line"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "comparison",
+      "tag": "TWO WAYS TO READ IT",
+      "headline": "Lumbar lens versus core lens.",
+      "comparisonLeft": {
+        "heading": "Lumbar lens",
+        "items": [
+          "Sore erectors",
+          "Tight QL",
+          "Manual therapy on the back",
+          "Stop playing pickleball"
+        ]
+      },
+      "comparisonRight": {
+        "heading": "Core lens",
+        "items": [
+          "Test trunk anti-rotation",
+          "Build core through the fascial chain",
+          "Train backhand load tolerance",
+          "Keep playing pickleball"
+        ]
+      }
+    },
+    {
+      "idx": 5,
+      "type": "solution",
+      "tag": "HOW I TEST IT",
+      "headline": "Test rotation under load before you treat the back.",
+      "body": "A simple anti-rotation test (palloff press or banded chop) tells me if the core is holding. If it leaks, the lumbar is doing core work every backhand. I treat the leak before I touch the back muscles.",
+      "quoteLabel": "WHAT I TELL THEM",
+      "quoteText": "If the core leaks, the back picks up the bill."
+    },
+    {
+      "idx": 6,
+      "type": "details",
+      "tag": "WHY BACK-ONLY CARE RELAPSES",
+      "headline": "Climb the chain or watch it cycle.",
+      "body": "Massage the back, stretch it, the lumbar feels better for a week. Then they play pickleball, the core leaks again, the back takes the load again, and the cycle repeats. The work has to climb the chain.",
+      "goldAccent": "Stop the leak and the back stops paying.",
+      "pills": [
+        "Treat the leak",
+        "Train the load",
+        "Keep the sport"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "Your threshold is higher than they told you.",
+      "body": "If pickleball is wrecking your back and back rubs only buy a week, send me a DM and let's train your core for the swing.",
+      "tagline": "Be Good. Help Someone. Learn Lots.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Pickleball back pain often starts at the core.\n\nActive adult walks in with a sore low back. No fall, no tweak, no obvious moment of injury. Just gradual ache that gets worse the day after pickleball. Back rubs and stretching buy a week of relief, then the lumbar grumbles all over again.\n\nPower runs through the fascia layer first. The thoracolumbar fascia ties the lat to the contralateral glute through the lumbar spine. Power for a backhand travels along that line. When the core cannot lock the trunk, the line slips and the lumbar segments shear. Where the power gets stuck is where the pain shows up.\n\nI test rotation under load before I treat the back. A palloff press or banded chop tells me if the core is holding. If it leaks, the lumbar is doing core work every backhand. Treat the leak first, then load the swing back up.\n\nIf pickleball is wrecking your back and back rubs only buy a week, send me a DM and let's train your core for the swing.\n\nBe Good. Help Someone. Learn Lots.\n\n#Pickleball #LowBackPain #PhysicalTherapy #ThresholdHealth"
+}

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>how to stretch correctly — draft 2026-04-25-soundbite-carousel-7-quotes-on-stretching-b0016</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;background:#0D0D18;overflow:hidden;}
+body{font-family:'Montserrat',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+.serif{font-family:'Cormorant Garamond',Georgia,serif;}
+.sans{font-family:'Montserrat',system-ui,sans-serif;}
+.viewer{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
+.stage{position:relative;width:100%;height:100%;overflow:hidden;}
+.track{display:flex;width:100%;height:100%;transition:transform 0.3s ease;}
+.slot{flex:0 0 100%;height:100%;display:flex;align-items:center;justify-content:center;padding:8px 56px;}
+.slide{position:relative;width:1080px;height:1350px;flex-shrink:0;overflow:hidden;transform-origin:center center;transform:scale(var(--fit, 1));box-shadow:0 8px 24px rgba(0,0,0,0.4);cursor:pointer;}
+.slide:hover{outline:2px solid rgba(201,168,76,0.6);outline-offset:-2px;}
+.nav{position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;line-height:1;}
+.nav:hover:not([disabled]){background:rgba(255,255,255,0.15);}
+.nav[disabled]{opacity:0.25;cursor:default;}
+.nav.prev{left:12px;}
+.nav.next{right:12px;}
+.counter{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);color:#C0C0C0;font-family:'Montserrat',system-ui,sans-serif;font-size:12px;letter-spacing:2px;background:rgba(0,0,0,0.4);padding:5px 12px;border-radius:14px;z-index:10;}
+</style>
+</head>
+<body>
+<div class="viewer">
+  <button class="nav prev" aria-label="previous slide">&lsaquo;</button>
+  <div class="stage">
+    <div class="track" id="track">
+<section class="slot" data-slide-idx="1">
+        <div class="slide"><div style="position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#0D0D18 0%,#1A1A2E 50%,#7002AB 100%);"></div>
+  <div style="position:absolute;top:44px;right:56px;z-index:5;font-family:'Cormorant Garamond',Georgia,serif;font-size:200px;font-weight:700;line-height:1;color:rgba(155,48,217,0.16);letter-spacing:-6px;pointer-events:none;">01</div>
+  <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 56px 120px;">
+    <span class="sans" style="font-size:13px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#C0C0C0;margin-bottom:28px;">STRETCHING</span>
+    <h1 class="serif" style="font-size:72px;font-weight:700;color:#F5F5F5;letter-spacing:-1.4px;line-height:0.98;margin-bottom:32px;max-width:920px;">How are you stretching?</h1>
+    <div style="width:72px;height:3px;background:#C9A84C;margin-bottom:28px;"></div>
+    <p class="sans" style="font-size:22px;font-weight:400;color:#D0D0D8;line-height:1.45;max-width:820px;">It is the first question I ask when someone tells me their stretching is not working. Six things I find myself saying in the clinic every single week.</p>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 28px 20px;display:flex;align-items:center;gap:12px;z-index:20;">
+    <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);">
+      <div style="width:25%;height:100%;border-radius:2px;background:#fff;"></div>
+    </div>
+    <span style="font-family:'Montserrat',system-ui,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);white-space:nowrap;">2/8</span>
+  </div>
+  <div style="position:absolute;top:0;right:0;bottom:0;width:48px;background:linear-gradient(to right, transparent, rgba(255,255,255,0.04));display:flex;align-items:center;justify-content:center;z-index:20;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div></div>
+      </section>
+<section class="slot" data-slide-idx="2">
+        <div class="slide"><div style="position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#0D0D18 0%,#1A1A2E 50%,#7002AB 100%);"></div>
+  <div style="position:absolute;top:44px;right:56px;z-index:5;font-family:'Cormorant Garamond',Georgia,serif;font-size:200px;font-weight:700;line-height:1;color:rgba(155,48,217,0.16);letter-spacing:-6px;pointer-events:none;">02</div>
+  <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 56px 120px;">
+    <span class="sans" style="font-size:13px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#9B30D9;margin-bottom:24px;">INTENSITY</span>
+    <h2 class="serif" style="font-size:58px;font-weight:600;color:#F5F5F5;letter-spacing:-1px;line-height:1.0;margin-bottom:28px;max-width:900px;">Hard and short is the wrong recipe.</h2>
+    <div style="width:56px;height:2px;background:#C9A84C;margin-bottom:24px;"></div>
+    <p class="sans" style="font-size:19px;color:#D0D0D8;line-height:1.5;max-width:780px;margin-bottom:28px;">Stretching is an instruction to the nervous system. Pull aggressively on a tight muscle and the nervous system tightens it further to protect itself.</p>
+    <div style="padding:22px 24px;background:rgba(13,13,24,0.55);border-radius:14px;border:1px solid rgba(201,168,76,0.3);">
+          <p class="sans" style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">FROM THE ROOM</p>
+          <p class="serif" style="font-size:19px;color:#F5F5F5;font-style:italic;line-height:1.4;">&ldquo;Most people stretch too hard and too short.&rdquo;</p>
+        </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 28px 20px;display:flex;align-items:center;gap:12px;z-index:20;">
+    <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);">
+      <div style="width:38%;height:100%;border-radius:2px;background:#fff;"></div>
+    </div>
+    <span style="font-family:'Montserrat',system-ui,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);white-space:nowrap;">3/8</span>
+  </div>
+  <div style="position:absolute;top:0;right:0;bottom:0;width:48px;background:linear-gradient(to right, transparent, rgba(255,255,255,0.04));display:flex;align-items:center;justify-content:center;z-index:20;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div></div>
+      </section>
+<section class="slot" data-slide-idx="3">
+        <div class="slide"><div style="position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#0D0D18 0%,#1A1A2E 50%,#7002AB 100%);"></div>
+  <div style="position:absolute;top:44px;right:56px;z-index:5;font-family:'Cormorant Garamond',Georgia,serif;font-size:200px;font-weight:700;line-height:1;color:rgba(155,48,217,0.16);letter-spacing:-6px;pointer-events:none;">03</div>
+  <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 56px 120px;">
+    <span class="sans" style="font-size:13px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#9B30D9;margin-bottom:24px;">RAMP</span>
+    <h2 class="serif" style="font-size:58px;font-weight:600;color:#F5F5F5;letter-spacing:-1px;line-height:1.0;margin-bottom:28px;max-width:900px;">Ramp into a stretch like you ramp into a lift.</h2>
+    <div style="width:56px;height:2px;background:#C9A84C;margin-bottom:24px;"></div>
+    <p class="sans" style="font-size:19px;color:#D0D0D8;line-height:1.5;max-width:780px;margin-bottom:28px;">Two of ten. Then three. Then four. Treating a stretch like a one-rep max is how you tear something that thought it was relaxing.</p>
+    <div style="padding:22px 24px;background:rgba(13,13,24,0.55);border-radius:14px;border:1px solid rgba(201,168,76,0.3);">
+          <p class="sans" style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">ANALOGY I REPEAT WEEKLY</p>
+          <p class="serif" style="font-size:19px;color:#F5F5F5;font-style:italic;line-height:1.4;">&ldquo;You wouldn't max out on a squat right away — you'd warm up into it. Same with stretching.&rdquo;</p>
+        </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 28px 20px;display:flex;align-items:center;gap:12px;z-index:20;">
+    <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);">
+      <div style="width:50%;height:100%;border-radius:2px;background:#fff;"></div>
+    </div>
+    <span style="font-family:'Montserrat',system-ui,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);white-space:nowrap;">4/8</span>
+  </div>
+  <div style="position:absolute;top:0;right:0;bottom:0;width:48px;background:linear-gradient(to right, transparent, rgba(255,255,255,0.04));display:flex;align-items:center;justify-content:center;z-index:20;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div></div>
+      </section>
+<section class="slot" data-slide-idx="4">
+        <div class="slide"><div style="position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#0D0D18 0%,#1A1A2E 50%,#7002AB 100%);"></div>
+  <div style="position:absolute;top:44px;right:56px;z-index:5;font-family:'Cormorant Garamond',Georgia,serif;font-size:200px;font-weight:700;line-height:1;color:rgba(155,48,217,0.16);letter-spacing:-6px;pointer-events:none;">04</div>
+  <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 56px 120px;">
+    <span class="sans" style="font-size:13px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#9B30D9;margin-bottom:24px;">RANGE OVER TIME</span>
+    <h2 class="serif" style="font-size:58px;font-weight:600;color:#F5F5F5;letter-spacing:-1px;line-height:1.0;margin-bottom:28px;max-width:900px;">Three of ten beats eight of ten.</h2>
+    <div style="width:56px;height:2px;background:#C9A84C;margin-bottom:24px;"></div>
+    <p class="sans" style="font-size:19px;color:#D0D0D8;line-height:1.5;max-width:780px;margin-bottom:28px;">Start at an 8 and 8 is the ceiling. Start at a 3 and that 3 earns you a 4 next session, a 5 the session after. Range opens for the people who refuse to chase it.</p>
+    <div style="padding:22px 24px;background:rgba(13,13,24,0.55);border-radius:14px;border:1px solid rgba(201,168,76,0.3);">
+          <p class="sans" style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">WHAT I TELL EVERY ATHLETE</p>
+          <p class="serif" style="font-size:19px;color:#F5F5F5;font-style:italic;line-height:1.4;">&ldquo;If I start at 8, that's all I'm gonna get. If I start at 3, eventually I'll still be at 3 and I'll get further.&rdquo;</p>
+        </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 28px 20px;display:flex;align-items:center;gap:12px;z-index:20;">
+    <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);">
+      <div style="width:63%;height:100%;border-radius:2px;background:#fff;"></div>
+    </div>
+    <span style="font-family:'Montserrat',system-ui,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);white-space:nowrap;">5/8</span>
+  </div>
+  <div style="position:absolute;top:0;right:0;bottom:0;width:48px;background:linear-gradient(to right, transparent, rgba(255,255,255,0.04));display:flex;align-items:center;justify-content:center;z-index:20;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div></div>
+      </section>
+<section class="slot" data-slide-idx="5">
+        <div class="slide"><div style="position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#0D0D18 0%,#1A1A2E 50%,#7002AB 100%);"></div>
+  <div style="position:absolute;top:44px;right:56px;z-index:5;font-family:'Cormorant Garamond',Georgia,serif;font-size:200px;font-weight:700;line-height:1;color:rgba(155,48,217,0.16);letter-spacing:-6px;pointer-events:none;">05</div>
+  <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 56px 120px;">
+    <span class="sans" style="font-size:13px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#9B30D9;margin-bottom:24px;">BREATH GAUGE</span>
+    <h2 class="serif" style="font-size:58px;font-weight:600;color:#F5F5F5;letter-spacing:-1px;line-height:1.0;margin-bottom:28px;max-width:900px;">Your breath is the gauge.</h2>
+    <div style="width:56px;height:2px;background:#C9A84C;margin-bottom:24px;"></div>
+    <p class="sans" style="font-size:19px;color:#D0D0D8;line-height:1.5;max-width:780px;margin-bottom:28px;">Holding your breath means the body is fighting the position. Slow even breathing means the body has permitted it. Breath tells you the truth before the muscle does.</p>
+    <div style="padding:22px 24px;background:rgba(13,13,24,0.55);border-radius:14px;border:1px solid rgba(201,168,76,0.3);">
+          <p class="sans" style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">PATIENT NOTE</p>
+          <p class="serif" style="font-size:19px;color:#F5F5F5;font-style:italic;line-height:1.4;">&ldquo;If you're fighting yourself or holding your breath — it's too much.&rdquo;</p>
+        </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 28px 20px;display:flex;align-items:center;gap:12px;z-index:20;">
+    <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);">
+      <div style="width:75%;height:100%;border-radius:2px;background:#fff;"></div>
+    </div>
+    <span style="font-family:'Montserrat',system-ui,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);white-space:nowrap;">6/8</span>
+  </div>
+  <div style="position:absolute;top:0;right:0;bottom:0;width:48px;background:linear-gradient(to right, transparent, rgba(255,255,255,0.04));display:flex;align-items:center;justify-content:center;z-index:20;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div></div>
+      </section>
+<section class="slot" data-slide-idx="6">
+        <div class="slide"><div style="position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#0D0D18 0%,#1A1A2E 50%,#7002AB 100%);"></div>
+  <div style="position:absolute;top:44px;right:56px;z-index:5;font-family:'Cormorant Garamond',Georgia,serif;font-size:200px;font-weight:700;line-height:1;color:rgba(155,48,217,0.16);letter-spacing:-6px;pointer-events:none;">06</div>
+  <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 56px 120px;">
+    <span class="sans" style="font-size:13px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#9B30D9;margin-bottom:24px;">WHERE PAIN ENTERS</span>
+    <h2 class="serif" style="font-size:58px;font-weight:600;color:#F5F5F5;letter-spacing:-1px;line-height:1.0;margin-bottom:28px;max-width:900px;">Stretch is a feeling. Pain is information.</h2>
+    <div style="width:56px;height:2px;background:#C9A84C;margin-bottom:24px;"></div>
+    <p class="sans" style="font-size:19px;color:#D0D0D8;line-height:1.5;max-width:780px;margin-bottom:28px;">A position that opens as a stretch and crosses into pain is telling you the entry was too aggressive. Back the dial down a notch and let the tissue come to you.</p>
+    <div style="padding:22px 24px;background:rgba(13,13,24,0.55);border-radius:14px;border:1px solid rgba(201,168,76,0.3);">
+          <p class="sans" style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">FROM A SESSION</p>
+          <p class="serif" style="font-size:19px;color:#F5F5F5;font-style:italic;line-height:1.4;">&ldquo;If it starts like a stretch and then builds into pain, you're starting too high.&rdquo;</p>
+        </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 28px 20px;display:flex;align-items:center;gap:12px;z-index:20;">
+    <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);">
+      <div style="width:88%;height:100%;border-radius:2px;background:#fff;"></div>
+    </div>
+    <span style="font-family:'Montserrat',system-ui,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);white-space:nowrap;">7/8</span>
+  </div>
+  <div style="position:absolute;top:0;right:0;bottom:0;width:48px;background:linear-gradient(to right, transparent, rgba(255,255,255,0.04));display:flex;align-items:center;justify-content:center;z-index:20;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div></div>
+      </section>
+<section class="slot" data-slide-idx="7">
+        <div class="slide"><div style="position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#0D0D18 0%,#1A1A2E 50%,#7002AB 100%);"></div>
+  <div style="position:absolute;top:44px;right:56px;z-index:5;font-family:'Cormorant Garamond',Georgia,serif;font-size:200px;font-weight:700;line-height:1;color:rgba(155,48,217,0.16);letter-spacing:-6px;pointer-events:none;">07</div>
+  <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 56px 120px;">
+    <span class="sans" style="font-size:13px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#9B30D9;margin-bottom:24px;">THE STANDING ORDER</span>
+    <h2 class="serif" style="font-size:58px;font-weight:600;color:#F5F5F5;letter-spacing:-1px;line-height:1.0;margin-bottom:28px;max-width:900px;">Never push through dead pain.</h2>
+    <div style="width:56px;height:2px;background:#C9A84C;margin-bottom:24px;"></div>
+    <p class="sans" style="font-size:19px;color:#D0D0D8;line-height:1.5;max-width:780px;margin-bottom:28px;">Sharp pain. Dull pain. Deep pain. All of it is a stop sign. Every millimeter of range is earned, never forced.</p>
+    <div style="padding:22px 24px;background:rgba(13,13,24,0.55);border-radius:14px;border:1px solid rgba(201,168,76,0.3);">
+          <p class="sans" style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">RULE OF THE CLINIC</p>
+          <p class="serif" style="font-size:19px;color:#F5F5F5;font-style:italic;line-height:1.4;">&ldquo;Never push through dead pain. Always progress systematically.&rdquo;</p>
+        </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 28px 20px;display:flex;align-items:center;gap:12px;z-index:20;">
+    <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);">
+      <div style="width:100%;height:100%;border-radius:2px;background:#fff;"></div>
+    </div>
+    <span style="font-family:'Montserrat',system-ui,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);white-space:nowrap;">8/8</span>
+  </div>
+  </div>
+      </section>
+<section class="slot" data-slide-idx="8">
+        <div class="slide"><div style="position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#0D0D18 0%,#1A1A2E 50%,#7002AB 100%);"></div>
+  <div style="position:absolute;top:44px;right:56px;z-index:5;font-family:'Cormorant Garamond',Georgia,serif;font-size:200px;font-weight:700;line-height:1;color:rgba(155,48,217,0.16);letter-spacing:-6px;pointer-events:none;">08</div>
+  <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:0 56px 120px;">
+    <span class="sans" style="font-size:13px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#C9A84C;margin-bottom:24px;">READY WHEN YOU ARE</span>
+    <h2 class="serif" style="font-size:58px;font-weight:600;color:#F5F5F5;letter-spacing:-1px;line-height:1.0;margin-bottom:24px;font-style:italic;max-width:900px;">Your threshold is higher than they told you.</h2>
+    <div style="width:72px;height:3px;background:#C9A84C;margin-bottom:28px;"></div>
+    <p class="sans" style="font-size:19px;color:#D0D0D8;line-height:1.5;margin-bottom:40px;max-width:740px;">If you have been stretching for years and the tightness keeps coming back, send me a DM and let's look at how you are doing it.</p>
+    <div style="display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:#C9A84C;color:#0D0D18;font-family:'Montserrat',system-ui,sans-serif;font-weight:700;font-size:16px;border-radius:32px;align-self:flex-start;">Book a free call</div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 28px 20px;display:flex;align-items:center;gap:12px;z-index:20;">
+    <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);">
+      <div style="width:113%;height:100%;border-radius:2px;background:#fff;"></div>
+    </div>
+    <span style="font-family:'Montserrat',system-ui,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);white-space:nowrap;">9/8</span>
+  </div></div>
+      </section>
+    </div>
+  </div>
+  <button class="nav next" aria-label="next slide">&rsaquo;</button>
+  <div class="counter" id="counter">1 / 8</div>
+</div>
+<script>
+(function(){
+  var total = 8;
+  var draftId = "2026-04-25-soundbite-carousel-7-quotes-on-stretching-b0016";
+  var params = new URLSearchParams(location.search);
+  var urlIdx = parseInt(params.get('slide') || '0', 10);
+  if (isNaN(urlIdx)) urlIdx = 0;
+  var idx = Math.max(0, Math.min(total - 1, urlIdx));
+
+  var track = document.getElementById('track');
+  var counter = document.getElementById('counter');
+  var prev = document.querySelector('.nav.prev');
+  var next = document.querySelector('.nav.next');
+
+  function fit(){
+    var scale = Math.min((window.innerHeight - 40) / 1350, (window.innerWidth - 120) / 1080);
+    if (scale <= 0 || !isFinite(scale)) scale = 1;
+    document.documentElement.style.setProperty('--fit', String(scale));
+  }
+
+  function render(){
+    track.style.transform = 'translateX(' + (-idx * 100) + '%)';
+    counter.textContent = (idx + 1) + ' / ' + total;
+    prev.disabled = idx === 0;
+    next.disabled = idx === total - 1;
+  }
+
+  function go(delta){
+    var nextIdx = Math.max(0, Math.min(total - 1, idx + delta));
+    if (nextIdx === idx) return;
+    idx = nextIdx;
+    render();
+  }
+
+  prev.addEventListener('click', function(e){ e.stopPropagation(); go(-1); });
+  next.addEventListener('click', function(e){ e.stopPropagation(); go(1); });
+
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+  });
+
+  var swipeLock = false;
+  window.addEventListener('wheel', function(e){
+    if (Math.abs(e.deltaX) < 40 || Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
+    if (swipeLock) return;
+    swipeLock = true;
+    setTimeout(function(){ swipeLock = false; }, 400);
+    go(e.deltaX > 0 ? 1 : -1);
+  }, { passive: true });
+
+  document.querySelectorAll('.slot').forEach(function(slot){
+    var slideEl = slot.querySelector('.slide');
+    if (!slideEl) return;
+    slideEl.addEventListener('click', function(){
+      var slideIdx = parseInt(slot.getAttribute('data-slide-idx'), 10);
+      if (window.parent) {
+        window.parent.postMessage({ type: 'carousel-slide-click', draftId: draftId, slideIdx: slideIdx }, '*');
+      }
+    });
+  });
+
+  window.addEventListener('resize', fit);
+  fit();
+  render();
+})();
+</script>
+</body>
+</html>

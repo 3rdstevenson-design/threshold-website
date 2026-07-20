@@ -1,0 +1,308 @@
+/* ============================================================
+   Threshold Health & Performance — Design Tokens
+   Brand colors, typography, and semantic type roles.
+   Source: threshold-design-system colors_and_type.css.
+   Fonts are loaded by Next.js via app/layout.tsx (next/font/google)
+   and exposed as --font-cormorant / --font-montserrat / --font-nunito.
+   The aliases below map them to the design system's names.
+   ============================================================ */
+
+:root {
+  /* ── Font aliases (next/font already loads the families) ───── */
+  --font-display: var(--font-cormorant), Georgia, 'Times New Roman', serif;
+  --font-ui:      var(--font-montserrat), system-ui, -apple-system, sans-serif;
+  --font-body:    var(--font-nunito), system-ui, -apple-system, sans-serif;
+
+  /* ── Brand color palette ──────────────────────────────────── */
+  --threshold-purple:  #7002AB;
+  --violet-mid:        #9B30D9;
+  --violet-deep:       #5A0187;
+  --champion-gold:     #C9A84C;
+  --sterling-silver:   #C0C0C0;
+  --graphite:          #8A8A9A;
+  --clinical-white:    #F5F5F5;
+  --deep-navy:         #1A1A2E;
+  --obsidian:          #0D0D18;
+  --pure-black:        #000000;
+
+  /* ── Semantic color roles (dark UI — default) ─────────────── */
+  --bg-primary:        var(--obsidian);
+  --bg-elevated:       var(--deep-navy);
+  --bg-overlay:        rgba(255, 255, 255, 0.03);
+  --fg-primary:        var(--clinical-white);
+  --fg-secondary:      var(--sterling-silver);
+  --fg-muted:          rgba(255, 255, 255, 0.30);
+  --fg-accent:         var(--threshold-purple);
+  --fg-accent-soft:    var(--champion-gold);
+  --border-hairline:   rgba(255, 255, 255, 0.10);
+  --border-subtle:     rgba(255, 255, 255, 0.05);
+  --border-accent:     var(--threshold-purple);
+
+  /* ── Glow / shadow tokens ─────────────────────────────────── */
+  --glow-sm:  0 0 20px rgba(112, 2, 171, 0.55);
+  --glow-md:  0 0 28px rgba(112, 2, 171, 0.25), 0 0 55px rgba(112, 2, 171, 0.10);
+  --glow-lg:  0 0 32px rgba(112, 2, 171, 0.90), 0 0 65px rgba(112, 2, 171, 0.45);
+  --glow-text-purple: 0 0 22px rgba(112, 2, 171, 0.80), 0 0 50px rgba(112, 2, 171, 0.40);
+
+  /* ── Signature gradients ──────────────────────────────────── */
+  --grad-signature:    linear-gradient(135deg, #7002AB 0%, #9B30D9 50%, #F5F5F5 100%);
+  --grad-clinical:     linear-gradient(135deg, #0D0D18 0%, #1A1A2E 55%, #7002AB 100%);
+  --grad-achievement:  linear-gradient(135deg, #7002AB 0%, #C9A84C 100%);
+  --grad-violet-spectrum: linear-gradient(135deg, #0D0D18 0%, #5A0187 35%, #7002AB 65%, #9B30D9 100%);
+  --grad-twilight:        linear-gradient(135deg, #1A1A2E 0%, #5A0187 55%, #7002AB 100%);
+  --grad-olympic:         linear-gradient(135deg, #8A8A9A 0%, #C0C0C0 50%, #F5F5F5 100%);
+  --grad-crucible:        linear-gradient(135deg, #0D0D18 0%, #7002AB 55%, #C9A84C 100%);
+  --grad-laurel:          linear-gradient(135deg, #C9A84C 0%, #C0C0C0 100%);
+
+  /* ── Spotlight / ambient gradients ────────────────────────── */
+  --spotlight-hero:
+    radial-gradient(ellipse 80% 70% at 50% -5%, rgba(112, 2, 171, 0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 50% 5%,  rgba(201, 168, 76, 0.08) 0%, transparent 55%),
+    var(--obsidian);
+  --spotlight-lars:
+    radial-gradient(ellipse 65% 90% at 50% -10%, rgba(112, 2, 171, 0.45) 0%, transparent 62%),
+    radial-gradient(ellipse 100% 55% at 50% 110%, rgba(201, 168, 76, 0.04) 0%, transparent 65%),
+    var(--obsidian);
+  --spotlight-dashboard:
+    radial-gradient(ellipse 60% 50% at 50% -5%, rgba(112, 2, 171, 0.28) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 40% at 50% 105%, rgba(112, 2, 171, 0.10) 0%, transparent 65%),
+    var(--obsidian);
+  --glow-section-purple:
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(112, 2, 171, 0.12) 0%, transparent 70%);
+
+  /* ── Spacing scale (8-pt base) ────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 144px;
+
+  /* ── Radii — Threshold uses SHARP edges. Never rounded. ───── */
+  --radius-none: 0px;
+  --radius-hairline: 1px;
+
+  /* ── Type scale ───────────────────────────────────────────── */
+  --fs-eyebrow:     12px;
+  --fs-micro:       10px;
+  --fs-body-sm:     14px;
+  --fs-body:        16px;
+  --fs-body-lg:     18px;
+  --fs-h3:          28px;
+  --fs-h2:          44px;
+  --fs-h1:          72px;
+  --fs-display:     88px;
+
+  --tracking-eyebrow: 0.35em;
+  --tracking-nav:     0.20em;
+  --tracking-button:  0.08em;
+  --tracking-label:   0.22em;
+
+  --weight-display-light: 300;
+  --weight-display:       400;
+  --weight-display-med:   500;
+  --weight-ui:            500;
+  --weight-ui-bold:       600;
+  --weight-body:          400;
+  --weight-body-bold:     700;
+
+  --lh-display: 1.05;
+  --lh-heading: 1.15;
+  --lh-body:    1.85;
+  --lh-ui:      1.4;
+
+  /* Transitions */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:   200ms;
+  --dur-med:    300ms;
+  --dur-slow:   350ms;
+  --dur-ambient: 4s;
+
+  /* ── Status colors (desaturated; never compete with purple/gold) ── */
+  --status-error-fg:      #E86A6A;
+  --status-error-bg:      rgba(232, 106, 106, 0.08);
+  --status-error-border:  rgba(232, 106, 106, 0.35);
+
+  --status-warn-fg:       var(--champion-gold);
+  --status-warn-bg:       rgba(201, 168, 76, 0.08);
+  --status-warn-border:   rgba(201, 168, 76, 0.35);
+
+  --status-success-fg:    #6FB58A;
+  --status-success-bg:    rgba(111, 181, 138, 0.08);
+  --status-success-border:rgba(111, 181, 138, 0.35);
+
+  --status-info-fg:       var(--violet-mid);
+  --status-info-bg:       rgba(155, 48, 217, 0.10);
+  --status-info-border:   rgba(155, 48, 217, 0.35);
+
+  /* ── Form & input tokens ──────────────────────────────────── */
+  --input-bg:             rgba(255, 255, 255, 0.03);
+  --input-bg-hover:       rgba(255, 255, 255, 0.05);
+  --input-bg-disabled:    rgba(255, 255, 255, 0.015);
+  --input-border:         rgba(255, 255, 255, 0.18);
+  --input-border-hover:   rgba(255, 255, 255, 0.32);
+  --input-border-focus:   var(--threshold-purple);
+  --input-border-error:   var(--status-error-fg);
+  --input-fg:             var(--clinical-white);
+  --input-placeholder:    rgba(255, 255, 255, 0.30);
+  --input-height:         44px;
+  --input-pad-x:          14px;
+  --input-radius:         var(--radius-none);
+
+  /* ── Focus ring ───────────────────────────────────────────── */
+  --focus-ring:
+    0 0 0 1px var(--threshold-purple),
+    0 0 0 4px rgba(112, 2, 171, 0.35);
+  --focus-ring-inset:
+    inset 0 0 0 1px var(--threshold-purple),
+    0 0 0 3px rgba(112, 2, 171, 0.30);
+  --focus-ring-error:
+    0 0 0 1px var(--status-error-fg),
+    0 0 0 4px rgba(232, 106, 106, 0.30);
+
+  --disabled-opacity: 0.40;
+
+  --link-fg:           var(--clinical-white);
+  --link-fg-hover:     var(--threshold-purple);
+  --link-fg-visited:   #B89BC9;
+}
+
+/* ============================================================
+   prefers-reduced-motion fallback.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-med:  0ms;
+    --dur-slow: 0ms;
+    --dur-ambient: 0s;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   Semantic type roles — apply directly to elements.
+   ============================================================ */
+
+.t-display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display-light);
+  font-size: clamp(48px, 8vw, var(--fs-display));
+  line-height: var(--lh-display);
+  letter-spacing: -0.01em;
+  color: var(--fg-primary);
+}
+
+.t-h1 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display-light);
+  font-size: clamp(40px, 6vw, var(--fs-h1));
+  line-height: var(--lh-display);
+  color: var(--fg-primary);
+}
+
+.t-h2 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display-light);
+  font-size: clamp(28px, 4vw, var(--fs-h2));
+  line-height: var(--lh-heading);
+  color: var(--fg-primary);
+}
+
+.t-h3 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display-med);
+  font-size: var(--fs-h3);
+  line-height: 1.25;
+  color: var(--fg-primary);
+}
+
+.t-quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: var(--weight-display);
+  font-size: clamp(24px, 3.5vw, var(--fs-h2));
+  line-height: 1.3;
+  color: var(--champion-gold);
+}
+
+.t-eyebrow {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-ui);
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--fg-secondary);
+}
+
+.t-nav {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-ui);
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--tracking-nav);
+  text-transform: uppercase;
+  color: var(--fg-secondary);
+}
+
+.t-button {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-ui-bold);
+  font-size: var(--fs-body-sm);
+  letter-spacing: var(--tracking-button);
+  text-transform: none;
+  color: var(--fg-primary);
+}
+
+.t-body {
+  font-family: var(--font-body);
+  font-weight: var(--weight-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg-secondary);
+}
+
+.t-body-lg {
+  font-family: var(--font-body);
+  font-weight: var(--weight-body);
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
+  color: var(--fg-secondary);
+}
+
+.t-body-emphasis {
+  font-family: var(--font-body);
+  font-weight: var(--weight-body-bold);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg-primary);
+}
+
+.t-caption {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-ui);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+/* ============================================================
+   Dashboard-specific keyframes (used by Spinner, Skeleton).
+   ============================================================ */
+@keyframes thr-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes thr-pulse {
+  0%, 100% { opacity: 0.32; }
+  50%      { opacity: 0.65; }
+}

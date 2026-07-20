@@ -10,6 +10,7 @@
 
 import readline from 'readline';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
@@ -17,7 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
-const VIDEO_OUT_DIR = path.resolve(ROOT, '../my-video-projects/out');
+const VIDEO_OUT_DIR = path.join(os.homedir(), 'Code', 'Social Media', 'Reels', 'Final');
 
 // ── Shared helpers (copied from queue-image.js to stay standalone) ─────────────
 

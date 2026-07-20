@@ -1,0 +1,106 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "A CHAPTER ENDS",
+      "headline": "Last patient visit. First choice to leave.",
+      "body": "After 4,000 visits and 319 cases, I walked out the door I chose to walk out of. Here's what eighteen months inside a clinic actually teaches you."
+    },
+    {
+      "idx": 2,
+      "type": "dialogue",
+      "tag": "THE REAL TRAINING GROUND",
+      "headline": "What school says vs. what the clinic proves",
+      "body": "Grad school gives you a framework. The clinic stress-tests every assumption inside it.",
+      "dialogueLeft": {
+        "label": "What education promises",
+        "quote": "Master the literature and you'll know how to treat people."
+      },
+      "dialogueRight": {
+        "label": "What the clinic teaches",
+        "quote": "Sit with enough real pain and complexity and you'll finally learn to think."
+      }
+    },
+    {
+      "idx": 3,
+      "type": "details",
+      "tag": "THE NUMBERS",
+      "headline": "4,000 visits. 319 humans. 18 months.",
+      "body": "Every case was a problem that couldn't be solved by a protocol. You learn to read people, adjust fast, and hold uncertainty without flinching.",
+      "pills": [
+        "Repetition",
+        "Real complexity",
+        "Real stakes",
+        "Real trust"
+      ],
+      "goldAccent": "Volume builds the instincts no classroom can."
+    },
+    {
+      "idx": 4,
+      "type": "diagram",
+      "tag": "HOW CLINICIANS ARE ACTUALLY BUILT",
+      "headline": "The mechanism school skips over",
+      "body": "Formal training gives you the first and last box. The middle one only comes from the floor.",
+      "diagramBoxes": [
+        {
+          "label": "CLASSROOM KNOWLEDGE",
+          "tone": "solid"
+        },
+        {
+          "label": "REPS WITH REAL PEOPLE",
+          "tone": "dashed"
+        },
+        {
+          "label": "CLINICAL INSTINCT",
+          "tone": "accent"
+        }
+      ],
+      "diagramConnector": "→"
+    },
+    {
+      "idx": 5,
+      "type": "timeline",
+      "tag": "HOW THE 18 MONTHS UNFOLDED",
+      "headline": "Confidence isn't given. It accumulates.",
+      "body": "The growth inside a first clinical job doesn't happen in a single moment. It stacks, slowly, until one day you notice it.",
+      "timelineSteps": [
+        {
+          "label": "Month 1: Surviving",
+          "tone": "neutral"
+        },
+        {
+          "label": "Month 3: Adjusting",
+          "tone": "neutral"
+        },
+        {
+          "label": "Month 9: Thinking faster",
+          "tone": "purple"
+        },
+        {
+          "label": "Month 18: Ready for what's next",
+          "tone": "gold"
+        }
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "solution",
+      "tag": "WHAT I'M TAKING WITH ME",
+      "headline": "The mentor, the reps, the gratitude.",
+      "body": "The skill I carry out the door was shaped by every mentor who pushed me, every staff member who held things together, and every patient who trusted me with their pain.",
+      "quoteLabel": "The Threshold Principle",
+      "quoteText": "The clinician you become is a direct reflection of the patients who let you learn on their behalf."
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "",
+      "body": "If you've been waiting for the right clinician to actually sit with your problem, book a free call and let's figure it out.",
+      "tagline": "Your threshold is higher than they told you.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Today I finished my last patient visit at my current clinic.\n\nThis was my first real job out of grad school, and the first job I've ever chosen to leave. Every transition before this one just happened to me. Graduating high school, graduating college. This one I made.\n\nI looked back at the numbers: over 4,000 patient visits, 319 unique cases across eighteen months. That's a lot of humans. A lot of stories. A lot of hands-on problem-solving compressed into a short stretch of time.\n\nFormal education cannot do what the clinic does. Repetition with real people, real pain, real complexity, that's what builds a clinician. No textbook replicates what happens when someone walks through the door hurting and trusts you to figure it out with them.\n\nI'm grateful for the mentors, the staff, and every single patient who let me into their care. The skill I carry out the door belongs to all of them as much as it does to me.\n\nTime to write the next chapter."
+}

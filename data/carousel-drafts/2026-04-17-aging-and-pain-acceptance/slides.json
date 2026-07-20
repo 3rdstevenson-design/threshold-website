@@ -1,0 +1,113 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "REAL STORY",
+      "headline": "Told to accept pain? Get a second opinion.",
+      "body": "A surgeon told my patient his shoulder pain was aging. His older sister, sitting beside him, had zero pain. The doctor didn't blink."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "THE PROBLEM",
+      "headline": "Age gets blamed for things it didn't cause.",
+      "body": "Too many people leave a clinical appointment carrying a story that was never fully examined. That story becomes a ceiling they stop trying to lift.",
+      "pills": [
+        "Told to accept it",
+        "Age used as the diagnosis",
+        "Movement restrictions labeled permanent",
+        "No next steps offered"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "solution",
+      "tag": "THE SHIFT",
+      "headline": "Aging is a context, not a sentence.",
+      "body": "Bursitis, inflammation, stiffness, these findings tell me where to look, not where to stop. There's almost always something to work with when you're willing to look past the label.",
+      "quoteLabel": "The Threshold Principle",
+      "quoteText": "Your age is the starting point of the assessment, never the conclusion."
+    },
+    {
+      "idx": 4,
+      "type": "features",
+      "tag": "HOW IT WORKS",
+      "headline": "What I actually assess when pain persists.",
+      "features": [
+        {
+          "icon": "◈",
+          "label": "Movement screening",
+          "desc": "I map exactly where range of motion is restricted and what's driving that restriction mechanically."
+        },
+        {
+          "icon": "◉",
+          "label": "Load tolerance testing",
+          "desc": "I find out how much your tissue can handle now and where the edge is between load and irritation."
+        },
+        {
+          "icon": "◆",
+          "label": "Compensatory patterns",
+          "desc": "Pain at one site usually means another structure has been overworking to compensate, and I identify which one."
+        },
+        {
+          "icon": "◇",
+          "label": "Capacity building plan",
+          "desc": "I build a progression that restores what you lost and extends past where you were before the pain started."
+        }
+      ]
+    },
+    {
+      "idx": 5,
+      "type": "details",
+      "tag": "THE DETAILS",
+      "headline": "What changes when someone takes this seriously.",
+      "body": "The patients who surprise themselves most are the ones who came in certain nothing would change. Within weeks of targeted work, the narrative shifts, from managing decline to building capacity.",
+      "pills": [
+        "Pain down, output up",
+        "Strength returning past baseline",
+        "Sleep and recovery improving",
+        "Confidence in movement restored"
+      ],
+      "goldAccent": "Moving better at your current age than you did five years ago is a real outcome, not a miracle."
+    },
+    {
+      "idx": 6,
+      "type": "howto",
+      "tag": "THE PATH",
+      "headline": "How we go from frustrated to moving well.",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Full assessment",
+          "desc": "We go through your history, your imaging, and your movement to build a complete picture, not a quick label."
+        },
+        {
+          "number": "02",
+          "title": "Clear target",
+          "desc": "We define what success looks like for your life, sport, or work, and set a measurable direction."
+        },
+        {
+          "number": "03",
+          "title": "Structured loading",
+          "desc": "I prescribe targeted exercise that progressively rebuilds the tissue's tolerance and your confidence in it."
+        },
+        {
+          "number": "04",
+          "title": "Ongoing recalibration",
+          "desc": "As your capacity grows, the program evolves so you keep moving forward instead of hitting a plateau."
+        }
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "Your body has more capacity than that appointment suggested.",
+      "body": "DM me and let's find out what's actually possible for you.",
+      "tagline": "Your threshold is higher than they told you.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "A patient walked in frustrated after his surgeon told him to accept his shoulder pain as part of getting older. His sister, older than him and completely pain-free, was sitting right there in the room. The doctor doubled down anyway.\n\nI hear this story more than I should. And I want to be direct: aging doesn't come with mandatory pain. It doesn't come with mandatory limitation. Almost every person who walks through my door with that kind of diagnosis has something to work with.\n\nRestoring movement. Reducing pain. Moving better at 55 than you did at 45. These are real outcomes, not exceptions.\n\nThe problem is accepting a ceiling that was never yours to begin with.\n\nIf a provider has told you this is how it's going to be, that's a signal, not a verdict. There's usually more information available, more options on the table, and more capacity in your body than that conversation suggested.\n\nI work with people who were told to accept decline, and we find out what's actually possible instead. Sometimes the answer surprises everyone.\n\nDM me. Let's find out what your body is actually capable of.\n\nBe Good. Help Someone. Learn Lots."
+}

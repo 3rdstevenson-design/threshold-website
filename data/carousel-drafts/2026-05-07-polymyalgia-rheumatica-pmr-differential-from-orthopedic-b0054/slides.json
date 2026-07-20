@@ -1,0 +1,92 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "CLINICAL PATTERN",
+      "headline": "Stiff everywhere, with no clear cause.",
+      "body": "When a patient walks in describing stiffness in the shoulders, the hips, and the whole body at once, the orthopedic differential is the wrong starting point. There is a name for that picture."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "THE PRESENTATION",
+      "headline": "Polymyalgia rheumatica looks like everything and nothing.",
+      "body": "Bilateral shoulder and hip stiffness. Worse in the morning. Lasts an hour or more before it eases. The patient describes pain everywhere and nothing specific. That picture has its own name.",
+      "pills": [
+        "Bilateral",
+        "Worse AM",
+        "Long morning stiffness"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "details",
+      "tag": "THE RHEUMATIC TELL",
+      "headline": "Inflammation moves differently from mechanics.",
+      "body": "PMR is a rheumatic inflammation, usually over age 50. It is symmetric. It is global. It shows up in inflammatory markers (ESR, CRP). It responds dramatically to a low dose of prednisone.",
+      "goldAccent": "Stiffness that beats a rub down belongs to a different doctor.",
+      "pills": [
+        "Symmetric",
+        "Global",
+        "Inflammatory markers"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "comparison",
+      "tag": "READING THE PICTURE",
+      "headline": "Looks like overuse, reads as inflammation.",
+      "comparisonLeft": {
+        "heading": "Looks like",
+        "items": [
+          "Bilateral shoulder ache",
+          "Bilateral hip ache",
+          "Stiff in the morning",
+          "Sounds like overuse"
+        ]
+      },
+      "comparisonRight": {
+        "heading": "Reads as",
+        "items": [
+          "Inflammatory pattern",
+          "Age over 50",
+          "Hour-plus AM stiffness",
+          "Needs lab work"
+        ]
+      }
+    },
+    {
+      "idx": 5,
+      "type": "solution",
+      "tag": "HOW I SCREEN IT",
+      "headline": "Screen for PMR before you prescribe exercises.",
+      "body": "Bilateral shoulder and hip stiffness over age 50, lasting more than an hour in the morning, deserves a rheumatology referral and bloodwork before a PT plan. Treating PMR as orthopedic pain delays the right care by months.",
+      "quoteLabel": "WHAT THEY SAY",
+      "quoteText": "Global stiffness."
+    },
+    {
+      "idx": 6,
+      "type": "details",
+      "tag": "WHY THE SCREEN MATTERS",
+      "headline": "What we ask even when PMR is ruled out.",
+      "body": "When stiffness is global, ask the questions PMR forces us to ask. Is it inflammatory? Symmetric? Worse in the morning? The same screen catches early rheumatoid arthritis, ankylosing spondylitis, and a few others. The answer changes which provider treats first.",
+      "goldAccent": "The body sometimes asks for a different doctor.",
+      "pills": [
+        "Inflammatory?",
+        "Symmetric?",
+        "Worse AM?"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "Your threshold is higher than they told you.",
+      "body": "If you are stiff everywhere with no clear cause and PT is going slow, send me a DM and let's run the right screen.",
+      "tagline": "Be Good. Help Someone. Learn Lots.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Stiff everywhere, with no clear cause.\n\nWhen a patient walks in describing stiffness in the shoulders, the hips, and the whole body at once, the orthopedic differential is the wrong starting point. The picture has its own name: polymyalgia rheumatica. PMR.\n\nPMR is a rheumatic inflammation, usually over age 50. It is symmetric. It is global. The morning stiffness lasts an hour or more before it eases. It shows up in inflammatory markers (ESR, CRP). It responds dramatically to a low dose of prednisone.\n\nBilateral shoulder and hip stiffness over age 50, lasting more than an hour in the morning, deserves a rheumatology referral and bloodwork before any PT plan. Treating PMR as orthopedic pain delays the right care by months. The screen also catches early rheumatoid arthritis and ankylosing spondylitis.\n\nIf you are stiff everywhere with no clear cause and PT is going slow, send me a DM and let's run the right screen.\n\nBe Good. Help Someone. Learn Lots.\n\n#PolymyalgiaRheumatica #PhysicalTherapy #ClinicalReasoning #ThresholdHealth"
+}

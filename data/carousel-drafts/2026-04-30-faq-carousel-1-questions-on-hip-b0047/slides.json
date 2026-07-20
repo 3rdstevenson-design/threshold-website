@@ -1,0 +1,77 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "PATIENT QUESTIONS",
+      "headline": "Is this okay? Is that normal?",
+      "body": "Almost every hip patient asks me a version of this question. Before I look at imaging, before I look at strength testing, before I look at anything else, I ask them one question back."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "THE QUESTION BEHIND THE QUESTION",
+      "headline": "Patients want a verdict. The body wants to be read.",
+      "body": "Is this okay is really asking, am I allowed to trust what I feel? When the answer comes from a chart or a scan first, the patient learns to override their own signal. Over time that erodes the most reliable instrument in the room.",
+      "pills": [
+        "Chart says one thing",
+        "Body says another",
+        "Patient stops listening"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "solution",
+      "tag": "FAQ:IS THIS NORMAL",
+      "headline": "Before I say anything, how do you FEEL about the hip?",
+      "body": "Regardless of what imaging shows, what do you feel as you walk around? The felt experience is the first data point. Imaging adds context. Imaging does not replace what your body is telling you.",
+      "quoteLabel": "MY REFRAME, EVERY TIME",
+      "quoteText": "First, before I say anything — how do you FEEL about the hip? Regardless of what any imaging might show, what do you feel as you're walking around?"
+    },
+    {
+      "idx": 4,
+      "type": "details",
+      "tag": "WHY I ASK THIS FIRST",
+      "headline": "Imaging is a snapshot. Walking is the test.",
+      "body": "An MRI captures one moment in one position. Walking captures hours of behavior under load. The signal that lives in your daily movement carries more information about how the hip is actually doing than the static image does.",
+      "pills": [
+        "Snapshot vs behavior",
+        "Static vs loaded",
+        "Moment vs pattern"
+      ],
+      "goldAccent": "Your body has been collecting data on this hip every day. Read that data first."
+    },
+    {
+      "idx": 5,
+      "type": "details",
+      "tag": "WHAT THE FELT SIGNAL TELLS US",
+      "headline": "Three things to notice when you walk.",
+      "body": "Pay attention to where the load lives, how the hip behaves on stairs and uneven ground, and whether anything sharp shows up under predictable inputs. Those three readouts decide where we look first when we get into the assessment.",
+      "pills": [
+        "Where load lives",
+        "Stairs and curbs",
+        "Sharp under predictable load"
+      ],
+      "goldAccent": "Felt experience is data. Walk around and notice it before you let imaging answer for you."
+    },
+    {
+      "idx": 6,
+      "type": "solution",
+      "tag": "THE RULE",
+      "headline": "Start with the body. Add the chart second.",
+      "body": "Imaging belongs in the conversation. The order is what changes the outcome. When felt experience speaks first and imaging adds context, you keep the patient's own signal at the center of the case.",
+      "quoteLabel": "THE STANDARD I HOLD",
+      "quoteText": "Felt experience leads. Imaging follows. The chart adds detail; it does not overrule the body."
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "",
+      "body": "If a hip has been felt off and a scan answer has not settled the question, send me a DM and we can read what your body is actually telling you together.",
+      "tagline": "Your threshold is higher than they told you.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "The most common question I get in the clinic is some version of, is this okay, is that normal?\n\nBefore I answer it, I ask one question back. How do you FEEL about the hip? Regardless of what any imaging might show, what do you feel as you are walking around?\n\nFelt experience is the first data point. Imaging is a snapshot of one moment in one position. Walking is hours of behavior under real load. The signal that lives in your daily movement carries more information about how the hip is actually doing than the static image does.\n\nWhen you walk around today, notice three things. Where does the load live. How does the hip behave on stairs and uneven ground. Does anything sharp show up under a predictable input. Those three readouts decide where we look first.\n\nIf a hip has been off and a scan answer has not settled the question, send me a DM and we can read what your body is actually telling you together.\n\nBe Good. Help Someone. Learn Lots.\n\n#HipPain #PatientEducation #PainScience #ThresholdHealth"
+}

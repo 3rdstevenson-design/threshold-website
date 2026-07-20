@@ -34,3 +34,21 @@ next-env.d.ts
 
 # Local queue fallback (Vercel Blob is the real store)
 data/queue.json
+data/analytics.json
+
+# Runtime state: offline queue snapshot, in-flight editor jobs, watcher state
+data/queue-cache.json
+data/editor-jobs.json
+data/watch-renders-state.json
+
+# ManyChat Playwright session (contains auth cookies)
+tools/.manychat-session/
+
+# ManyChat config files (may contain DM text and private links)
+tools/manychat-configs/
+
+# Python venv for reframe.py (MediaPipe)
+.venv/
+
+# isolated production build dir (always-on launchd service)
+.next-prod/

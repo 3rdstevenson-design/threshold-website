@@ -1,0 +1,16 @@
+{
+  "turns": [
+    {
+      "role": "user",
+      "text": "Don't just stick all the text in the bottom left corner. Let's also design some graphics to go along with each of the slides, except for the intro one.",
+      "scope": "draft",
+      "ts": "2026-04-18T19:28:23.644Z"
+    },
+    {
+      "role": "assistant",
+      "text": "Added a 'graphic' object to slides 2 through 6, each specifying a distinct visual element (icon grid, before/after shoulder diagram, quadrant watermark, dual gauge, vertical flowline) with placement and design description so a designer can execute them alongside the existing text layout.",
+      "scope": "draft",
+      "ts": "2026-04-18T19:28:46.800Z"
+    }
+  ]
+}

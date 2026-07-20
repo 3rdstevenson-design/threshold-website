@@ -1,6 +1,7 @@
 import React from 'react'
 import TestimonialCarousel from './TestimonialCarousel'
 import { BOOKING_URL } from '@/lib/booking'
+import { SITE_TAGLINE } from '@/lib/site'
 
 // Logo mark path — the crossing curves only, for use in nav / watermark
 const MARK_PATH =
@@ -62,7 +63,7 @@ const crossCards = [
 ]
 
 const larsCredentials = [
-  { stat: 'Olympic',  label: 'Athlete Prep',            detail: 'Tokyo & Paris Games' },
+  { stat: 'Olympic',  label: 'Athlete Prep',            detail: 'Tokyo & Paris Olympic Games' },
   { stat: '1:1',      label: 'Direct Care Only',         detail: 'No techs. No aides.' },
   { stat: 'DPT',      label: 'Doctor of Physical Therapy', detail: 'Strength & Conditioning background' },
 ]
@@ -102,6 +103,12 @@ function Nav() {
             className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
           >
             The Work
+          </a>
+          <a
+            href="/blog"
+            className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
+          >
+            Journal
           </a>
           <a
             href="/about"
@@ -205,7 +212,7 @@ export default function Page() {
             </p>
 
             <h1 className="font-cormorant font-light text-clinical-white leading-[1.05] text-5xl md:text-7xl lg:text-[5.5rem] mb-8 max-w-4xl">
-              Your threshold is higher than they told you.
+              {SITE_TAGLINE}
             </h1>
 
             <p className="font-montserrat text-base md:text-lg text-sterling-silver leading-relaxed max-w-2xl mb-10">
@@ -455,8 +462,8 @@ export default function Page() {
                   </p>
                   <p>
                     By the time I finished my doctorate, I&apos;d worked with
-                    sprinters prepping for the Tokyo and Paris Games. That same
-                    process is what runs every session at Threshold.
+                    sprinters prepping for the Tokyo and Paris Olympic Games.
+                    That same process is what runs every session at Threshold.
                   </p>
                   <p>
                     I trained in strength and conditioning before PT school, and

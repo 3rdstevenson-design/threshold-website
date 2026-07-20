@@ -1,0 +1,80 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "PATIENT QUESTIONS",
+      "headline": "Two questions that try to make your body pick a side.",
+      "body": "Tight or weak. Safe or harmful. The honest answer to both is, it depends on the rest of the picture. Here is how I read each one in clinic."
+    },
+    {
+      "idx": 2,
+      "type": "solution",
+      "tag": "FAQ:TIGHT VS WEAK",
+      "headline": "Is my main issue tight muscles or weak muscles?",
+      "body": "Almost always both. The tightness is the stiffness you feel standing around. The weakness is the strength gap you feel when you load the task. Treating one and skipping the other is how patients stall out.",
+      "quoteLabel": "WHAT I TELL THEM",
+      "quoteText": "It's a combination — things are imbalanced, things are tight. The tightness is the stiffness you feel standing around, and then the strength isn't there for the tasks you want to do."
+    },
+    {
+      "idx": 3,
+      "type": "details",
+      "tag": "WHY BOTH MATTER",
+      "headline": "Tight AND weak coexist. We address both.",
+      "body": "Stretching gives the muscle room to fire. Strength teaches it to fire when the task asks. If you only stretch, the task still fails. If you only strengthen, the tight tissue limits how much of that strength you can use.",
+      "pills": [
+        "Stretch for room",
+        "Strength for output",
+        "Pair them together"
+      ],
+      "goldAccent": "The body rarely gives you a clean either/or. Treat the picture, not the label."
+    },
+    {
+      "idx": 4,
+      "type": "solution",
+      "tag": "FAQ:RUNNING & JOINTS",
+      "headline": "Is running bad for my joints?",
+      "body": "In a vacuum, theoretically yes. Outside the vacuum, your form, your volume progression, your hip mobility, and which muscles do the work all rewrite that answer. Running damages joints when the muscles stop doing their job.",
+      "quoteLabel": "MY ANSWER, IN FULL",
+      "quoteText": "In a vacuum — if you don't look at any other factors — theoretically yes. But nobody runs in a vacuum. Context matters: your running form, your volume progression, whether your hips are stretched and the glutes fire, whether your quads are monopolizing the movement. The joint gets damaged when the muscles aren't doing their job."
+    },
+    {
+      "idx": 5,
+      "type": "details",
+      "tag": "WHY CONTEXT WINS",
+      "headline": "Nobody runs in a vacuum.",
+      "body": "The variables that decide whether running is safe live outside the joint: hip range, glute timing, quad dominance, weekly mileage, surface, and how fast you ramp. The joint gets damaged when those upstream pieces fall out of order.",
+      "pills": [
+        "Form",
+        "Volume progression",
+        "Hip mobility",
+        "Glute timing",
+        "Quad dominance"
+      ],
+      "goldAccent": "The joint is the messenger. The muscles upstream are the cause."
+    },
+    {
+      "idx": 6,
+      "type": "details",
+      "tag": "WHAT TIES THESE TOGETHER",
+      "headline": "It is rarely one thing.",
+      "body": "The questions patients bring me almost always force a binary that the body refuses to answer. Tight or weak. Run or rest. The cleaner question is which combination of inputs your tissue is asking for today.",
+      "pills": [
+        "Tight AND weak",
+        "Form AND mileage",
+        "Treat the picture"
+      ],
+      "goldAccent": "Stop forcing the body to pick a side. Read the whole signal."
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "",
+      "body": "If you have been answered with a binary that did not match how your body actually feels, send me a DM and let's read the whole picture together.",
+      "tagline": "Your threshold is higher than they told you.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Two questions patients keep asking that try to make the body pick a side.\n\nThe first is whether the issue is tight muscles or weak muscles. Almost always both. The tightness is the stiffness you feel standing around. The weakness is the strength gap you feel when you load the task. Treating one and skipping the other is how recovery stalls.\n\nThe second is whether running is bad for your joints. In a vacuum, theoretically yes. Outside the vacuum, your form, your volume progression, your hip mobility, and which muscles do the work all rewrite that answer. The joint is the messenger. The muscles upstream are usually the cause.\n\nIf you keep getting binary answers that do not match how your body actually feels day to day, send me a DM and let's read the whole picture together.\n\nBe Good. Help Someone. Learn Lots.\n\n#PatientEducation #SportsRehab #PainScience #ThresholdHealth"
+}

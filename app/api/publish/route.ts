@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readQueue, updatePost, QueuePost } from '@/lib/queue';
+import { publishFailurePatch, isNetworkError } from '@/lib/publishFailure';
 
-// Lazy import meta publisher to avoid errors when META env vars aren't set yet
+// Lazy import meta publisher to avoid errors when META env vars aren't set yet.
+// Note: publishCarouselPost is intentionally NOT imported — carousels are no
+// longer published to Instagram (see the carousel hand-off below).
 async function getPublisher() {
-  const { publishImagePost, publishCarouselPost, publishReelPost } = await import('@/lib/meta');
-  return { publishImagePost, publishCarouselPost, publishReelPost };
+  const { publishImagePost, createReelContainer } = await import('@/lib/meta');
+  return { publishImagePost, createReelContainer };
+}
+
+// Best-effort failure bookkeeping: when the publish failed because the
+// network is down, the queue write usually fails too — that must not blow up
+// the rest of the tick. The post simply stays 'approved' and retries.
+async function recordFailure(post: QueuePost, err: unknown) {
+  try {
+    await updatePost(post.id, publishFailurePatch(post, err));
+  } catch (writeErr: any) {
+    console.error(`publish: could not record failure on ${post.id}: ${writeErr.message}`);
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -15,43 +29,143 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const posts = await readQueue();
+  // Offline grace: when R2 is unreachable (work network) nothing can publish
+  // anyway — report that cleanly instead of a 500 so the autopublish tick logs
+  // stay readable and the launchd agent doesn't look broken. The publish
+  // selection must NEVER run against a stale cache (it would double-publish
+  // posts already published from another read), so this path only degrades to
+  // "do nothing this tick"; the next tick with connectivity catches up.
+  let posts: QueuePost[];
+  try {
+    posts = await readQueue();
+  } catch (err: any) {
+    if (isNetworkError(err)) {
+      console.error(`publish: queue unreachable (offline?): ${err.message}`);
+      return NextResponse.json({
+        published: 0, processing: 0, handedOff: 0, offline: true, errors: [],
+      });
+    }
+    console.error(`publish: failed to read queue: ${err.message}`);
+    return NextResponse.json(
+      { error: `Failed to read queue: ${err.message}` },
+      { status: 500 },
+    );
+  }
   const now = new Date();
   const due = posts.filter(
     (p) => p.status === 'approved' && new Date(p.scheduledTime) <= now
   );
 
   if (due.length === 0) {
-    return NextResponse.json({ published: 0, errors: [] });
+    return NextResponse.json({ published: 0, processing: 0, handedOff: 0, errors: [] });
   }
 
-  const { publishImagePost, publishCarouselPost, publishReelPost } = await getPublisher();
+  // Carousels are NOT auto-published: Instagram's native music can only be added
+  // by hand in the mobile app (no Content Publishing API parameter exists). They
+  // are siphoned off here and sent to Telegram for manual posting; reels and
+  // single-image posts publish to Instagram as before.
+  const carousels = due.filter((p) => p.type === 'carousel');
+  // No-monologue reels (timelapse / caption-overlay) are tagged manualPost: Lars adds
+  // music by hand in the IG app, so they hand off to Telegram like carousels. Talking-
+  // head reels carry no manualPost flag and auto-publish unchanged.
+  const manualReels = due.filter((p) => p.type === 'reel' && p.manualPost === true);
+  const toPublish = due.filter(
+    (p) => p.type !== 'carousel' && !(p.type === 'reel' && p.manualPost === true),
+  );
 
   let published = 0;
+  let processing = 0;
+  let handedOff = 0;
   const errors: string[] = [];
 
-  for (const post of due) {
-    try {
-      let mediaId: string;
-      if (post.type === 'image') {
-        mediaId = await publishImagePost(post);
-      } else if (post.type === 'carousel') {
-        mediaId = await publishCarouselPost(post);
-      } else {
-        mediaId = await publishReelPost(post);
+  // ── Carousels → Telegram hand-off (never published to Instagram) ──────────────
+  if (carousels.length > 0) {
+    const { sendCarouselToTelegram } = await import('@/lib/telegram');
+    for (const post of carousels) {
+      try {
+        await sendCarouselToTelegram(post);
+        await updatePost(post.id, {
+          status: 'sent_to_telegram',
+          telegramSentAt: new Date().toISOString(),
+          publishError: undefined,
+        });
+        handedOff++;
+      } catch (err: any) {
+        const msg = `Carousel ${post.id}: ${err.message}`;
+        console.error(msg);
+        errors.push(msg);
+        // Offline → stay 'approved', no attempt counted. Real error → retry
+        // up to the ceiling, then 'failed' so it surfaces instead of silently
+        // burning a tick forever.
+        await recordFailure(post, err);
       }
-      await updatePost(post.id, {
-        status: 'published',
-        publishedAt: new Date().toISOString(),
-        metaPublishId: mediaId,
-      });
-      published++;
-    } catch (err: any) {
-      const msg = `Post ${post.id} (${post.type}): ${err.message}`;
-      console.error(msg);
-      errors.push(msg);
     }
   }
 
-  return NextResponse.json({ published, errors });
+  // ── Manual-post reels → Telegram hand-off (never auto-published) ──────────────
+  if (manualReels.length > 0) {
+    const { sendReelToTelegram } = await import('@/lib/telegram');
+    for (const post of manualReels) {
+      try {
+        await sendReelToTelegram(post);
+        await updatePost(post.id, {
+          status: 'sent_to_telegram',
+          telegramSentAt: new Date().toISOString(),
+          publishError: undefined,
+        });
+        handedOff++;
+      } catch (err: any) {
+        const msg = `Manual reel ${post.id}: ${err.message}`;
+        console.error(msg);
+        errors.push(msg);
+        // Same failure accounting as carousels: offline waits, real errors
+        // retry up to the ceiling then go 'failed'.
+        await recordFailure(post, err);
+      }
+    }
+  }
+
+  // ── Reels + images → Instagram (unchanged) ────────────────────────────────────
+  if (toPublish.length > 0) {
+    const { publishImagePost, createReelContainer } = await getPublisher();
+    for (const post of toPublish) {
+      try {
+        if (post.type === 'reel') {
+          // Step 1 only: create container and return. Step 2 (finalize) is handled
+          // by /api/cron/publish-pending-containers once Meta finishes processing.
+          const containerId = await createReelContainer(post);
+          await updatePost(post.id, {
+            status: 'processing',
+            metaContainerId: containerId,
+            publishError: undefined,
+            // The reaper ages 'processing' posts against this, so it must be
+            // stamped on every attempt.
+            lastAttemptAt: new Date().toISOString(),
+          });
+          processing++;
+        } else {
+          // image
+          const mediaId = await publishImagePost(post);
+          await updatePost(post.id, {
+            status: 'published',
+            publishedAt: new Date().toISOString(),
+            metaPublishId: mediaId,
+            publishError: undefined,
+            publishAttempts: undefined,
+          });
+          published++;
+        }
+      } catch (err: any) {
+        const msg = `Post ${post.id} (${post.type}): ${err.message}`;
+        console.error(msg);
+        errors.push(msg);
+        // Previously swallowed: the post silently stayed 'approved' with no
+        // recorded error. Now every reel/image failure is written to the post
+        // (offline waits; real errors retry to the ceiling, then 'failed').
+        await recordFailure(post, err);
+      }
+    }
+  }
+
+  return NextResponse.json({ published, processing, handedOff, errors });
 }

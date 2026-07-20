@@ -1,10 +1,23 @@
-# CLAUDE.md
+# Threshold Dashboard
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+**Full context**: read `@../../Claude Second Brain/wiki/project-threshold-dashboard.md` first. For brand application, read `@../../Claude Second Brain/wiki/threshold-brand.md`.
+
+This file provides guidance to Claude Code when working with code in this repository.
 
 ## Overview
 
-This repository contains two things: a **Next.js marketing website** for Threshold Health & Performance, and a **brand identity asset library** (logos, social kit, stationery).
+This repository contains three things, all served from the same Next.js 14 app:
+
+1. **Marketing website** for Threshold Health & Performance (`app/page.tsx`) — single-page, prerendered.
+2. **Threshold Dashboard** — internal Instagram CMS at `app/dashboard/*`. Queue (`app/dashboard/queue/page.tsx`), carousels (`app/dashboard/carousels/page.tsx`), editor (`app/dashboard/editor/`), etc. The queue scans the local filesystem for finished reels and carousels via `app/api/local-scan/route.ts` (canonical paths: `~/Code/Social Media/Reels/Final/` and `~/Code/Social Media/Carousels/Final/`) and approves/publishes them through Meta's Instagram API.
+3. **Brand identity asset library** (`Logos/`) — logos, social kit, stationery.
+
+## Canonical export paths (do not change without updating the dashboard scanner)
+
+- Reels: `~/Code/Social Media/Reels/Final/<slug>.mp4`
+- Carousels: `~/Code/Social Media/Carousels/Final/<title>/slide-NN.png`
+
+These are read by `app/api/local-scan/route.ts`. If you change them there, also update `~/Code/Social Media/my-video-projects/scripts/render-slides.ts` (reels) and `~/Code/Social Media/threshold-carousel/templates/export.js` (carousels).
 
 ## Commands
 
@@ -13,18 +26,19 @@ npm install       # install dependencies
 npm run dev       # local dev server at localhost:3000
 npm run build     # production build (run before deploying)
 npm run lint      # ESLint
+npm test          # vitest run
 ```
 
-## Website Architecture
+## Architecture notes
 
-Single-page Next.js 14 App Router site (`app/page.tsx`). No client components — fully static, prerendered at build time.
+- **`app/layout.tsx`** — root layout; loads Cormorant Garamond, Montserrat, and Nunito Sans via `next/font/google`.
+- **`app/page.tsx`** — marketing site (static, prerendered).
+- **`app/dashboard/*`** — interactive CMS pages, all `'use client'`.
+- **`app/api/*`** — server routes for queue, scanner, approve, Meta publish, etc.
+- **`scripts/`** — long-running watcher (`watch-renders.mjs`) launched via `~/Library/LaunchAgents/com.threshold.{watch-renders,autopublish}.plist`. Carousels are auto-queued by `~/Code/Social Media/Carousels/templates/export.js` POSTing to `/api/local-scan/upload` after each export — no separate watcher needed.
+- **`tailwind.config.ts`** — custom colors (`obsidian`, `deep-navy`, `threshold-purple`, `clinical-white`, `sterling-silver`, `champion-gold`) and font families mapped to CSS variables.
 
-- **`app/layout.tsx`** — root layout; loads Cormorant Garamond, Montserrat, and Nunito Sans via `next/font/google` as CSS variables
-- **`app/page.tsx`** — all five sections plus `Nav` and `CrossCard` components inline; booking URL constant at top
-- **`app/globals.css`** — sets `scroll-behavior: smooth` and base colors
-- **`tailwind.config.ts`** — custom colors (`obsidian`, `deep-navy`, `threshold-purple`, `clinical-white`, `sterling-silver`, `champion-gold`) and font families mapped to CSS variables
-
-The site is deploy-ready for Vercel with no additional configuration needed.
+Vercel deploys from the GitHub remote (project keyed by `projectId`, not folder name).
 
 ## Brand Colors
 

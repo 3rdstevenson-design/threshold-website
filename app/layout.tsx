@@ -1,6 +1,8 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Montserrat, Nunito_Sans } from 'next/font/google'
 import Script from 'next/script'
+import StructuredData from '@/components/StructuredData'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, OG_IMAGE } from '@/lib/site'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -24,9 +26,48 @@ const nunitoSans = Nunito_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Threshold Health & Performance | Reston, Virginia',
-  description:
-    'Physical therapy and performance coaching for serious people who are done settling for partial answers.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} | Reston, Virginia`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | Reston, Virginia`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    images: [{ url: OG_IMAGE }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME} | Reston, Virginia`,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Editor',
+    statusBarStyle: 'black',
+  },
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#0D0D18',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -48,7 +89,10 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <StructuredData />
+        {children}
+      </body>
     </html>
   )
 }

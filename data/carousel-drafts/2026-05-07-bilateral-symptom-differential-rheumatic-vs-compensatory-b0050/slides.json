@@ -1,0 +1,92 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "CLINICAL PATTERN",
+      "headline": "Both sides hurt. That changes the differential.",
+      "body": "Most pain has one origin: how this person walks, sits, swings, sleeps. When the same picture shows up on both sides at the same time, load alone has a hard time explaining it."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "THE TELL",
+      "headline": "Bilateral symptoms widen the picture.",
+      "body": "One-sided pain usually traces to load history. When both sides match each other in tempo, location, and intensity, the cause is likely living above the muscle layer.",
+      "pills": [
+        "Both knees",
+        "Both shoulders",
+        "Both hips"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "details",
+      "tag": "THE THREE BUCKETS",
+      "headline": "Three differentials live behind a bilateral picture.",
+      "body": "Compensatory loading can mirror across symmetric athletes (lifters, runners, cyclists). Spinal-origin pain refers bilaterally when central or bilateral nerve roots are involved. Rheumatic disease is systemic by design and shows up symmetric.",
+      "goldAccent": "One side narrows the search. Two sides opens it.",
+      "pills": [
+        "Compensatory",
+        "Spinal-origin",
+        "Rheumatic"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "comparison",
+      "tag": "READING THE PATTERN",
+      "headline": "Compensatory load versus rheumatic or spinal pattern.",
+      "comparisonLeft": {
+        "heading": "Compensatory",
+        "items": [
+          "Loading-driven history",
+          "Asymmetric severity",
+          "Eases with movement",
+          "Responds to mechanical change"
+        ]
+      },
+      "comparisonRight": {
+        "heading": "Rheumatic or spinal",
+        "items": [
+          "Morning stiffness over 30 min",
+          "Equal severity left and right",
+          "Follows a dermatome or central pattern",
+          "Responds to medical workup"
+        ]
+      }
+    },
+    {
+      "idx": 5,
+      "type": "solution",
+      "tag": "HOW I DECIDE",
+      "headline": "Screen before you treat.",
+      "body": "When the pain is bilateral and matches across both sides, I run the rheumatic and neurologic screens before touching tissue. If the screens are clean, we treat the load story. If they flag, the patient sees the right doctor first.",
+      "quoteLabel": "WHAT I TELL THEM",
+      "quoteText": "Both sides matching is data. It tells me to look at the system or the spine before I look at the muscles."
+    },
+    {
+      "idx": 6,
+      "type": "details",
+      "tag": "WHAT CHANGES",
+      "headline": "Same complaint, three different roads.",
+      "body": "A bilateral compensatory pattern still gets PT first. A rheumatic flag means rheumatology and bloodwork before progressive loading. A central spinal flag means an imaging conversation with the medical team. Same complaint, three different roads.",
+      "goldAccent": "Treating the wrong category wastes months.",
+      "pills": [
+        "Same pain",
+        "Different work-up",
+        "Different referrals"
+      ]
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "Your threshold is higher than they told you.",
+      "body": "If both knees, both shoulders, or both hips keep flaring at the same time and one provider keeps treating one side, send me a DM and let's read the pattern.",
+      "tagline": "Be Good. Help Someone. Learn Lots.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Both sides hurt. Both knees. Both shoulders. Both hips. That changes the differential.\n\nWhen pain shows up on one side, the cause is usually load history: how you walk, sit, swing, sleep. When the same picture shows up bilaterally, load alone has a hard time explaining it.\n\nThree differentials live behind a bilateral picture. Compensatory loading can mirror across symmetric athletes (lifters, runners, cyclists). Spinal-origin pain refers bilaterally when central or bilateral nerve roots are involved. Rheumatic disease is systemic by design and shows up symmetric.\n\nSo when bilateral symptoms walk in, I run the rheumatic and neurologic screens before I touch tissue. If those are clean, we treat the load story. If they flag, the patient sees the right doctor first.\n\nSame complaint, three different roads.\n\nIf both sides keep flaring at the same time and one provider keeps treating one side, send me a DM and let's read the pattern.\n\nBe Good. Help Someone. Learn Lots.\n\n#PhysicalTherapy #ClinicalReasoning #DifferentialDiagnosis #ThresholdHealth"
+}

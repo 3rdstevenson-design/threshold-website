@@ -1,0 +1,90 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "PATIENT QUESTIONS",
+      "headline": "Is my pain actually sciatica?",
+      "body": "Sciatica has become the catch-all label for any back-and-leg pain. Most of what gets called sciatica is something else. Here is the diagnostic pattern I use before the label gets stuck."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "WHY THIS MATTERS",
+      "headline": "The label decides the treatment.",
+      "body": "Sciatica gets treated as a nerve case. Piriformis syndrome gets treated as a muscle case. Same leg pain, very different plan. If the label is wrong, the treatment chases the wrong tissue and the pain hangs around.",
+      "pills": [
+        "Nerve plan vs muscle plan",
+        "Label drives treatment",
+        "Wrong label, wrong plan"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "solution",
+      "tag": "FAQ:IS IT SCIATICA",
+      "headline": "Actual sciatica follows a very specific pattern.",
+      "body": "It starts at the low back. It runs down the hip, across the outside of the shin, and through the ankle. The whole path. If your pain skips a section, it is more likely piriformis syndrome.",
+      "quoteLabel": "MY DIAGNOSTIC RULE",
+      "quoteText": "Actual diagnosis of sciatica is a very specific pattern — starts at the low back, runs down the hip, across the outside of the shin and through the ankle. If your pain doesn't follow that full pattern, it's more likely piriformis syndrome."
+    },
+    {
+      "idx": 4,
+      "type": "diagram",
+      "tag": "THE SCIATIC PATH",
+      "headline": "Trace it head to foot.",
+      "body": "Sciatica follows the full path. If your symptoms hit one piece and skip the rest, the conversation shifts to the piriformis.",
+      "diagramBoxes": [
+        {
+          "label": "Low back",
+          "tone": "solid"
+        },
+        {
+          "label": "Hip",
+          "tone": "solid"
+        },
+        {
+          "label": "Outside of shin",
+          "tone": "solid"
+        },
+        {
+          "label": "Through the ankle",
+          "tone": "accent"
+        }
+      ],
+      "diagramConnector": "Full path = sciatica. Partial path = look at the piriformis."
+    },
+    {
+      "idx": 5,
+      "type": "solution",
+      "tag": "THE OTHER ANSWER",
+      "headline": "If the path is partial, look at the piriformis.",
+      "body": "Piriformis syndrome reproduces leg pain when a deep hip muscle compresses the nerve locally. The pain stays around the glute and back of the thigh, and it does not run the full sciatic line down to the ankle.",
+      "quoteLabel": "PIRIFORMIS, IN PLAIN TERMS",
+      "quoteText": "Local glute and back-of-thigh pain that stops short of the full sciatic path is usually piriformis. Treat the muscle, calm the nerve."
+    },
+    {
+      "idx": 6,
+      "type": "details",
+      "tag": "BEFORE YOU SELF-LABEL",
+      "headline": "Three questions to ask first.",
+      "body": "Where does the pain start? Where does it stop? Does it run the full path or only a section? Those three readouts get you most of the way to a useful working diagnosis before anyone says the word sciatica.",
+      "pills": [
+        "Where it starts",
+        "Where it stops",
+        "Full path or partial"
+      ],
+      "goldAccent": "The label that travels with you decides the plan that gets built. Get the label right."
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "",
+      "body": "If you have been told you have sciatica and the plan has not moved the pain, send me a DM and let's trace the actual path together.",
+      "tagline": "Your threshold is higher than they told you.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Is my pain actually sciatica? It is one of the most common questions I get, and most of what gets called sciatica turns out to be something else.\n\nActual sciatica is a specific pattern. It starts at the low back. It runs down the hip, across the outside of the shin, and through the ankle. The whole path. If your pain skips a section, it is more likely piriformis syndrome.\n\nThe label decides the plan. Sciatica gets treated as a nerve case. Piriformis syndrome gets treated as a muscle case. Same leg pain, very different treatment.\n\nBefore you self-label, ask three questions. Where does the pain start. Where does it stop. Does it run the full path or only a section. Those three readouts get you most of the way to a useful working diagnosis.\n\nIf you have been told you have sciatica and the plan has not moved the pain, send me a DM and let's trace the actual path together.\n\nBe Good. Help Someone. Learn Lots.\n\n#Sciatica #PiriformisSyndrome #PatientEducation #ThresholdHealth"
+}

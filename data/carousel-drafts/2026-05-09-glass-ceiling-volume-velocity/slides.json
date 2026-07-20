@@ -1,0 +1,84 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "THE GLASS CEILING",
+      "headline": "Why athletes really get hurt.",
+      "body": "Volume and velocity. One you see coming. One you don't. Both break the same line. Here's the model I use with every athlete I treat."
+    },
+    {
+      "idx": 2,
+      "type": "solution",
+      "tag": "THE MODEL",
+      "headline": "Your body has a breaking point.",
+      "body": "Picture a ceiling above and a floor below. The space between is your adaptation zone. Cross the ceiling, you're hurt. Stay under it, you adapt and the line moves up. That's how athletes get stronger without breaking down.",
+      "quoteLabel": "THE PRINCIPLE",
+      "quoteText": "Push as close to the ceiling as you can without breaking it. Then completely recover. The body raises the ceiling for next time."
+    },
+    {
+      "idx": 3,
+      "type": "solution",
+      "tag": "MECHANISM 01 OF 02",
+      "headline": "Velocity.",
+      "body": "Too fast. Too intense. One rep blows straight through the ceiling and you're hurt. Sprained ankle. Pulled hamstring. Tweaked back. The cause is obvious because the moment is obvious.",
+      "quoteLabel": "WHAT IT LOOKS LIKE",
+      "quoteText": "One rep, too much. The injury is sudden because the load is sudden. You feel exactly when it happened."
+    },
+    {
+      "idx": 4,
+      "type": "solution",
+      "tag": "MECHANISM 02 OF 02",
+      "headline": "Volume.",
+      "body": "Each rep feels small. But every rep raises the floor. Sneak in another practice, push through soreness, run twice on Tuesday. Eventually the floor meets the ceiling, and the next normal rep is the injury.",
+      "quoteLabel": "WHAT IT LOOKS LIKE",
+      "quoteText": "Fatigue stacks rep after rep. The floor rises until even a normal rep clips through. The injury feels like nothing caused it."
+    },
+    {
+      "idx": 5,
+      "type": "details",
+      "tag": "THE TRAP",
+      "headline": "Fatigue sets in long before you feel it.",
+      "body": "Neither one announces itself. Velocity happens all at once. Volume is fatigue stacking rep after rep, raising the floor under you while every rep feels the same. That's why the third practice this week feels fine, until all of a sudden that last rep starts to hurt.",
+      "pills": [
+        "Third practice this week",
+        "Run twice on Tuesday",
+        "Push through soreness"
+      ],
+      "goldAccent": "You don't feel yourself getting close to the ceiling. The fatigue sets in, and the floor keeps rising under you."
+    },
+    {
+      "idx": 6,
+      "type": "comparison",
+      "tag": "THE PRESCRIPTION",
+      "headline": "Get close. Don't break it. Recover fully.",
+      "body": "Two paths into the same workload. Only one of them makes you stronger. High intensity. Low volume. Complete recovery. Repeat.",
+      "comparisonLeft": {
+        "heading": "BREAK THE CEILING",
+        "items": [
+          "Body repairs to where it was",
+          "No adaptation",
+          "Same ceiling, same risk next time"
+        ]
+      },
+      "comparisonRight": {
+        "heading": "GET CLOSE, RECOVER",
+        "items": [
+          "Body raises the ceiling",
+          "You get stronger",
+          "Same workload becomes easier"
+        ]
+      }
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "FOR ATHLETES & PARENTS",
+      "headline": "Worried your ceiling is about to break?",
+      "body": "DM me the word CEILING and I'll send you the load-management cheat sheet I give my athletes. The same one that keeps them on the field instead of in my clinic.",
+      "tagline": "Be Good. Help Someone. Learn Lots.",
+      "ctaText": "DM CEILING"
+    }
+  ],
+  "caption": "There are only two ways athletes really get hurt.\n\nVelocity. Too fast, too intense. One rep blows straight through the ceiling and you're hurt. Sprained ankle. Pulled hamstring. Tweaked back. The cause is obvious because the moment is obvious.\n\nVolume. Each rep feels small. But every rep raises the floor. Sneak in another practice, push through soreness, run twice on Tuesday. Eventually the floor meets the ceiling, and the next normal rep is the injury.\n\nNeither one announces itself. You don't feel yourself getting close to the ceiling. Fatigue sets in, the floor keeps rising under you, and every rep feels the same. That's why the third practice this week feels fine, until all of a sudden that last rep starts to hurt.\n\nThe fix is the same in both directions. Get as close to the ceiling as you can. Don't break it. Recover fully. Then the body raises the ceiling for next time.\n\nDM the word CEILING and I'll send you the load-management cheat sheet I give my athletes.\n\nBe Good. Help Someone. Learn Lots.\n\n#YouthSports #AthleteTraining #SportsInjury #PhysicalTherapy #LoadManagement"
+}

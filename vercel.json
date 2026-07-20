@@ -1,1 +1,8 @@
-{}
+{
+  "crons": [
+    {
+      "path": "/api/cron/content-performance-sync",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}

@@ -29,7 +29,7 @@ function Nav() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-sm border-b border-white/5">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <LogoMark className="h-7 w-auto text-clinical-white group-hover:text-threshold-purple transition-colors duration-300" />
+          <LogoMark className="h-7 w-auto text-clinical-white group-hover:text-violet-mid transition-colors duration-300" />
           <span className="font-montserrat text-xs font-semibold tracking-[0.2em] text-clinical-white uppercase">
             Threshold
           </span>
@@ -42,8 +42,14 @@ function Nav() {
             The CROSS Method
           </Link>
           <Link
+            href="/blog"
+            className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
+          >
+            Journal
+          </Link>
+          <Link
             href="/about"
-            className="font-montserrat text-xs tracking-wide text-clinical-white hover:text-threshold-purple transition-colors duration-200"
+            className="font-montserrat text-xs tracking-wide text-clinical-white hover:text-violet-mid transition-colors duration-200"
           >
             About
           </Link>
@@ -87,7 +93,7 @@ export default function AboutPage() {
             <h1 className="font-cormorant font-light text-clinical-white leading-[1.0] text-5xl md:text-7xl lg:text-8xl">
               Dr. Lars Stevenson
             </h1>
-            <p className="font-montserrat text-xs tracking-[0.22em] text-threshold-purple uppercase mt-4">
+            <p className="font-montserrat text-xs tracking-[0.22em] text-violet-mid uppercase mt-4">
               PT, DPT &nbsp;·&nbsp; Strength &amp; Conditioning &nbsp;·&nbsp; Reston, Virginia
             </p>
           </div>
@@ -132,7 +138,7 @@ export default function AboutPage() {
                 </p>
                 <p>
                   By the time he finished his doctorate, he&apos;d worked with
-                  sprinters prepping for the Tokyo Games. That same process is what
+                  sprinters prepping for the Tokyo Olympic Games. That same process is what
                   runs every session at Threshold.
                 </p>
                 <p>
@@ -161,7 +167,7 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10">
               {[
                 { stat: 'DPT',     label: 'Doctor of Physical Therapy',    sub: 'Evidence-based clinical practice' },
-                { stat: 'Olympic', label: 'Athlete Preparation',           sub: 'Tokyo Games 2021' },
+                { stat: 'Olympic', label: 'Athlete Preparation',           sub: 'Tokyo Olympic Games 2021' },
                 { stat: '1:1',     label: 'Direct Care Every Session',     sub: 'No techs. No aides. Just the work.' },
               ].map((item) => (
                 <div key={item.label} className="bg-obsidian p-10 text-center">

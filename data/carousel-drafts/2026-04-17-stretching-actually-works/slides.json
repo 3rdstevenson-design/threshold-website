@@ -1,0 +1,156 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "STRAIGHT TALK",
+      "headline": "Stretching works. You're just doing it wrong.",
+      "body": "Before you write off stretching, consider that the method you're using might be the actual problem."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "THE PROBLEM",
+      "headline": "Why stretching gets a bad reputation.",
+      "body": "Most people try it, feel no lasting change, and blame the concept. The real issue is almost always how the stretch is applied.",
+      "pills": [
+        "Too much intensity",
+        "Too short a duration",
+        "No consistency",
+        "Wrong muscle targeted"
+      ],
+      "graphic": {
+        "type": "iconGrid",
+        "placement": "right",
+        "items": [
+          {
+            "icon": "🔥",
+            "label": "Too much intensity"
+          },
+          {
+            "icon": "⏱️",
+            "label": "Too short"
+          },
+          {
+            "icon": "❌",
+            "label": "No consistency"
+          },
+          {
+            "icon": "🎯",
+            "label": "Wrong muscle"
+          }
+        ],
+        "style": "Each icon sits above its label in a 2×2 grid. Icons are large (64px). Labels are small caps. Grid floats right-center, text content anchored left."
+      }
+    },
+    {
+      "idx": 3,
+      "type": "solution",
+      "tag": "THE SHIFT",
+      "headline": "Intensity and time are the variables that matter.",
+      "body": "A post-op athlete couldn't position his shoulder for squats. Four minutes of low-intensity stretching on his pec and biceps changed that completely, same session.",
+      "quoteLabel": "The Threshold Principle",
+      "quoteText": "Stretching is as nuanced as strength training, and it deserves the same respect for dosage and method.",
+      "graphic": {
+        "type": "beforeAfter",
+        "placement": "top",
+        "description": "Two silhouette shoulder diagrams side by side. Left labeled BEFORE — shoulder in restricted position, red arc showing limited range. Right labeled AFTER — shoulder in full overhead position, green arc showing full range. A vertical dividing line splits them. Clean, minimal line-art style."
+      }
+    },
+    {
+      "idx": 4,
+      "type": "features",
+      "tag": "HOW IT WORKS",
+      "headline": "Four things that make stretching actually work.",
+      "features": [
+        {
+          "icon": "◈",
+          "label": "Low intensity",
+          "desc": "Staying at a 2 to 3 out of 10 keeps the nervous system calm enough to let the tissue lengthen."
+        },
+        {
+          "icon": "◉",
+          "label": "Two-minute holds",
+          "desc": "Duration under two minutes rarely produces lasting range of motion change in a single bout."
+        },
+        {
+          "icon": "◆",
+          "label": "Correct muscle targeted",
+          "desc": "Stretching the wrong structure near the right joint changes nothing, so identification matters."
+        },
+        {
+          "icon": "◇",
+          "label": "Consistent application",
+          "desc": "One session shows you it works, repeated sessions build the change that sticks over time."
+        }
+      ],
+      "graphic": {
+        "type": "quadrantDiagram",
+        "placement": "center-background",
+        "description": "A large 2×2 quadrant grid fills the slide background at low opacity. Each quadrant holds one feature icon scaled up to ~120px as a watermark behind its corresponding text block. Text blocks sit in each quadrant corner, left-aligned. Grid lines are thin and muted."
+      }
+    },
+    {
+      "idx": 5,
+      "type": "details",
+      "tag": "THE DETAILS",
+      "headline": "The dose that actually drives change.",
+      "body": "Two to three out of ten intensity. Two to three minutes per muscle. That's the window where the nervous system stops guarding and the tissue responds. Most people never touch this range because it feels too easy.",
+      "pills": [
+        "2-3/10 effort",
+        "2-3 min per stretch",
+        "Target one muscle at a time",
+        "Repeat across sessions"
+      ],
+      "goldAccent": "Apply the right dose and you'll feel a difference inside the same session.",
+      "graphic": {
+        "type": "dualGauge",
+        "placement": "right",
+        "description": "Two vertical bar gauges stacked side by side on the right half of the slide. Left gauge labeled INTENSITY — filled to the 2-3/10 zone, highlighted in brand green, zones above shaded red with an X. Right gauge labeled DURATION — a horizontal timeline bar marked 0, 1 min, 2 min, 3 min, with the 2-3 min window highlighted in brand green. Both gauges are clean, minimal, with tick marks and numeric labels."
+      }
+    },
+    {
+      "idx": 6,
+      "type": "howto",
+      "tag": "THE PATH",
+      "headline": "How to start stretching with precision.",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Identify the limiting muscle",
+          "desc": "Find the specific structure that's restricting your movement, not just the area that feels tight."
+        },
+        {
+          "number": "02",
+          "title": "Set your intensity at 2-3/10",
+          "desc": "Move into the stretch until you feel mild tension, then stop well before any sensation of pain."
+        },
+        {
+          "number": "03",
+          "title": "Hold for a full two minutes",
+          "desc": "Use a timer and stay in position, letting the tension soften naturally rather than forcing it."
+        },
+        {
+          "number": "04",
+          "title": "Test movement immediately after",
+          "desc": "Check the range of motion you were chasing right away so you can see the direct effect."
+        }
+      ],
+      "graphic": {
+        "type": "verticalFlowline",
+        "placement": "left",
+        "description": "A vertical spine line runs down the left quarter of the slide. Each of the four steps has a numbered circle node on the spine. A short horizontal connector extends right from each node into the step text block. Nodes are filled circles with the step number inside. The spine line is brand-colored. Step text sits to the right of the spine, leaving the far-left edge as a clean graphic column."
+      }
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "",
+      "body": "If you have a stubborn range of motion issue and want to figure out what's actually limiting it, book a free call and we'll work through it together.",
+      "tagline": "Your threshold is higher than they told you.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Stretching works. Full stop.\n\nI had a late-stage post-op athlete who could overhead press and bench press without pain, but couldn't get his shoulder into position to grab the squat bar. Two minutes on his pec major, two minutes on his biceps, both at a 3/10 intensity. That was it. Tension dropped, shoulder moved, he squatted pain-free.\n\nPeople say stretching doesn't work the same way people used to say strength training doesn't work. If someone isn't getting stronger from lifting, I'd ask how they're training, because we know strength training works when done right. Stretching is the same deal. The method matters. The intensity matters. The duration matters.\n\nMost people stretch too hard for too short. They hit an 8/10 intensity for 20 seconds and wonder why nothing changes. That's an application problem.\n\nIf you want to actually increase your range of motion, here's the rule: 2 to 3 out of 10 intensity, held for two to three minutes. That's the dose that drives change.\n\nStretching is a skill. Treat it like one.\n\nBe Good. Help Someone. Learn Lots."
+}

@@ -1,0 +1,105 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "CLINICAL REALITY",
+      "headline": "Your Pain Is Not a Sentence",
+      "body": "A surgeon told my patient his shoulder pain was just aging. His older sister, pain-free, was sitting right there."
+    },
+    {
+      "idx": 2,
+      "type": "dialogue",
+      "tag": "THE MOMENT",
+      "headline": "What Was Said Versus What Was True",
+      "body": "Same room. Same conversation. Two completely different realities sitting side by side.",
+      "dialogueLeft": {
+        "label": "The Surgeon's Verdict",
+        "quote": "This is what happens when you get older. You need to accept it."
+      },
+      "dialogueRight": {
+        "label": "The Evidence in the Room",
+        "quote": "His older sister sat right there. No pain. No limitation. The doctor doubled down anyway."
+      }
+    },
+    {
+      "idx": 3,
+      "type": "problem",
+      "tag": "THE PROBLEM",
+      "headline": "Aging Gets Blamed for Everything",
+      "body": "When the answer is \"you're just getting older,\" it shuts down every question worth asking. The real issue is almost never age itself.",
+      "pills": [
+        "Age caused the pain",
+        "Nothing left to work with",
+        "Decline is inevitable",
+        "Accept and move on"
+      ]
+    },
+    {
+      "idx": 4,
+      "type": "diagram",
+      "tag": "THE MECHANISM",
+      "headline": "What Actually Creates Pain Over Time",
+      "body": "Age changes tissue. But tissue responds to load, movement, and training. The link between aging and pain is not direct, it runs through something fixable.",
+      "diagramBoxes": [
+        {
+          "label": "TISSUE CHANGE",
+          "tone": "solid"
+        },
+        {
+          "label": "CAPACITY GAP",
+          "tone": "dashed"
+        },
+        {
+          "label": "PAIN & LIMIT",
+          "tone": "accent"
+        }
+      ],
+      "diagramConnector": "→"
+    },
+    {
+      "idx": 5,
+      "type": "timeline",
+      "tag": "WHAT RECOVERY LOOKS LIKE",
+      "headline": "From Frustrated to Moving Again",
+      "body": "This is what the process looked like for my patient with the shoulder MRI and the dismissive verdict.",
+      "timelineSteps": [
+        {
+          "label": "Told to accept it",
+          "tone": "neutral"
+        },
+        {
+          "label": "Movement assessed",
+          "tone": "neutral"
+        },
+        {
+          "label": "Load & range restored",
+          "tone": "purple"
+        },
+        {
+          "label": "Weeks later, lifting again",
+          "tone": "gold"
+        }
+      ]
+    },
+    {
+      "idx": 6,
+      "type": "solution",
+      "tag": "THE REFRAME",
+      "headline": "Older Means More Adaptable Than You Think",
+      "body": "Aging shifts what it takes to reach your ceiling. It does not lower the ceiling. With the right approach, people move better at 55 than they did at 40.",
+      "quoteLabel": "The Threshold Principle",
+      "quoteText": "Your body keeps adapting at any age, it just needs the right demand placed on it."
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "",
+      "body": "If someone has told you to accept the pain, send me a DM and let's find out what's actually possible.",
+      "tagline": "Your threshold is higher than they told you.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "A patient walked in frustrated after a surgeon told him his shoulder pain was just part of getting older. His older sister sat right beside him, completely pain-free. The doctor doubled down anyway.\n\nI hear this story constantly. And every time I do, something tightens in my chest, because that sentence, \"this is just how it's going to be,\" is one of the most damaging things a provider can say.\n\nAging does change your body. Tissue changes, recovery shifts, load tolerance adjusts. But pain and limitation are not the inevitable cost of living longer. Almost always there is something to work with. Restore movement. Reduce pain. Build capacity that someone thought was gone for good.\n\nThe patient with the MRI full of bursitis and inflammation? We found plenty to work with. His shoulder started moving better within weeks.\n\nWhat changes as you age is not your ceiling. It is what it takes to reach it. That requires a different approach, not a resignation letter.\n\nIf someone has told you to accept it, that is a signal to get a second opinion, not a final answer. Your body is more adaptable than that sentence gives it credit for.\n\nDM me. Let's find out what's actually possible."
+}

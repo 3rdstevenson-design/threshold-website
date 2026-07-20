@@ -1,0 +1,92 @@
+{
+  "slides": [
+    {
+      "idx": 1,
+      "type": "hero",
+      "tag": "CLINICAL PATTERN",
+      "headline": "Clean MRI. Lateral knee pain. The label said sprain. The pattern said something else.",
+      "body": "Fifteen-year-old softball and lacrosse player, right-handed, lateral knee pain on the same side. MRI showed an intact LCL. Imaging gave us a tissue label that did not explain the pain."
+    },
+    {
+      "idx": 2,
+      "type": "problem",
+      "tag": "WHEN IMAGING DOES NOT EXPLAIN IT",
+      "headline": "The scan is one slice of one moment.",
+      "body": "An intact LCL on imaging tells us the ligament is structurally fine. It does not tell us why the lateral knee keeps getting irritated under sport. When the picture is quiet and the symptom is loud, the cause is usually upstream.",
+      "pills": [
+        "Tissue label vs cause",
+        "Static image",
+        "Loaded behavior is missing"
+      ]
+    },
+    {
+      "idx": 3,
+      "type": "details",
+      "tag": "THE CHAIN BEHIND THE PAIN",
+      "headline": "Right-handed rotational athletes load the same side over and over.",
+      "body": "Throwing, batting, and stick work pull the body into a repeating right-side rotational pattern. The right hip drives. The right knee absorbs. The lateral structures of the right knee end up taking load that the hip and trunk should be sharing.",
+      "pills": [
+        "Right hip drives",
+        "Right knee absorbs",
+        "Lateral structures pay"
+      ],
+      "goldAccent": "The pain shows up where the load lands. The cause lives where the load came from."
+    },
+    {
+      "idx": 4,
+      "type": "comparison",
+      "tag": "TWO WAYS TO READ THE KNEE",
+      "headline": "What the MRI sees vs what the chain shows.",
+      "comparisonLeft": {
+        "heading": "MRI lens",
+        "items": [
+          "LCL intact",
+          "No bone bruise",
+          "No meniscal tear",
+          "Verdict: clean"
+        ]
+      },
+      "comparisonRight": {
+        "heading": "Chain lens",
+        "items": [
+          "Right hip rotational dominance",
+          "Trunk falls behind on rotation",
+          "Lateral knee absorbs the slack",
+          "Verdict: compensation pattern"
+        ]
+      }
+    },
+    {
+      "idx": 5,
+      "type": "solution",
+      "tag": "DECODING IT",
+      "headline": "Trace the load up the chain.",
+      "body": "When the MRI is clean and the pain is real, look at what loads the lateral knee in this athlete's actual sport. For a right-handed rotational athlete, that almost always means hip rotation, trunk timing, and how the right side handles ground reaction. Treat the chain and the lateral knee gets relief.",
+      "quoteLabel": "THE READ",
+      "quoteText": "Imaging tells us what tissues are torn. The chain tells us why a tissue keeps getting asked to do somebody else's job."
+    },
+    {
+      "idx": 6,
+      "type": "details",
+      "tag": "WHY THIS PATTERN HIDES",
+      "headline": "Compensation does not show up on a static scan.",
+      "body": "MRIs capture tissue. They do not capture how a fifteen-year-old loads her right hip during a throwing motion or a lacrosse step. The whole reason the knee hurts lives in motion that the imaging room cannot see.",
+      "pills": [
+        "Tissue is fine",
+        "Loading is the problem",
+        "Motion shows the cause"
+      ],
+      "goldAccent": "If the picture is clean and the pain is real, get the body moving and watch the chain."
+    },
+    {
+      "idx": 7,
+      "type": "cta",
+      "tag": "READY WHEN YOU ARE",
+      "headline": "",
+      "body": "If imaging keeps coming back clean and the same area keeps getting irritated under your sport, send me a DM and let's read the chain together.",
+      "tagline": "Your threshold is higher than they told you.",
+      "ctaText": "Book a free call"
+    }
+  ],
+  "caption": "Clean MRI. Lateral knee pain. The label said LCL sprain intact. The pattern said something else.\n\nFifteen-year-old softball and lacrosse player, right-handed, lateral knee pain on the same side. The scan was structurally clean. Imaging gave us a tissue label that did not explain why the lateral knee kept getting irritated under sport.\n\nWhen the picture is quiet and the symptom is loud, the cause is usually upstream. Right-handed rotational athletes load the same side over and over. Throwing, batting, and stick work pull the body into a repeating right-side rotational pattern. The right hip drives. The right knee absorbs. The lateral structures of the right knee end up taking load that the hip and trunk should be sharing.\n\nTreat the chain and the lateral knee gets relief. Treat only the knee and the irritation comes back the next time the athlete plays.\n\nIf imaging keeps coming back clean and the same area keeps getting irritated under your sport, send me a DM and let's read the chain together.\n\nBe Good. Help Someone. Learn Lots.\n\n#YouthAthlete #SportsRehab #ClinicalReasoning #ThresholdHealth"
+}
