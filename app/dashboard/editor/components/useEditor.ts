@@ -15,14 +15,15 @@ import type {
   Caption,
   CaptionStyle,
   Clip,
+  CutSettings,
   EditPlan,
   HeaderConfig,
   SpellingCorrection,
 } from '@/lib/editor/editPlan';
 import { applyAction, clipEditedMs, clipSpeed, editedDurationMs } from '@/lib/editor/editPlan';
-import { autoCut, TALKING_HEAD_CUT_OPTIONS, type Silence, type Word } from '@/lib/editor/autoCut';
+import { type Silence, type Word } from '@/lib/editor/autoCut';
+import { runCutStages } from '@/lib/editor/cutPipeline';
 import { chunkCaptions } from '@/lib/editor/captionChunker';
-import { detectRepeatStutters } from '@/lib/editor/stutterDetection';
 
 const SESSION_KEY = 'dashboard_authed';
 
@@ -49,6 +50,8 @@ export type AutoCutStats = {
   droppedTinyClips?: number;
   singleWordCuts?: number;
   fragmentCuts?: number;
+  retakeCuts?: number;
+  retakeGroups?: number;
 };
 
 export type EditorState = {
@@ -91,6 +94,8 @@ export function useEditor(slug: string | null) {
   }, []);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Plan queued by the debounce but not yet PUT. Drained by flushSave(). */
+  const pendingSave = useRef<EditPlan | null>(null);
 
   // ── Load on slug change ─────────────────────────────────────────
   useEffect(() => {
@@ -167,13 +172,33 @@ export function useEditor(slug: string | null) {
 
   const queueSave = useCallback((next: EditPlan) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => saveNow(next), 400);
+    pendingSave.current = next;
+    saveTimer.current = setTimeout(() => {
+      pendingSave.current = null;
+      saveNow(next);
+    }, 400);
   }, [saveNow]);
 
-  // Flush on unmount
-  useEffect(() => () => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-  }, []);
+  /**
+   * Write any debounced-but-unsent plan immediately. Callers must await this
+   * before an action that reads the plan server-side (Export), otherwise the
+   * server renders a plan up to 400ms stale.
+   */
+  const flushSave = useCallback(async () => {
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+    }
+    const pending = pendingSave.current;
+    pendingSave.current = null;
+    if (pending) await saveNow(pending);
+  }, [saveNow]);
+
+  // Flush on unmount. This previously only cleared the timer, which silently
+  // discarded any edit made within 400ms of switching projects.
+  const flushRef = useRef(flushSave);
+  useEffect(() => { flushRef.current = flushSave; }, [flushSave]);
+  useEffect(() => () => { void flushRef.current(); }, []);
 
   // Keep the ref in sync for the common case where plan changes via
   // external sources (load, reload, etc).
@@ -235,24 +260,6 @@ export function useEditor(slug: string | null) {
     commitPlan(last);
     queueSave(last);
   }, [future, commitPlan, queueSave]);
-
-  const runAutoCut = useCallback(() => {
-    setLastAutoCut(null);
-    if (!analysis) return;
-    mutate((cur) => {
-      const result = autoCut({
-        duration: cur.sourceDuration,
-        words: analysis.words,
-        silences: analysis.silences,
-        fillerWords: cur.fillerWords,
-      });
-      setLastAutoCut(result.stats);
-      return applyAction(cur, {
-        type: 'auto_cut',
-        params: { clips: result.clips, stats: result.stats },
-      });
-    });
-  }, [analysis, mutate]);
 
   const splitAt = useCallback((editedMs: number) => {
     mutate((cur) => {
@@ -361,55 +368,87 @@ export function useEditor(slug: string | null) {
   }, [analysis, mutate]);
 
   /**
-   * Combined pipeline — triggered by the "Analyze audio" button:
-   *   1. Detect repeat-phrase stutters (two-pass restarts within 4s)
-   *   2. autoCut silences + filler words, treating stutter ranges as
-   *      extra remove ranges that get merged with the silence/filler cuts
-   *   3. Drop any surviving clip < 1s
-   *   4. Regenerate captions against the post-cut clips
+   * Combined pipeline — triggered by the "Analyze audio" button and the
+   * Auto-Cut settings panel's "Re-apply cuts". Runs the SAME four staged
+   * detectors as the server pipeline (cutPipeline.ts: silences → fillers
+   * → stutters → retakes) against the stored analysis.json — no
+   * re-transcription — honouring plan.cutSettings, then regenerates
+   * captions against the post-cut clips.
    *
-   * All four steps commit as a SINGLE history entry so one ⌘Z reverts
-   * everything back to the state before Analyze.
+   * Everything commits as a SINGLE history entry so one ⌘Z reverts back
+   * to the state before Analyze.
    */
   const runAutoCutAndCaptions = useCallback(() => {
     setLastAutoCut(null);
     if (!analysis) return;
     mutate((cur) => {
-      // Step 1: stutter detection. Partial-word fragment removal is off
-      // (too aggressive on casual speech); single-word repeats stay on.
-      const stutters = detectRepeatStutters(analysis.words, {
-        singleWordRepeats: true,
-        partialWordFragments: false,
-      });
-
-      // Step 2+3: auto-cut with stutter ranges merged in. Same talking-head
-      // preset as the server pipeline so manual re-analysis matches.
-      const result = autoCut({
+      const cut = runCutStages({
         duration: cur.sourceDuration,
         words: analysis.words,
         silences: analysis.silences,
         fillerWords: cur.fillerWords,
-        options: {
-          ...TALKING_HEAD_CUT_OPTIONS,
-          extraRemoveRanges: stutters.removeRanges,
-        },
+        settings: cur.cutSettings,
       });
       setLastAutoCut({
-        ...result.stats,
-        stutterCuts: stutters.phrasesRemoved,
-        singleWordCuts: stutters.singleWordsRemoved,
-        fragmentCuts: stutters.fragmentsRemoved,
+        ...cut.stats,
+        silenceCuts: cut.stages.silences.cutCount,
+        fillerCuts: cut.stages.fillers.cutCount,
+        stutterCuts: cut.stages.stutters.phrasesRemoved,
+        singleWordCuts: cut.stages.stutters.singleWordsRemoved,
+        fragmentCuts: cut.stages.stutters.fragmentsRemoved,
+        retakeCuts: cut.stages.retakes.cutCount,
+        retakeGroups: cut.stages.retakes.groupsFound,
       });
       const afterCut = applyAction(cur, {
         type: 'auto_cut',
-        params: { clips: result.clips, stats: result.stats },
+        params: { clips: cut.clips, stats: cut.stats },
       });
 
-      // Step 4: captions against the post-cut timeline
       const captions = chunkCaptions(analysis.words, afterCut.clips, {
         customSpellings: afterCut.customSpellings ?? [],
       });
-      return applyAction(afterCut, {
+      const withCaptions = applyAction(afterCut, {
+        type: 'generate_captions',
+        params: { captions },
+      });
+      // Retake alternates + cut annotations ride outside the action log
+      // (same policy as the server pipeline) — undo restores full
+      // snapshots, so these revert with everything else.
+      return { ...withCaptions, retakeGroups: cut.retakeGroups, cutLog: cut.cutLog };
+    });
+  }, [analysis, mutate]);
+
+  /** Patch the auto-cut tuning (silence threshold, retake preference). */
+  const setCutSettings = useCallback((patch: Partial<CutSettings>) => {
+    mutate((cur) => applyAction(cur, { type: 'set_cut_settings', params: patch }));
+  }, [mutate]);
+
+  /** Replace the project's filler-word list. Takes effect on the next
+   *  auto-cut run (runAutoCutAndCaptions). */
+  const setFillerWords = useCallback((fillerWords: string[]) => {
+    const clean = Array.from(
+      new Set(fillerWords.map((w) => w.trim().toLowerCase()).filter(Boolean)),
+    );
+    mutate((cur) => applyAction(cur, {
+      type: 'update_filler_words',
+      params: { fillerWords: clean },
+    }));
+  }, [mutate]);
+
+  /**
+   * Restore removed source range(s) back onto the timeline as clips
+   * ("undo this one cut" from a removed-segment marker), then regenerate
+   * captions so the restored words appear. One history entry.
+   */
+  const restoreGap = useCallback((ranges: { start: number; end: number }[]) => {
+    mutate((cur) => {
+      const restored = applyAction(cur, { type: 'restore_gap', params: { ranges } });
+      if (restored.clips === cur.clips) return null;
+      if (!analysis) return restored;
+      const captions = chunkCaptions(analysis.words, restored.clips, {
+        customSpellings: restored.customSpellings ?? [],
+      });
+      return applyAction(restored, {
         type: 'generate_captions',
         params: { captions },
       });
@@ -552,6 +591,7 @@ export function useEditor(slug: string | null) {
     loading,
     saveError,
     reload,
+    flushSave,
     lastAutoCut,
     selectedClipId,
     setSelectedClipId,
@@ -563,8 +603,10 @@ export function useEditor(slug: string | null) {
     canUndo: past.length > 0,
     canRedo: future.length > 0,
     actions: {
-      runAutoCut,
       runAutoCutAndCaptions,
+      setCutSettings,
+      setFillerWords,
+      restoreGap,
       resyncCaptions,
       splitAt,
       deleteClip,

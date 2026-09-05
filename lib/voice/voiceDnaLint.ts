@@ -16,6 +16,7 @@ export type VoiceViolationCategory =
   | 'engagement_bait'
   | 'ai_cringe'
   | 'clinical_banned'
+  | 'borrowed_language'
   | 'fatal_negation_pattern'
   | 'em_dash'
   | 'exclamation'
@@ -110,6 +111,25 @@ const CLINICAL_BANNED = [
   'evidence-based',
 ];
 
+/**
+ * Borrowed language — terminology coined by another coach, method, or the
+ * fitness-influencer lexicon. It is not Lars's voice, so it must never enter
+ * his copy AS his own words. The gate is quote-exempt: a borrowed term is fine
+ * inside a direct quote or right after an attribution cue (he's naming the
+ * source, not adopting the phrase). Keep this list conservative — standard
+ * training vocabulary he actually uses (deload, posterior chain, double
+ * progression, minimum effective dose) must never appear here. The list grows
+ * as borrowed terms are caught; add the offender, not the category.
+ */
+const BORROWED_LANGUAGE = [
+  'movement snack',
+  'movement snacks',
+  'exercise snack',
+  'exercise snacks',
+  'grease the groove',
+  'greasing the groove',
+];
+
 /** Flat banned-phrase list for embedding in LLM prompts (single source of truth). */
 export const BANNED_PHRASES: string[] = [
   ...DEAD_AI_LANGUAGE,
@@ -117,7 +137,31 @@ export const BANNED_PHRASES: string[] = [
   ...ENGAGEMENT_BAIT,
   ...AI_CRINGE,
   ...CLINICAL_BANNED,
+  ...BORROWED_LANGUAGE,
 ];
+
+/**
+ * Attribution cues that make a borrowed term acceptable — Lars is naming or
+ * quoting the source, not writing in the term. Tested against the text
+ * immediately preceding the match (anchored to its end).
+ */
+const ATTRIBUTION_CUE =
+  /(?:so[- ]?called|the term|coined|dubbed|known as|referred to as|call(?:s|ed)? (?:it|this|them)|as [\w.’' ]{1,20}(?:calls?|puts? it|says)|what [\w.’' ]{1,20}calls?)[\sa-z:,'"“‘]{0,12}$/i;
+
+/** Spans wrapped in double or curly quotes; a borrowed term inside one is a quote. */
+function quotedRanges(text: string): Array<[number, number]> {
+  const ranges: Array<[number, number]> = [];
+  const patterns = [/"[^"]{0,240}"/g, /“[^”]{0,240}”/g, /‘[^’]{0,240}’/g];
+  for (const re of patterns) {
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) ranges.push([m.index, m.index + m[0].length]);
+  }
+  return ranges;
+}
+
+function indexInRanges(ranges: Array<[number, number]>, i: number): boolean {
+  return ranges.some(([s, e]) => i >= s && i < e);
+}
 
 const PHRASE_CATEGORIES: Array<{ category: VoiceViolationCategory; phrases: string[] }> = [
   { category: 'dead_ai_language', phrases: DEAD_AI_LANGUAGE },
@@ -151,6 +195,8 @@ const FATAL_PATTERNS: RegExp[] = [
   /\bforget\s+[^.!?\n]{1,60}[.,;]\s*(?:this is|it['’]?s|that['’]?s)\b/gi,
   // "Less X, more Y."
   /\bless\s+\w[^.!?\n]{0,40},\s*more\s+\w/gi,
+  // "[It/the barrier] was never X. It was Y." / "...never X, it was Y."
+  /\b(?:was|were|is|are)\s+never\b[^.!?\n]{1,80}[.,;]\s*(?:it|this|that)(?:['’]s| is| was| were)\b/gi,
 ];
 
 /* ------------------------------------------------------------------ */
@@ -218,6 +264,28 @@ export function lintVoiceDna(text: string): VoiceLintResult {
           hard: true,
           autoFixable: false,
           suggestion: `Remove or rephrase "${m[0]}".`,
+        });
+      }
+    }
+  }
+
+  // Borrowed language — hard, but exempt inside a direct quote or right after
+  // an attribution cue (Lars naming the source rather than adopting the term).
+  {
+    const ranges = quotedRanges(text);
+    for (const phrase of BORROWED_LANGUAGE) {
+      const re = phraseRegex(phrase);
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(text)) !== null) {
+        const before = text.slice(Math.max(0, m.index - 60), m.index);
+        if (indexInRanges(ranges, m.index) || ATTRIBUTION_CUE.test(before)) continue;
+        violations.push({
+          category: 'borrowed_language',
+          match: m[0],
+          index: m.index,
+          hard: true,
+          autoFixable: false,
+          suggestion: `"${m[0]}" is borrowed terminology. Say it plainly in Lars's own words, or quote/attribute the source.`,
         });
       }
     }

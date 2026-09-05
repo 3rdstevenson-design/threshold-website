@@ -123,6 +123,14 @@ type AuditReport = {
 
 /** Deepgram caption-drift threshold above which auto-correct kicks in. */
 const DEEPGRAM_DRIFT_THRESHOLD_MS = 150;
+
+// If the pre-correct Deepgram pass saw every matched caption within this
+// bound, a whisper-audit 'fail' that rests only on max drift is treated
+// as whisper matcher noise and downgraded to 'warn' (see the veto before
+// the promoting phase). Chunker lead (~150ms) + ASR jitter lands real,
+// well-synced renders around 250-450ms here; genuine cumulative desync
+// (the pre-2026-07-25 concat bug) ramped well past 600ms.
+const DEEPGRAM_VETO_MS = 600;
 /**
  * Only rewrite individual captions whose drift exceeds this. Lower than
  * the gate threshold so auto-correct can catch mid-sized drifts that
@@ -150,7 +158,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   const finalV2Path = path.join(slugDir, 'final-v2.mp4');
   const finalV2FailedPath = path.join(slugDir, 'final-v2-FAILED.mp4');
   const auditPath = path.join(slugDir, 'audit.json');
-  const auditWavPath = path.join(slugDir, 'audit.wav');
+  const auditAudioPath = path.join(slugDir, 'audit.ogg');
 
   // ── Phase 1: loading ─────────────────────────────────────────────
   stage('loading');
@@ -253,57 +261,58 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   if (!fs.existsSync(sourceAbs)) {
     throw new Error(`source missing: ${polishedPlan.sourceVideo}`);
   }
-  const tmpDir = path.join(slugDir, 'render-tmp-v2');
-  fs.mkdirSync(tmpDir, { recursive: true });
-  try {
-    const clipPaths: string[] = [];
-    for (let i = 0; i < polishedPlan.clips.length; i++) {
-      const c = polishedPlan.clips[i];
-      const dur = c.sourceEnd - c.sourceStart;
-      const clipFile = path.join(tmpDir, `clip_${String(i).padStart(4, '0')}.mp4`);
+  // Single-pass trim+concat via filter_complex — one continuous encode.
+  //
+  // The previous shape (cut each clip to its own AAC-encoded mp4, then
+  // `concat -c copy`) accumulated audio error at every splice: each AAC
+  // segment carries ~21-42ms of encoder priming and rounds its length up
+  // to whole 1024-sample frames, and stream-copy concat stitches those
+  // artifacts end to end. On a 25-cut talking-head reel the captions
+  // drifted progressively ~100ms → ~900ms across the timeline (audit
+  // maxDrift 1440ms) and the render came out +292ms over plan. One
+  // filter-graph pass encodes audio as ONE continuous stream, so there
+  // are no per-boundary artifacts to accumulate.
+  {
+    const clips = polishedPlan.clips;
+    const n = clips.length;
+    const vSplits = clips.map((_, i) => `[vs${i}]`).join('');
+    const aSplits = clips.map((_, i) => `[as${i}]`).join('');
+    const parts: string[] = [
+      `[0:v]split=${n}${vSplits}`,
+      `[0:a]asplit=${n}${aSplits}`,
+    ];
+    for (let i = 0; i < n; i++) {
+      const c = clips[i];
       log(
-        `  clip ${i + 1}/${polishedPlan.clips.length}: ` +
-          `${c.sourceStart.toFixed(2)}s → ${c.sourceEnd.toFixed(2)}s (${dur.toFixed(2)}s)`,
+        `  clip ${i + 1}/${n}: ` +
+          `${c.sourceStart.toFixed(2)}s → ${c.sourceEnd.toFixed(2)}s ` +
+          `(${(c.sourceEnd - c.sourceStart).toFixed(2)}s)`,
       );
-      const r = await run('ffmpeg', [
-        '-y',
-        '-ss', String(c.sourceStart),
-        '-i', sourceAbs,
-        '-t', String(dur),
-        '-c:v', 'libx264', '-preset', 'fast', '-crf', '20',
-        '-c:a', 'aac', '-b:a', '128k',
-        '-g', '30', '-keyint_min', '30',
-        '-pix_fmt', 'yuv420p',
-        clipFile,
-      ], { signal });
-      if (r.code !== 0) {
-        throw new Error(`ffmpeg cut failed on clip ${i}: ${r.stderr.slice(-300)}`);
-      }
-      clipPaths.push(clipFile);
+      parts.push(
+        `[vs${i}]trim=start=${c.sourceStart}:end=${c.sourceEnd},setpts=PTS-STARTPTS[v${i}]`,
+        `[as${i}]atrim=start=${c.sourceStart}:end=${c.sourceEnd},asetpts=PTS-STARTPTS[a${i}]`,
+      );
     }
+    const pairs = clips.map((_, i) => `[v${i}][a${i}]`).join('');
+    parts.push(`${pairs}concat=n=${n}:v=1:a=1[v][a]`);
 
-    const listPath = path.join(tmpDir, 'list.txt');
-    fs.writeFileSync(
-      listPath,
-      clipPaths.map((p) => `file '${p.replace(/'/g, "'\\''")}'`).join('\n'),
-    );
-    log('Concatenating v2 clips…');
+    log('Cutting + concatenating v2 clips (single pass)…');
     const rConcat = await run('ffmpeg', [
       '-y',
-      '-f', 'concat', '-safe', '0', '-i', listPath,
-      '-c', 'copy',
+      '-i', sourceAbs,
+      '-filter_complex', parts.join(';'),
+      '-map', '[v]', '-map', '[a]',
+      '-c:v', 'libx264', '-preset', 'fast', '-crf', '20',
+      '-g', '30', '-keyint_min', '30',
+      '-pix_fmt', 'yuv420p',
+      '-r', '30',
+      '-c:a', 'aac', '-b:a', '128k',
       concatV2Path,
     ], { signal });
     if (rConcat.code !== 0) {
-      throw new Error(`ffmpeg concat failed: ${rConcat.stderr.slice(-300)}`);
+      throw new Error(`ffmpeg trim+concat failed: ${rConcat.stderr.slice(-300)}`);
     }
     log(`Concat → ${path.relative(VIDEO_PROJECT_ROOT, concatV2Path)}`);
-  } finally {
-    // Best-effort cleanup of scratch clips.
-    try {
-      for (const f of fs.readdirSync(tmpDir)) fs.unlinkSync(path.join(tmpDir, f));
-      fs.rmdirSync(tmpDir);
-    } catch {}
   }
 
   // ── Phase 5: rendering (Remotion) ────────────────────────────────
@@ -319,21 +328,39 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   const deepgramKey = process.env.DEEPGRAM_API_KEY;
   let dgWords: DeepgramWord[] = [];
   let dgReport: AuditReport['deepgram'] = undefined;
+  // The PRE-correct Deepgram measurement — captions from the edit plan vs
+  // Nova-3's transcription of the rendered audio. Unlike the post-correct
+  // number (captions rebuilt FROM Deepgram words, so near-tautological),
+  // this one genuinely cross-checks render sync, and it's what the
+  // whisper-gate veto below keys on.
+  let preCorrectDg: { maxDriftMs: number; matchedCount: number; captionCount: number } | null = null;
   if (!deepgramKey) {
     log('DEEPGRAM_API_KEY not set — skipping sync-audit layer.');
   } else {
     try {
       log('Extracting audio for Deepgram…');
-      await ensureAuditWav(finalV2Path, auditWavPath, false, signal);
+      // ALWAYS force a fresh extract. force=false once reused a stale
+      // audit.ogg left by an interrupted earlier run of the same slug —
+      // a transcription of a DIFFERENT edit timeline — and the rechunk
+      // then baked ~10s of phantom retake text into the captions
+      // (2026-07-25: 19-00-03 and 19-10-51 failed audit twice this way).
+      await ensureAuditAudio(finalV2Path, auditAudioPath, /*force*/ true, signal);
       log('Transcribing with Deepgram Nova-3…');
-      const audio = fs.readFileSync(auditWavPath);
+      const audio = fs.readFileSync(auditAudioPath);
       const dgRes = await transcribeWithDeepgram(audio, deepgramKey, {
-        contentType: 'audio/wav',
+        contentType: 'audio/ogg',
+        signal,
+        onLog: log,
       });
       dgWords = dgRes.words;
       log(`Deepgram returned ${dgWords.length} word(s).`);
       const captionsNow = readV2Captions(planV2Path);
       const drift = measureCaptionDrift(captionsNow, dgWords);
+      preCorrectDg = {
+        maxDriftMs: drift.maxDriftMs,
+        matchedCount: drift.matchedCount,
+        captionCount: drift.captionCount,
+      };
       dgReport = {
         maxDriftMs: drift.maxDriftMs,
         meanDriftMs: drift.meanDriftMs,
@@ -411,10 +438,12 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
       // Re-measure Deepgram drift for the final audit record.
       if (deepgramKey) {
         try {
-          await ensureAuditWav(finalV2Path, auditWavPath, /*force*/ true, signal);
-          const audio = fs.readFileSync(auditWavPath);
+          await ensureAuditAudio(finalV2Path, auditAudioPath, /*force*/ true, signal);
+          const audio = fs.readFileSync(auditAudioPath);
           const dgRes2 = await transcribeWithDeepgram(audio, deepgramKey, {
-            contentType: 'audio/wav',
+            contentType: 'audio/ogg',
+            signal,
+            onLog: log,
           });
           const finalCaptions = polishedOnDisk.captions ?? auto.captions;
           const drift2 = measureCaptionDrift(finalCaptions, dgRes2.words);
@@ -454,6 +483,34 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
         `(non-fatal) failed to rewrite audit.json: ${e instanceof Error ? e.message : e}`,
       );
     }
+  }
+
+  // Deepgram veto on the whisper max-drift gate. whisper.cpp small.en
+  // word matching produces isolated (and locally correlated) spikes on
+  // disfluent regions — a caption it scored at 1250ms measured 200ms
+  // against Nova-3 on the same render (2026-07-25). When the whisper
+  // audit fails ONLY on drift (structure ok, mean sane) while the
+  // independent pre-correct Deepgram pass saw every caption within
+  // DEEPGRAM_VETO_MS, trust Deepgram: downgrade to 'warn' so the render
+  // promotes instead of dead-ending in final-v2-FAILED.mp4.
+  if (
+    auditReport.overallStatus === 'fail' &&
+    auditReport.structural.ok &&
+    (auditReport.drift?.meanDriftMs ?? Infinity) <= 600 &&
+    preCorrectDg !== null &&
+    preCorrectDg.maxDriftMs <= DEEPGRAM_VETO_MS &&
+    preCorrectDg.captionCount > 0 &&
+    preCorrectDg.matchedCount / preCorrectDg.captionCount >= 0.9
+  ) {
+    log(
+      `Whisper audit fail overruled: Deepgram measured max ${preCorrectDg.maxDriftMs}ms ` +
+        `across ${preCorrectDg.matchedCount}/${preCorrectDg.captionCount} captions ` +
+        `(≤ ${DEEPGRAM_VETO_MS}ms veto bound) — treating as warn.`,
+    );
+    auditReport.overallStatus = 'warn';
+    try {
+      fs.writeFileSync(auditPath, JSON.stringify(auditReport, null, 2));
+    } catch {}
   }
 
   // ── Phase 9: promoting ───────────────────────────────────────────
@@ -535,20 +592,26 @@ async function runAuditRender(input: {
  * to Deepgram. If `force` is true, the existing file is overwritten
  * even if it already exists (used after re-render).
  */
-async function ensureAuditWav(
+// Opus 32k, not WAV — raw PCM bodies hit Deepgram's upload window
+// (408 SLOW_UPLOAD) past ~1 minute of audio. Deliberately no loudnorm
+// here (unlike the ingest extract): drift is measured against the
+// rendered mix as-is, and adding normalization would change timings vs.
+// the historical audit baseline.
+async function ensureAuditAudio(
   videoPath: string,
-  wavPath: string,
+  audioPath: string,
   force = false,
   signal?: AbortSignal,
 ): Promise<void> {
-  if (!force && fs.existsSync(wavPath)) return;
+  if (!force && fs.existsSync(audioPath)) return;
   const r = await run('ffmpeg', [
     '-y',
     '-i', videoPath,
     '-vn',
     '-ar', '16000',
     '-ac', '1',
-    wavPath,
+    '-c:a', 'libopus', '-b:a', '32k', '-application', 'voip',
+    audioPath,
   ], { signal });
   if (r.code !== 0) {
     throw new Error(`ffmpeg audio extract failed: ${r.stderr.slice(-300)}`);

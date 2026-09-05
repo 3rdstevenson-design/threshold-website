@@ -26,18 +26,9 @@ import { spawn } from 'child_process';
 import { TAKES_ROOT, VIDEO_PROJECT_ROOT } from './paths';
 import { probeDurationSec, killOnAbort } from './ffmpeg';
 import { readPlan, writePlan } from './planStore';
-import { applyAction, createPlan, randomId, type EditPlan, type RetakeGroup } from './editPlan';
-import {
-  removeSilences,
-  removeFillers,
-  removeStutters,
-  removeRetakes,
-  TALKING_HEAD_CUT_OPTIONS,
-  type Silence,
-  type Word,
-} from './autoCut';
-import { detectRepeatStutters } from './stutterDetection';
-import { detectRetakesFromWords } from './retakeDetection';
+import { applyAction, createPlan, type EditPlan } from './editPlan';
+import { type Silence, type Word } from './autoCut';
+import { runCutStages } from './cutPipeline';
 import { chunkCaptions } from './captionChunker';
 import { writeStatus } from './status';
 import { runPolishStream } from './polishPipeline';
@@ -103,130 +94,44 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
     writePlan(plan);
   }
 
-  // ── Phase: silences ──────────────────────────────────────────────
-  stage('silences');
-  const silenceStage = removeSilences({
+  // ── Phases: silences → fillers → stutters → retakes ──────────────
+  // The four detection stages live in cutPipeline.ts (shared with the
+  // client-side "Analyze audio" re-run so both cut identically). Tuning
+  // comes from plan.cutSettings; the removed ranges land on plan.cutLog
+  // so the timeline can mark removed segments by reason.
+  const cut = runCutStages({
     duration: plan.sourceDuration,
+    words,
     silences,
-    options: TALKING_HEAD_CUT_OPTIONS,
-  });
-  log(
-    `Silences: ${silenceStage.stats.cutCount} cut \u00b7 ` +
-      `-${silenceStage.stats.secondsRemoved.toFixed(2)}s.`,
-  );
-  send('stage-stats', { stage: 'silences', stats: silenceStage.stats });
-
-  // ── Phase: fillers ───────────────────────────────────────────────
-  stage('fillers');
-  const fillerStage = removeFillers({
-    clips: silenceStage.clips,
-    words,
     fillerWords: plan.fillerWords,
-    duration: plan.sourceDuration,
-    options: TALKING_HEAD_CUT_OPTIONS,
-  });
-  log(
-    `Fillers: ${fillerStage.stats.cutCount} cut \u00b7 ` +
-      `-${fillerStage.stats.secondsRemoved.toFixed(2)}s.`,
-  );
-  send('stage-stats', { stage: 'fillers', stats: fillerStage.stats });
-
-  // ── Phase: stutters ──────────────────────────────────────────────
-  stage('stutters');
-  const stutterStage = removeStutters({
-    clips: fillerStage.clips,
-    words,
-    duration: plan.sourceDuration,
-    detector: (survivingWords) =>
-      detectRepeatStutters(survivingWords, {
-        singleWordRepeats: true,
-        // Partial-word fragment removal is the most aggressive pass and
-        // over-fires on casual speech (clipping real short words), so it's
-        // off. Single-word repeats ("the the") stay on.
-        partialWordFragments: false,
-      }),
-    options: TALKING_HEAD_CUT_OPTIONS,
-  });
-  log(
-    `Stutters: ${stutterStage.stats.phrasesRemoved} phrase(s), ` +
-      `${stutterStage.stats.singleWordsRemoved} single-word, ` +
-      `${stutterStage.stats.fragmentsRemoved} fragment(s) \u00b7 ` +
-      `-${stutterStage.stats.secondsRemoved.toFixed(2)}s.`,
-  );
-  send('stage-stats', { stage: 'stutters', stats: stutterStage.stats });
-
-  // ── Phase: retakes ───────────────────────────────────────────────
-  // Whole-phrase redos across short pauses (say it, flub it, say it again).
-  // Coarser than stutters, so it runs last on the survivors. Keeps the
-  // LAST take of each group; alternates are stored on plan.retakeGroups
-  // so the Timeline can offer "use this take instead".
-  stage('retakes');
-  const retakeStage = removeRetakes({
-    clips: stutterStage.clips,
-    words,
-    duration: plan.sourceDuration,
-    detector: (survivingWords) => {
-      const detection = detectRetakesFromWords(survivingWords);
-      return {
-        removeRanges: detection.removeRanges,
-        groups: detection.groups.map((g) => ({
-          alternatives: g.alternatives.map((a) => ({
-            start: a.start,
-            end: a.end,
-            transcript: a.transcript,
-            meanConfidence: a.meanConfidence,
-          })),
-          keptIndex: g.keptIndex,
-          flagged: g.flagged,
-          reason: g.reason,
-        })),
-      };
+    settings: plan.cutSettings,
+    onStage: (name, stats) => {
+      stage(name);
+      send('stage-stats', { stage: name, stats });
     },
-    options: TALKING_HEAD_CUT_OPTIONS,
   });
-  const retakeGroups: RetakeGroup[] = retakeStage.groups.map((g) => {
-    const alternatives = g.alternatives.map((a) => ({
-      id: randomId('alt'),
-      sourceStart: a.start,
-      sourceEnd: a.end,
-      transcript: a.transcript,
-      meanConfidence: a.meanConfidence,
-    }));
-    return {
-      id: randomId('rtg'),
-      alternatives,
-      keptAlternativeId: alternatives[g.keptIndex]?.id ?? alternatives[alternatives.length - 1].id,
-      flagged: g.flagged,
-      reason: g.reason,
-    };
-  });
+  log(`Silences: ${cut.stages.silences.cutCount} cut · -${cut.stages.silences.secondsRemoved.toFixed(2)}s.`);
+  log(`Fillers: ${cut.stages.fillers.cutCount} cut · -${cut.stages.fillers.secondsRemoved.toFixed(2)}s.`);
   log(
-    `Retakes: ${retakeStage.stats.groupsFound} group(s), ` +
-      `${retakeStage.stats.cutCount} cut · ` +
-      `-${retakeStage.stats.secondsRemoved.toFixed(2)}s` +
-      (retakeStage.stats.flaggedGroups > 0
-        ? ` · ${retakeStage.stats.flaggedGroups} flagged for review`
+    `Stutters: ${cut.stages.stutters.phrasesRemoved} phrase(s), ` +
+      `${cut.stages.stutters.singleWordsRemoved} single-word, ` +
+      `${cut.stages.stutters.fragmentsRemoved} fragment(s) · ` +
+      `-${cut.stages.stutters.secondsRemoved.toFixed(2)}s.`,
+  );
+  log(
+    `Retakes: ${cut.stages.retakes.groupsFound} group(s), ` +
+      `${cut.stages.retakes.cutCount} cut · ` +
+      `-${cut.stages.retakes.secondsRemoved.toFixed(2)}s` +
+      (cut.stages.retakes.flaggedGroups > 0
+        ? ` · ${cut.stages.retakes.flaggedGroups} flagged for review`
         : ''),
   );
-  send('stage-stats', { stage: 'retakes', stats: retakeStage.stats });
 
-  const combinedStats = {
-    removedCount:
-      silenceStage.stats.cutCount +
-      fillerStage.stats.cutCount +
-      stutterStage.stats.cutCount +
-      retakeStage.stats.cutCount,
-    removedSeconds:
-      silenceStage.stats.secondsRemoved +
-      fillerStage.stats.secondsRemoved +
-      stutterStage.stats.secondsRemoved +
-      retakeStage.stats.secondsRemoved,
-  };
   let workingPlan: EditPlan = applyAction(plan, {
     type: 'auto_cut',
-    params: { clips: retakeStage.clips, stats: combinedStats },
+    params: { clips: cut.clips, stats: cut.stats },
   });
-  workingPlan = { ...workingPlan, retakeGroups };
+  workingPlan = { ...workingPlan, retakeGroups: cut.retakeGroups, cutLog: cut.cutLog };
 
   // ── Phase: captioning ────────────────────────────────────────────
   stage('captioning');
@@ -270,21 +175,31 @@ function runIngest(input: {
       { cwd: VIDEO_PROJECT_ROOT, detached: true },
     );
     const cleanup = killOnAbort(proc, input.signal);
+    // Keep the tail of the child's output so a failure surfaces the real
+    // reason (e.g. "Deepgram 408: …") instead of a bare exit code.
+    const tail: string[] = [];
+    const remember = (line: string) => {
+      tail.push(line);
+      if (tail.length > 10) tail.shift();
+    };
     proc.stdout.on('data', (d) => {
       for (const line of d.toString().split(/\r?\n/)) {
-        if (line.trim()) input.onLog(line);
+        if (line.trim()) { input.onLog(line); remember(line); }
       }
     });
     proc.stderr.on('data', (d) => {
       for (const line of d.toString().split(/\r?\n/)) {
-        if (line.trim()) input.onLog(line);
+        if (line.trim()) { input.onLog(line); remember(line); }
       }
     });
     proc.on('error', (e) => { cleanup(); reject(e); });
     proc.on('close', (code) => {
       cleanup();
       if (code === 0) resolve();
-      else reject(new Error(`ingest exited ${code}`));
+      else {
+        const detail = tail.length ? `: ${tail.join(' | ').slice(-500)}` : '';
+        reject(new Error(`ingest exited ${code}${detail}`));
+      }
     });
   });
 }

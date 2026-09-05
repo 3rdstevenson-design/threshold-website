@@ -37,6 +37,15 @@ if (fs.existsSync(envPath)) {
   }
 }
 
+/**
+ * R2 keys under `instagram/` are deleted 30 days after upload
+ * (`expire-instagram-media-30d`, scripts/set-r2-lifecycle.mjs). Manual-post
+ * story reels wait months in the queue for their scheduled Telegram hand-off,
+ * so an object there is a ticking 404 — lib/upload.ts now writes them to
+ * `manual/`, and anything still on the old prefix needs migrating.
+ */
+const EXPIRING_PREFIX_RE = /\/instagram\//;
+
 const DRY = process.argv.includes('--dry');
 const DIAGNOSE = process.argv.includes('--diagnose');
 const AUDIT = process.argv.includes('--audit');
@@ -141,6 +150,10 @@ async function runAudit(): Promise<void> {
       problems.push(`R2 video unreachable (HTTP ${info.status})`);
     } else if (info.length !== localBytes) {
       problems.push(`R2 object truncated: ${info.length} vs ${localBytes} local bytes — run fix-loop-reels to re-upload`);
+    } else if (EXPIRING_PREFIX_RE.test(p.videoUrl ?? '')) {
+      // Reachable today, gone within 30 days of upload. Flag it while the local
+      // file is still the good copy, not after the object has already 404'd.
+      problems.push('still on the expiring instagram/ prefix — will 404 within 30 days of upload; run fix-loop-reels to move it to manual/');
     }
 
     // 3. Cover/poster.
@@ -177,12 +190,18 @@ async function main() {
   let vidFixed = 0;
   let posterFixed = 0;
   let skipped = 0;
+  let errored = 0;
   const rows: string[] = [];
 
   for (const p of posts) {
     const notes = p.notes;
     if (p.type !== 'reel' || !notes || !/^story-loop-/i.test(notes)) continue;
 
+    // Fault-isolate every post. One corrupt local file used to throw out of the
+    // loop, and since writeQueue() only runs after it, EVERY repair made before
+    // the bad reel was discarded — the uploads happened, the queue never learned
+    // their new URLs (2026-08-05: story-loop-img6474 killed a 14-reel repair).
+    try {
     const local = resolveDraftFile(notes);
     if (!local) { rows.push(`  skip  ${notes}  (no local file in Reels/Final)`); skipped++; continue; }
 
@@ -196,7 +215,11 @@ async function main() {
     const info = await videoInfo(p.videoUrl);
     // "Complete" means the R2 object is the full file — not just present. R2 has
     // stored truncated uploads that pass a status/size-floor check but won't play.
-    const complete = info.status === 200 && info.length === localBytes;
+    // Also treat "still on the expiring prefix" as needing a re-upload: objects
+    // under `instagram/` are deleted after 30 days, and a manual-post reel can
+    // sit in the queue far longer than that (see EXPIRING_PREFIX_RE).
+    const complete =
+      info.status === 200 && info.length === localBytes && !EXPIRING_PREFIX_RE.test(p.videoUrl ?? '');
     if (DIAGNOSE) {
       rows.push(`  ${notes}  status=${info.status} r2=${info.length} local=${localBytes} complete=${complete}  ${p.videoUrl ?? ''}`);
       continue;
@@ -232,6 +255,10 @@ async function main() {
       posterFixed++;
     }
     rows.push(`  fix   ${notes}  (${note})`);
+    } catch (e: any) {
+      rows.push(`  ERR   ${notes}  (${e?.message ?? e})`);
+      errored++;
+    }
   }
 
   if (!DRY && !DIAGNOSE) await writeQueue(posts);
@@ -241,7 +268,7 @@ async function main() {
     console.log(
       `\n${DRY ? '[DRY RUN — nothing written] ' : ''}captions set: ${capFixed}, ` +
       `videos ${DRY ? 'to re-upload' : 're-uploaded'}: ${vidFixed}, ` +
-      `posters ${DRY ? 'to set' : 'set'}: ${posterFixed}, skipped: ${skipped}`,
+      `posters ${DRY ? 'to set' : 'set'}: ${posterFixed}, skipped: ${skipped}, errored: ${errored}`,
     );
   }
   if (!DRY && !DIAGNOSE) console.log('Refresh the dashboard to see the updated captions and previews.');

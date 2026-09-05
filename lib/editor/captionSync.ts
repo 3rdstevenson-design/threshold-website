@@ -25,6 +25,7 @@
 import type { Caption } from './editPlan';
 import { normalizeWord, type Word } from './autoCut';
 import { chunkCaptions, type CaptionChunkOptions } from './captionChunker';
+import { deepgramPost } from './deepgramFetch';
 
 export type DeepgramWord = {
   /** Word text (punctuation may be attached depending on request params). */
@@ -84,20 +85,22 @@ const DEEPGRAM_ENDPOINT =
 export async function transcribeWithDeepgram(
   audio: ArrayBuffer | Buffer | Uint8Array,
   apiKey: string,
-  options: { contentType?: string; signal?: AbortSignal } = {},
+  options: {
+    contentType?: string;
+    signal?: AbortSignal;
+    onLog?: (msg: string) => void;
+  } = {},
 ): Promise<DeepgramResponse> {
   if (!apiKey) throw new Error('DEEPGRAM_API_KEY missing');
-  const contentType = options.contentType ?? 'audio/wav';
+  const contentType = options.contentType ?? 'audio/ogg';
 
-  const body = toBodyInit(audio);
-  const res = await fetch(DEEPGRAM_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      Authorization: `Token ${apiKey}`,
-      'Content-Type': contentType,
-    },
-    body,
+  const res = await deepgramPost({
+    url: DEEPGRAM_ENDPOINT,
+    apiKey,
+    contentType,
+    body: audio,
     signal: options.signal,
+    onRetry: options.onLog,
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
@@ -397,13 +400,6 @@ export function findClosestWord(
       ? (search(fallbackWindowMs, false) ?? search(fallbackWindowMs, true))
       : null)
   );
-}
-
-function toBodyInit(audio: ArrayBuffer | Buffer | Uint8Array): BodyInit {
-  // Node's fetch accepts ArrayBuffer / Uint8Array / Buffer directly via
-  // BodyInit. We widen to BodyInit so TS doesn't complain under the
-  // strict DOM fetch typing.
-  return audio as unknown as BodyInit;
 }
 
 // ── Raw response types (narrow subset of the Deepgram Listen API) ──

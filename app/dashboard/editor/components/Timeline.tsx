@@ -28,7 +28,8 @@ import {
   editedMsToSource,
   CLIP_SPEED_PRESETS,
 } from '@/lib/editor/editPlan';
-import type { Caption, Clip, EditPlan, RetakeGroup } from '@/lib/editor/editPlan';
+import type { Caption, Clip, CutLogEntry, EditPlan, RetakeGroup } from '@/lib/editor/editPlan';
+import { clipsToCutRanges, type Word } from '@/lib/editor/autoCut';
 import { snapValue } from '@/lib/editor/snap';
 import { filmstripFrameBackground, filmstripFrameIndex } from '@/lib/editor/filmstrip';
 
@@ -62,6 +63,33 @@ type Props = {
    *  candidate edge frame (in SOURCE seconds) so trimming is frame-accurate
    *  by eye, Edits-style — not just a ghost bar. */
   onScrubSource?: (sourceSec: number) => void;
+  /** Transcript words (source seconds) — lets removed-segment markers show
+   *  what was cut. */
+  analysisWords?: Word[];
+  /** Restore removed source range(s) as clips ("undo this one cut"). */
+  onRestoreGap?: (ranges: { start: number; end: number }[]) => void;
+};
+
+/** One gap between timeline-adjacent clips: what was removed there and why. */
+type RemovedSegment = {
+  key: string;
+  /** Edited-time position of the boundary the cut sits at. */
+  boundaryMs: number;
+  /** Pixel fudge for the flex row's 2px inter-clip gaps. */
+  gapOffsetPx: number;
+  /** Source ranges removed at this boundary. */
+  pieces: { start: number; end: number }[];
+  seconds: number;
+  reasons: (CutLogEntry['reason'] | 'manual')[];
+  transcript: string;
+};
+
+const CUT_REASON_COLOR: Record<RemovedSegment['reasons'][number], string> = {
+  silence: C.silver,
+  filler: C.gold,
+  stutter: C.red,
+  retake: C.violet,
+  manual: C.white,
 };
 
 const ZOOM_PRESETS = [0.5, 1, 2, 4] as const;
@@ -233,6 +261,86 @@ export function Timeline(props: Props) {
     [props.plan.clips, props.selectedClipId],
   );
 
+  // ── Removed-segment markers ─────────────────────────────────────────
+  // Every gap between timeline-adjacent clips (plus leading/trailing) is a
+  // removed source range. plan.cutLog labels WHY it was removed; the
+  // transcript words inside it show WHAT was removed. Toggleable, and each
+  // marker restores its cut via onRestoreGap.
+  const [showRemoved, setShowRemoved] = useState(true);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = window.localStorage.getItem('editor-show-removed');
+    if (raw != null) setShowRemoved(raw === '1');
+  }, []);
+  const toggleShowRemoved = useCallback(() => {
+    setShowRemoved((cur) => {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('editor-show-removed', cur ? '0' : '1');
+      }
+      return !cur;
+    });
+  }, []);
+  const [selectedCutKey, setSelectedCutKey] = useState<string | null>(null);
+
+  const removedSegments = useMemo<RemovedSegment[]>(() => {
+    const clips = props.plan.clips;
+    if (clips.length === 0) return [];
+    const cutRanges = clipsToCutRanges(clips, props.plan.sourceDuration);
+    if (cutRanges.length === 0) return [];
+    const cutLog = props.plan.cutLog ?? [];
+    const words = props.analysisWords ?? [];
+    const segs: RemovedSegment[] = [];
+    let accMs = 0;
+    for (let i = 0; i <= clips.length; i++) {
+      const boundaryMs = accMs;
+      if (i < clips.length) accMs += clipEditedMs(clips[i]);
+      const leftEnd = i === 0 ? 0 : clips[i - 1].sourceEnd;
+      const rightStart = i === clips.length ? props.plan.sourceDuration : clips[i].sourceStart;
+      if (rightStart - leftEnd < 0.02) continue;
+      // Intersect with the global cut ranges so reordered clips don't
+      // present covered source time as a removable gap.
+      const pieces = cutRanges
+        .map((r) => ({ start: Math.max(r.start, leftEnd), end: Math.min(r.end, rightStart) }))
+        .filter((r) => r.end - r.start >= 0.02);
+      if (pieces.length === 0) continue;
+      const seconds = pieces.reduce((s, r) => s + (r.end - r.start), 0);
+      const reasonSet = new Set<RemovedSegment['reasons'][number]>();
+      for (const p of pieces) {
+        for (const e of cutLog) {
+          if (e.start < p.end && e.end > p.start) reasonSet.add(e.reason);
+        }
+      }
+      if (reasonSet.size === 0) reasonSet.add('manual');
+      const transcript = words
+        .filter((w) => {
+          const mid = (w.start + w.end) / 2;
+          return pieces.some((p) => mid >= p.start && mid <= p.end);
+        })
+        .map((w) => w.text)
+        .join(' ');
+      segs.push({
+        key: `cut-${i}`,
+        boundaryMs,
+        gapOffsetPx: Math.max(0, i * 2 - 1),
+        pieces,
+        seconds,
+        reasons: Array.from(reasonSet),
+        transcript,
+      });
+    }
+    return segs;
+  }, [props.plan.clips, props.plan.sourceDuration, props.plan.cutLog, props.analysisWords]);
+
+  // A restored (or re-cut) timeline invalidates the open marker.
+  useEffect(() => {
+    if (selectedCutKey && !removedSegments.some((s) => s.key === selectedCutKey)) {
+      setSelectedCutKey(null);
+    }
+  }, [removedSegments, selectedCutKey]);
+  const selectedCut = selectedCutKey
+    ? removedSegments.find((s) => s.key === selectedCutKey) ?? null
+    : null;
+
   // One request serves every clip thumbnail — the strip is sliced client-side.
   const filmstripUrl = `/api/editor/project/${props.plan.slug}/filmstrip?k=${encodeURIComponent(dashKey())}`;
 
@@ -294,6 +402,27 @@ export function Timeline(props: Props) {
           click a clip to select · drag to reorder · click the timeline to seek
         </span>
         <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {removedSegments.length > 0 && (
+            <button
+              onClick={toggleShowRemoved}
+              style={{
+                padding: '2px 8px',
+                fontSize: 10,
+                fontWeight: 700,
+                background: showRemoved ? C.surface2 : 'transparent',
+                color: showRemoved ? C.white : C.silver,
+                border: `1px solid ${C.border}`,
+                borderRadius: 8,
+                cursor: 'pointer',
+                letterSpacing: 0,
+                textTransform: 'none',
+                marginRight: 8,
+              }}
+              title={showRemoved
+                ? 'Hide the removed-segment markers'
+                : 'Show where the auto-cut removed segments (click a marker to audit/restore)'}
+            >✂ {removedSegments.length} cut{removedSegments.length === 1 ? '' : 's'} {showRemoved ? '· shown' : '· hidden'}</button>
+          )}
           <span style={{ fontSize: 9, opacity: 0.6, marginRight: 4 }}>zoom</span>
           <span
             style={{
@@ -395,6 +524,34 @@ export function Timeline(props: Props) {
                 </div>
               </SortableContext>
             </DndContext>
+            {/* Removed-segment markers — one wedge per cut boundary. Click
+                to open the audit panel below the timeline. */}
+            {showRemoved && removedSegments.map((seg) => (
+              <button
+                key={seg.key}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedCutKey((k) => (k === seg.key ? null : seg.key));
+                }}
+                title={`Removed ${seg.seconds.toFixed(1)}s (${seg.reasons.join(', ')}) — click to audit / restore`}
+                style={{
+                  position: 'absolute',
+                  top: -3,
+                  bottom: -3,
+                  left: msToPx(seg.boundaryMs) + seg.gapOffsetPx,
+                  transform: 'translateX(-50%)',
+                  width: 7,
+                  padding: 0,
+                  background: CUT_REASON_COLOR[seg.reasons[0]],
+                  opacity: selectedCutKey === seg.key ? 1 : 0.75,
+                  border: `1px solid ${C.bg}`,
+                  outline: selectedCutKey === seg.key ? `1px solid ${C.gold}` : 'none',
+                  borderRadius: 2,
+                  cursor: 'pointer',
+                  zIndex: 5,
+                }}
+              />
+            ))}
           </div>
 
           {/* Caption track — single-click an empty gap seeks (bubbles to the
@@ -460,6 +617,77 @@ export function Timeline(props: Props) {
           />
         </div>
       </div>
+      {showRemoved && selectedCut && (
+        <div style={{
+          marginTop: 8,
+          padding: '8px 12px',
+          background: C.surface,
+          border: `1px solid ${C.border}`,
+          borderRadius: 8,
+          fontSize: 12,
+          color: C.silver,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ color: C.white, fontWeight: 700 }}>
+              Removed {selectedCut.seconds.toFixed(1)}s
+            </span>
+            {selectedCut.reasons.map((r) => (
+              <span key={r} style={{
+                padding: '1px 8px',
+                borderRadius: 8,
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                background: C.surface2,
+                color: CUT_REASON_COLOR[r],
+                border: `1px solid ${C.border}`,
+              }}>{r}</span>
+            ))}
+            <span style={{ flex: 1 }} />
+            {props.onRestoreGap && (
+              <button
+                onClick={() => props.onRestoreGap!(selectedCut.pieces)}
+                style={{
+                  padding: '3px 10px',
+                  background: C.gold,
+                  color: C.bg,
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+                title="Put this removed segment back on the timeline (one ⌘Z undoes)"
+              >↩ Restore</button>
+            )}
+            <button
+              onClick={() => setSelectedCutKey(null)}
+              style={{
+                padding: '3px 8px',
+                background: 'transparent',
+                color: C.silver,
+                border: `1px solid ${C.border}`,
+                borderRadius: 8,
+                fontSize: 11,
+                cursor: 'pointer',
+              }}
+            >×</button>
+          </div>
+          {selectedCut.transcript ? (
+            <div style={{ fontStyle: 'italic', opacity: 0.85 }}>
+              “{selectedCut.transcript.length > 220
+                ? `${selectedCut.transcript.slice(0, 220)}…`
+                : selectedCut.transcript}”
+            </div>
+          ) : (
+            <div style={{ opacity: 0.6 }}>No speech in this segment (dead air).</div>
+          )}
+        </div>
+      )}
       {selectedClip && props.onSetClipSpeed && (
         <SpeedPanel
           clip={selectedClip}

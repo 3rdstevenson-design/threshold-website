@@ -30,6 +30,7 @@ import { Toolbar } from './components/Toolbar';
 import { ExportDonePanel } from './components/ExportDonePanel';
 import { HeaderConfigForm } from './components/HeaderConfigForm';
 import { FillerWordsPanel } from './components/FillerWordsPanel';
+import { AutoCutSettingsPanel } from './components/AutoCutSettingsPanel';
 import { Timeline } from './components/Timeline';
 import { ShortcutsOverlay } from './components/ShortcutsOverlay';
 import { CaptionStylePanel } from './components/CaptionStylePanel';
@@ -41,6 +42,7 @@ import {
 import { LongFormView } from './components/LongFormView';
 import { dashKey, useEditor } from './components/useEditor';
 import { clipEditedMs } from '@/lib/editor/editPlan';
+import { HOOK_HOLD_FLAG_PCT } from '@/lib/retentionMath';
 import type { ProcessStage, AuditSummary } from './components/Toolbar';
 import { MobileSheet } from './components/MobileSheet';
 import { MobileBottomNav } from './components/MobileBottomNav';
@@ -63,6 +65,8 @@ type ProjectUIState = {
   rendering: boolean;
   renderLog: string[];
   renderProgress: { pct: number; phase: string } | null;
+  /** Last export failure, surfaced in the UI. Cleared on the next run. */
+  renderError: string | null;
   processStage: ProcessStage;
   /** Queue position while processStage === 'queued'. 0 when running. */
   queuePosition: number;
@@ -78,6 +82,7 @@ const DEFAULT_PROJECT_STATE: ProjectUIState = {
   rendering: false,
   renderLog: [],
   renderProgress: null,
+  renderError: null,
   processStage: 'idle',
   queuePosition: 0,
   processError: null,
@@ -125,7 +130,7 @@ export default function EditorPage() {
     ? (projectStates[selectedSlug] ?? DEFAULT_PROJECT_STATE)
     : DEFAULT_PROJECT_STATE;
   const {
-    rendering, renderLog, renderProgress,
+    rendering, renderLog, renderProgress, renderError,
     processStage, processError, processLog, auditSummary,
     proposal, approvedIds, previewingPolishCuts,
   } = current;
@@ -176,8 +181,26 @@ export default function EditorPage() {
   const previewRef = useRef<VideoPreviewHandle>(null);
   const [showShortcuts, setShowShortcuts] = useState(false);
 
+  // Published-reel performance keyed by project slug — one fetch on
+  // mount; drives the "how did this project's reel do" callout.
+  const [publishedPerf, setPublishedPerf] = useState<Record<string, {
+    mediaId: string;
+    views: number;
+    completionRate: number | null;
+    hookHold3sPct: number | null;
+  }>>({});
+  useEffect(() => {
+    fetch('/api/editor/published-performance', {
+      headers: { 'x-dashboard-key': dashKey() },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (j?.bySlug) setPublishedPerf(j.bySlug); })
+      .catch(() => {});
+  }, []);
+
   const {
     plan, analysis, loading: editorLoading, saveError, reload: reloadEditor,
+    flushSave,
     lastAutoCut, selectedClipId, setSelectedClipId,
     selectedCaptionId, setSelectedCaptionId,
     playheadEditedMs, setPlayheadEditedMs,
@@ -585,15 +608,21 @@ export default function EditorPage() {
       rendering: true,
       renderLog: [],
       renderProgress: { pct: 0, phase: 'starting' },
+      renderError: null,
     });
     try {
+      // The plan save is debounced 400ms. Without this, clicking Export right
+      // after an edit renders the PREVIOUS plan.
+      await flushSave();
       const res = await fetch(`/api/editor/project/${slug}/render`, {
         method: 'POST',
         headers: { 'x-dashboard-key': dashKey() },
       });
       if (!res.ok || !res.body) {
+        const detail = await res.text().catch(() => '');
         updateProject(slug, (p) => ({
-          renderLog: [...p.renderLog, `render failed: ${res.status}`],
+          renderError: `Export failed (${res.status}). ${detail.slice(0, 300)}`,
+          renderLog: [...p.renderLog, `render failed: ${res.status} ${detail.slice(0, 300)}`],
         }));
         return;
       }
@@ -622,16 +651,26 @@ export default function EditorPage() {
         }
         if (ev === 'error' && msg) {
           updateProject(slug, (p) => ({
+            renderError: msg,
             renderLog: [...p.renderLog, `ERROR: ${msg}`],
           }));
         }
       });
+    } catch (e) {
+      // Without this catch a rejected fetch became an unhandled rejection: the
+      // button silently snapped back to "Export" and nothing was ever logged,
+      // which is how six exports vanished with no trace.
+      const msg = e instanceof Error ? e.message : String(e);
+      updateProject(slug, (p) => ({
+        renderError: `Export failed: ${msg}`,
+        renderLog: [...p.renderLog, `ERROR: ${msg}`],
+      }));
     } finally {
       patchProject(slug, { rendering: false });
       // Leave the final percentage visible for a moment; clear on next run.
       fetchProjects();
     }
-  }, [selectedSlug, patchProject, updateProject, fetchProjects]);
+  }, [selectedSlug, patchProject, updateProject, fetchProjects, flushSave]);
 
   // Keyboard shortcuts. The full scheme is listed in <ShortcutsOverlay/>
   // (press ?). Editing keys call the same useEditor actions the mouse uses,
@@ -810,6 +849,10 @@ export default function EditorPage() {
     ? { title: 'Processing', lines: processLog, active: true, onClear: clearProcessLog }
     : rendering
       ? { title: 'Rendering', lines: renderLog, active: true, onClear: clearRenderLog }
+      // A failed export opens its own log by default. Previously the only
+      // trace of a failure was a line in a panel the user had to think to open.
+      : renderError
+        ? { title: `Export failed — ${renderError}`, lines: renderLog, active: true, onClear: clearRenderLog }
       : processLog.length > 0
         ? { title: 'Process log', lines: processLog, active: false, onClear: clearProcessLog }
         : renderLog.length > 0
@@ -1004,6 +1047,8 @@ export default function EditorPage() {
                       onInsertCaption={actions.insertCaption}
                       onFlipRetake={actions.flipRetake}
                       onSetClipSpeed={actions.setClipSpeed}
+                      analysisWords={analysis?.words}
+                      onRestoreGap={actions.restoreGap}
                     />
                   </div>
                   <MobileBottomNav
@@ -1076,7 +1121,15 @@ export default function EditorPage() {
                 </MobileSheet>
 
                 <MobileSheet open={activeSheet === 'words'} title="Words & Cleanup" onClose={() => setActiveSheet(null)}>
-                  <FillerWordsPanel words={plan.fillerWords} />
+                  <AutoCutSettingsPanel
+                    settings={plan.cutSettings}
+                    onChange={actions.setCutSettings}
+                    onReapply={actions.runAutoCutAndCaptions}
+                    canReapply={!!analysis?.hasWords}
+                  />
+                  <div style={{ marginTop: 12 }}>
+                    <FillerWordsPanel words={plan.fillerWords} onChange={actions.setFillerWords} />
+                  </div>
                   {proposal && (
                     <div style={{ marginTop: 12 }}>
                       <DisfluencyReviewPanel
@@ -1150,6 +1203,33 @@ export default function EditorPage() {
             <>
               {/* Top controls row */}
               <div style={{ flex: '0 0 auto' }}>
+                {selectedSlug && publishedPerf[selectedSlug] && (() => {
+                  const perf = publishedPerf[selectedSlug];
+                  const flagged =
+                    perf.hookHold3sPct !== null && perf.hookHold3sPct < HOOK_HOLD_FLAG_PCT;
+                  return (
+                    <div style={{
+                      padding: '7px 20px',
+                      background: flagged ? 'rgba(190, 60, 60, 0.10)' : 'rgba(201, 168, 76, 0.07)',
+                      borderBottom: `1px solid ${C.border}`,
+                      borderLeft: `3px solid ${flagged ? C.red : C.gold}`,
+                      fontSize: 12,
+                      color: C.silver,
+                    }}>
+                      <span style={{ color: C.white, fontWeight: 700 }}>Published reel:</span>{' '}
+                      {perf.hookHold3sPct !== null
+                        ? `held ${perf.hookHold3sPct}% of viewers at 3s`
+                        : 'no retention curve yet'}
+                      {' · '}{perf.views >= 1000 ? `${(perf.views / 1000).toFixed(1)}k` : perf.views} views
+                      {perf.completionRate !== null && ` · ${Math.round(perf.completionRate * 100)}% completion`}
+                      {flagged && (
+                        <span style={{ color: C.red, fontWeight: 700 }}>
+                          {' '}— the hook lost viewers early; lead with the payoff sooner next time.
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
                 <HeaderConfigForm header={plan.header} onChange={actions.setHeader} />
                 <Toolbar
                   hasSelectedClip={!!selectedClipId}
@@ -1247,7 +1327,14 @@ export default function EditorPage() {
                   minHeight: 0,
                   overflow: isMobile ? 'visible' : 'auto',
                 }}>
-                  <FillerWordsPanel words={plan.fillerWords} />
+                  <AutoCutSettingsPanel
+                    settings={plan.cutSettings}
+                    onChange={actions.setCutSettings}
+                    onReapply={actions.runAutoCutAndCaptions}
+                    canReapply={!!analysis?.hasWords}
+                  />
+
+                  <FillerWordsPanel words={plan.fillerWords} onChange={actions.setFillerWords} />
 
                   {/* Polish proposal — per-range review. Only shown while a
                       proposal is open (after "Preview cuts", before apply/cancel). */}
@@ -1315,6 +1402,8 @@ export default function EditorPage() {
                   onInsertCaption={actions.insertCaption}
                   onFlipRetake={actions.flipRetake}
                   onSetClipSpeed={actions.setClipSpeed}
+                  analysisWords={analysis?.words}
+                  onRestoreGap={actions.restoreGap}
                 />
               </div>
             </>

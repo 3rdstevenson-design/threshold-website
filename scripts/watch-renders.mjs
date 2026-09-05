@@ -152,6 +152,12 @@ function fmt(date) {
 
 const STATE_PATH = path.join(ROOT, 'data', 'watch-renders-state.json');
 const MAX_STATE_ENTRIES = 1000;
+// Bumped when the scan filter widens. On 2026-07-26 it went from the
+// case-sensitive `.endsWith('.mp4')` to /\.(mp4|mov)$/i, which made 26
+// long-standing .MP4 files in Final/ visible for the first time. Those are
+// years-old renders, not a backlog, so a version bump marks them handled once
+// instead of flooding the queue on the first poll after the upgrade.
+const FILTER_VERSION = 2;
 
 const queued = new Set();
 
@@ -169,6 +175,7 @@ function saveState() {
   try {
     fs.mkdirSync(path.dirname(STATE_PATH), { recursive: true });
     const state = {
+      filterVersion: FILTER_VERSION,
       known: [...knownFiles].slice(-MAX_STATE_ENTRIES),
       queued: [...queued].slice(-MAX_STATE_ENTRIES),
     };
@@ -227,20 +234,54 @@ async function autoQueue(filePath) {
 // ── Watcher (polling) ─────────────────────────────────────────────────────────
 
 let knownFiles = new Set();
+// filename -> size at the previous poll. A file whose size is still moving is
+// mid-write, and queueing it uploads a truncated object to R2.
+const lastSize = new Map();
+// filename -> { count, nextAttempt }. Bounds retries for uploads that keep
+// failing so one bad file can't spin the watcher.
+const failures = new Map();
+const MAX_QUEUE_ATTEMPTS = 5;
+const QUEUE_RETRY_BASE_MS = 30_000;
 
 function scanDir() {
   if (!fs.existsSync(VIDEO_OUT_DIR)) return;
   return fs.readdirSync(VIDEO_OUT_DIR)
-    .filter((f) => f.endsWith('.mp4'))
-    .map((f) => ({ name: f, mtime: fs.statSync(path.join(VIDEO_OUT_DIR, f)).mtimeMs }));
+    // Match the dashboard scanner (lib/localScan.ts:33) exactly. The old
+    // case-sensitive `.endsWith('.mp4')` skipped every .MP4 and .mov in the
+    // folder, so those never auto-queued and only appeared on a manual rescan.
+    .filter((f) => /\.(mp4|mov)$/i.test(f))
+    .map((f) => {
+      const st = fs.statSync(path.join(VIDEO_OUT_DIR, f));
+      return { name: f, mtime: st.mtimeMs, size: st.size };
+    });
 }
 
 async function poll() {
   const files = scanDir();
   if (!files) return;
 
-  for (const { name, mtime } of files) {
+  // Drop bookkeeping for files that have left the folder (rejected, moved).
+  const present = new Set(files.map((f) => f.name));
+  for (const n of [...lastSize.keys()]) if (!present.has(n)) lastSize.delete(n);
+  for (const n of [...failures.keys()]) if (!present.has(n)) failures.delete(n);
+
+  for (const { name, mtime, size } of files) {
     const fullPath = path.join(VIDEO_OUT_DIR, name);
+
+    // Still serving a backoff from a previous failed upload.
+    const failure = failures.get(name);
+    if (failure && Date.now() < failure.nextAttempt) continue;
+
+    // Settle gate: the size must hold steady across two consecutive polls
+    // before we touch the file. A render that writes in place grows while the
+    // watcher is looking at it, and each poll used to fire a fresh upload —
+    // that is what produced 34 truncated duplicate posts on 2026-07-26 (one
+    // per poll, at 786KB, 2MB, 3.4MB … up to the real size). render-loop-reel
+    // now renames atomically into Final/, but this covers every other writer.
+    const previousSize = lastSize.get(name);
+    lastSize.set(name, size);
+    if (size === 0 || previousSize !== size) continue;
+
     // New file = not in knownFiles set, or mtime changed significantly (re-render)
     const key = `${name}:${Math.floor(mtime / 1000)}`; // 1s precision
     // Re-render of an already-handled name (fresh mtime key): hand it to the
@@ -253,9 +294,28 @@ async function poll() {
       await new Promise((r) => setTimeout(r, 1500));
       try {
         await autoQueue(fullPath);
+        failures.delete(name);
       } catch (err) {
-        console.error(`    ❌ Failed to queue ${name}:`, err.message);
-        knownFiles.delete(key); // let it retry on the next poll
+        // Retry with backoff, then give up. Deleting the key unconditionally
+        // meant a permanently-failing upload (e.g. the caption API returning
+        // 500) re-fired every poll forever: on 2026-07-26 that produced a
+        // 16MB log and a runaway ffmpeg/Deepgram spawn loop off ONE file.
+        const n = (failures.get(name)?.count ?? 0) + 1;
+        if (n >= MAX_QUEUE_ATTEMPTS) {
+          console.error(
+            `    ❌ Giving up on ${name} after ${n} attempts: ${err.message}\n` +
+            `       Fix the cause, then touch the file to retry.`,
+          );
+          failures.set(name, { count: n, nextAttempt: Infinity });
+        } else {
+          const delayMs = QUEUE_RETRY_BASE_MS * 2 ** (n - 1);
+          console.error(
+            `    ❌ Failed to queue ${name} (attempt ${n}/${MAX_QUEUE_ATTEMPTS}): ${err.message}\n` +
+            `       Retrying in ${Math.round(delayMs / 1000)}s.`,
+          );
+          failures.set(name, { count: n, nextAttempt: Date.now() + delayMs });
+          knownFiles.delete(key);
+        }
       }
     } else {
       knownFiles.add(key);
@@ -287,6 +347,21 @@ async function main() {
   if (state) {
     for (const k of state.known) knownFiles.add(k);
     for (const n of state.queued) queued.add(n);
+
+    // Files the previous filter could never see are pre-existing, not new.
+    if ((state.filterVersion ?? 1) < FILTER_VERSION) {
+      let migrated = 0;
+      for (const { name, mtime } of scanDir() || []) {
+        if (/\.mp4$/.test(name)) continue; // the old filter already covered these
+        if (queued.has(name)) continue;
+        knownFiles.add(`${name}:${Math.floor(mtime / 1000)}`);
+        queued.add(name);
+        migrated++;
+      }
+      saveState();
+      console.log(`    Filter upgrade: marked ${migrated} pre-existing non-.mp4 file(s) as handled.`);
+    }
+
     const existing = scanDir() || [];
     const backlog = existing.filter(
       ({ name, mtime }) => !knownFiles.has(`${name}:${Math.floor(mtime / 1000)}`) && !queued.has(name),

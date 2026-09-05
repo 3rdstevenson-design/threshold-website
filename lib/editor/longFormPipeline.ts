@@ -209,9 +209,12 @@ export async function runClipProposalStage(input: {
 }
 
 /**
- * Extract the audio track from the long-form source to a WAV and send
- * it to Deepgram with diarize=true. Writes diarization.json alongside
- * analysis.json. Skipped (with a warning) if DEEPGRAM_API_KEY isn't set.
+ * Extract the audio track from the long-form source to 16kHz mono Opus
+ * and send it to Deepgram with diarize=true. Writes diarization.json
+ * alongside analysis.json. Skipped (with a warning) if DEEPGRAM_API_KEY
+ * isn't set. Opus, not WAV: a 42-minute source produced an 82MB WAV that
+ * could never clear Deepgram's upload window (408 SLOW_UPLOAD); Opus 32k
+ * is ~8× smaller and ASR-transparent.
  */
 async function runDiarization(input: {
   slug: string;
@@ -226,7 +229,7 @@ async function runDiarization(input: {
   }
 
   const slugDir = path.join(TAKES_ROOT, input.slug);
-  const wavPath = path.join(slugDir, 'audio.wav');
+  const audioPath = path.join(slugDir, 'audio.ogg');
   input.onLog('Extracting audio for diarization…');
   const r = await run('ffmpeg', [
     '-y',
@@ -234,8 +237,8 @@ async function runDiarization(input: {
     '-vn',
     '-ac', '1',
     '-ar', '16000',
-    '-c:a', 'pcm_s16le',
-    wavPath,
+    '-c:a', 'libopus', '-b:a', '32k', '-application', 'voip',
+    audioPath,
   ], { signal: input.signal });
   if (r.code !== 0) {
     input.onLog(`WARN: ffmpeg audio extract failed — skipping diarization. ${r.stderr.slice(-300)}`);
@@ -244,16 +247,20 @@ async function runDiarization(input: {
 
   input.onLog('Calling Deepgram Nova-3 with diarize=true…');
   try {
-    const audio = fs.readFileSync(wavPath);
-    const diar = await diarizeWithDeepgram(audio, apiKey);
+    const audio = fs.readFileSync(audioPath);
+    const diar = await diarizeWithDeepgram(audio, apiKey, {
+      contentType: 'audio/ogg',
+      signal: input.signal,
+      onLog: input.onLog,
+    });
     const outPath = path.join(slugDir, 'diarization.json');
     fs.writeFileSync(outPath, JSON.stringify(diar, null, 2));
     input.onLog(`Diarization: ${diar.words.length} word(s), speakers [${diar.speakers.join(', ')}].`);
   } catch (e) {
     input.onLog(`WARN: Deepgram diarization failed — continuing. ${e instanceof Error ? e.message : String(e)}`);
   } finally {
-    // Don't keep the WAV around; it's multi-hundred-MB on a 1-hour source.
-    try { fs.unlinkSync(wavPath); } catch {}
+    // Don't keep the extracted audio around after the upload.
+    try { fs.unlinkSync(audioPath); } catch {}
   }
 }
 
@@ -277,21 +284,31 @@ function runIngest(input: {
       { cwd: VIDEO_PROJECT_ROOT, detached: true },
     );
     const cleanup = killOnAbort(proc, input.signal);
+    // Keep the tail of the child's output so a failure surfaces the real
+    // reason (e.g. "Deepgram 408: …") instead of a bare exit code.
+    const tail: string[] = [];
+    const remember = (line: string) => {
+      tail.push(line);
+      if (tail.length > 10) tail.shift();
+    };
     proc.stdout.on('data', (d) => {
       for (const line of d.toString().split(/\r?\n/)) {
-        if (line.trim()) input.onLog(line);
+        if (line.trim()) { input.onLog(line); remember(line); }
       }
     });
     proc.stderr.on('data', (d) => {
       for (const line of d.toString().split(/\r?\n/)) {
-        if (line.trim()) input.onLog(line);
+        if (line.trim()) { input.onLog(line); remember(line); }
       }
     });
     proc.on('error', (e) => { cleanup(); reject(e); });
     proc.on('close', (code) => {
       cleanup();
       if (code === 0) resolve();
-      else reject(new Error(`ingest exited ${code}`));
+      else {
+        const detail = tail.length ? `: ${tail.join(' | ').slice(-500)}` : '';
+        reject(new Error(`ingest exited ${code}${detail}`));
+      }
     });
   });
 }

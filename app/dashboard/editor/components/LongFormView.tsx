@@ -43,7 +43,7 @@ type Props = {
   slug: string;
   durationSec?: number;
   /** Server-derived pipeline stage — drives the poll loop + Failed/Retry UI. */
-  stage?: 'ingesting' | 'transcribed' | 'clips-proposed' | 'editing' | 'rendered' | 'error';
+  stage?: 'ingesting' | 'transcribed' | 'clips-proposed' | 'editing' | 'rendered' | 'stale' | 'error';
   /** Stored error message when the last run failed. */
   error?: string | null;
   /** Re-run the full /process pipeline for this project. */

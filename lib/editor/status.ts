@@ -20,6 +20,7 @@ export type Stage =
   | 'clips-proposed'
   | 'editing'
   | 'rendered'
+  | 'stale'
   | 'error';
 
 export type LegacyStage =
@@ -60,13 +61,32 @@ export interface ProjectStatus {
 function derivedStage(slugDir: string, slug: string, category: Category): Stage {
   const has = (rel: string) => fs.existsSync(path.join(slugDir, rel));
 
+  // Every candidate must be slug-scoped. A bare `talking-head.mp4` used to be
+  // in this list, which flipped EVERY talking-head project to "Exported" at
+  // once the moment that one file existed in Drafts/.
   const renderedCandidates = [
     path.join(slugDir, 'final.mp4'),
     path.join(DRAFTS_DIR, `edits-${slug}.mp4`),
     path.join(DRAFTS_DIR, `talking-head-${slug}.mp4`),
-    path.join(DRAFTS_DIR, 'talking-head.mp4'),
   ];
-  if (renderedCandidates.some((p) => fs.existsSync(p))) return 'rendered';
+  const rendered = renderedCandidates.find((p) => fs.existsSync(p));
+  if (rendered) {
+    // A render is only "Exported" if it is newer than the plan it was built
+    // from. Otherwise the badge reports yesterday's render as today's export
+    // and the user has no signal that their Export click did nothing.
+    const planPath = path.join(slugDir, 'edit-plan.json');
+    try {
+      if (fs.existsSync(planPath)) {
+        const planMs = fs.statSync(planPath).mtimeMs;
+        const renderMs = fs.statSync(rendered).mtimeMs;
+        if (planMs > renderMs) return 'stale';
+      }
+    } catch {
+      // stat failed — fall through and report it as rendered rather than
+      // hiding a finished file behind an unreadable timestamp.
+    }
+    return 'rendered';
+  }
 
   if (category === 'long-form') {
     // Long-form doesn't go through the edit-plan → render flow; its

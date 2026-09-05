@@ -147,7 +147,7 @@ describe('plan versioning (v3)', () => {
   });
 
   it('createPlan writes the current version', () => {
-    expect(createPlan({ slug: 's', sourceVideo: 'v.mp4', sourceDuration: 1 }).version).toBe(3);
+    expect(createPlan({ slug: 's', sourceVideo: 'v.mp4', sourceDuration: 1 }).version).toBe(EDIT_PLAN_VERSION);
   });
 });
 

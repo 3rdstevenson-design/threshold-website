@@ -37,12 +37,30 @@ describe('lintVoiceDna', () => {
     expect(r.violations.filter((v) => v.category === 'ai_cringe')).toHaveLength(0);
   });
 
+  it('flags borrowed terminology used as his own voice', () => {
+    const r = lintVoiceDna('Drop a movement snack into any gap in your day to stay strong.');
+    expect(r.pass).toBe(false);
+    expect(r.violations.some((v) => v.category === 'borrowed_language')).toBe(true);
+  });
+
+  it('exempts borrowed terms inside a direct quote', () => {
+    const r = lintVoiceDna('Pavel built a whole method around "greasing the groove" for pull-ups.');
+    expect(r.violations.some((v) => v.category === 'borrowed_language')).toBe(false);
+  });
+
+  it('exempts borrowed terms after an attribution cue', () => {
+    const r = lintVoiceDna('The influencer crowd calls it a movement snack, a hard set in a gap.');
+    expect(r.violations.some((v) => v.category === 'borrowed_language')).toBe(false);
+  });
+
   it('flags the FATAL negation pattern variants', () => {
     const fatals = [
       "This isn't about strength. This is about control.",
       "It's not weakness. It's untrained capacity.",
       'Forget stretching. This is loading.',
       'Less mobility work, more strength work.',
+      'The barrier was never the 30 minutes. It was the belief that it was not worth it.',
+      'The fix is never the fancy drill, it was always the basics done well.',
     ];
     for (const text of fatals) {
       const r = lintVoiceDna(text);

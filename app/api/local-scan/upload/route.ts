@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
+import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadFile, uploadFiles } from '@/lib/upload';
 import {
@@ -10,7 +11,7 @@ import {
   VoiceDnaViolationError,
 } from '@/lib/queue';
 import { suggestScheduleTimes } from '@/lib/scheduler';
-import { transcribeVideoToCaptionDetailed } from '@/lib/transcribe';
+import { transcribeVideoToCaptionDetailed, readCarouselCaptionSidecar } from '@/lib/transcribe';
 import { generateCarouselCaption } from '@/lib/caption';
 
 // Coalesce concurrent uploads for the same filename within this process so
@@ -38,11 +39,58 @@ async function transcribeAndCaption(
   filePath: string,
   captionHint?: string,
 ): Promise<{ caption: string; fromSidecar: boolean }> {
-  const { caption, fromSidecar } = await transcribeVideoToCaptionDetailed(filePath, captionHint);
-  return {
-    caption: caption || captionHint || '✏️ Add caption before approving',
-    fromSidecar,
-  };
+  try {
+    const { caption, fromSidecar } = await transcribeVideoToCaptionDetailed(filePath, captionHint);
+    return {
+      caption: caption || captionHint || '✏️ Add caption before approving',
+      fromSidecar,
+    };
+  } catch (err) {
+    // A caption is a nice-to-have; the finished video reaching the queue is
+    // not. Transcription/LLM outages (Deepgram timeouts, an exhausted
+    // Anthropic credit balance) used to propagate into a 500 that made the
+    // watcher retry the same file forever and the reel never queue at all.
+    // Degrade to the placeholder and let Lars write it in the queue UI.
+    console.error(
+      `[local-scan/upload] caption generation failed for ${path.basename(filePath)}; ` +
+      `queueing with placeholder: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return {
+      caption: captionHint || '✏️ Add caption before approving',
+      fromSidecar: false,
+    };
+  }
+}
+
+async function carouselCaption(
+  folderPath: string,
+  slidePaths: string[],
+  captionHint?: string,
+): Promise<{ caption: string; fromSidecar: boolean }> {
+  // A hand-written `caption.txt` in the folder wins outright — Lars writes
+  // these in the carousel/quote-card skills and they are the caption, not a
+  // hint. Read it here rather than trusting the caller: the export scripts
+  // POST without `captionHint`, and only the rescan path fills it in.
+  const sidecar = readCarouselCaptionSidecar(folderPath) ?? captionHint?.trim();
+  if (sidecar) return { caption: sidecar, fromSidecar: true };
+
+  try {
+    const caption = await generateCarouselCaption(slidePaths, captionHint);
+    return {
+      caption: caption || '✏️ Add caption before approving',
+      fromSidecar: false,
+    };
+  } catch (err) {
+    // Same degrade as the reel path above, and for the same reason: an
+    // Anthropic outage (an exhausted credit balance is what surfaced this)
+    // used to reject the whole insert, so every carousel and quote card
+    // 500'd and silently never queued while the slides sat in R2.
+    console.error(
+      `[local-scan/upload] carousel caption generation failed for ${path.basename(folderPath)}; ` +
+        `queueing with placeholder: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return { caption: '✏️ Add caption before approving', fromSidecar: false };
+  }
 }
 
 /** Total source bytes: the video file for reels, the summed slides for
@@ -111,16 +159,19 @@ async function buildAndAppend(
       ...(/^story-/i.test(name) ? { manualPost: true } : {}),
     };
   } else {
-    const [imageUrls, carouselCaption] = await Promise.all([
+    const [imageUrls, { caption, fromSidecar }] = await Promise.all([
       uploadFiles(slidePaths!),
-      generateCarouselCaption(slidePaths!, captionHint),
+      carouselCaption(filePath, slidePaths!, captionHint),
     ]);
     post = {
       id: uuidv4(),
       status: 'pending',
       type: 'carousel',
       pillar,
-      caption: carouselCaption || captionHint || '✏️ Add caption before approving',
+      caption,
+      // Same rule as reels: a human-written sidecar bypasses the Voice-DNA
+      // queue gate. Lars's own phrasing is deliberate.
+      ...(fromSidecar ? { voiceOverride: true } : {}),
       imageUrls,
       ...(sourceSize !== undefined ? { sourceSize } : {}),
       scheduledTime: scheduledTime.toISOString(),
@@ -167,6 +218,9 @@ export async function POST(req: NextRequest) {
     const { post, created } = await task;
     return NextResponse.json(post, { status: created ? 201 : 200 });
   } catch (err: any) {
+    // Log it: a bare 500 here is invisible in the launchd log, which is why
+    // 26 carousels sat unqueued for two days with no server-side trace.
+    console.error(`[local-scan/upload] failed: ${err?.message ?? String(err)}`);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

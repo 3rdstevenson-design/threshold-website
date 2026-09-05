@@ -23,9 +23,14 @@ export type CaptionChunkOptions = {
   /** Subtract this from each caption's startMs so it appears just
    *  before the speaker says the first word. Default 150ms. */
   leadInMs?: number;
-  /** Extend each caption's endMs to the next caption's startMs if the
+  /** Extend each caption's endMs toward the next caption's startMs if the
    *  gap between them is under this threshold. Default 800ms. */
   gapFillMs?: number;
+  /** Hard cap on how far past its last spoken word a caption may linger
+   *  when gap-filling. Keeps chips tight to speech so a manual cut right
+   *  after a sentence doesn't land inside a long padded tail. Default
+   *  300ms. */
+  maxTailMs?: number;
   /** Hard ceiling on the JOINED caption text length. If adding the next
    *  word would push past this, break the chunk. Prevents CSS ellipsis
    *  mid-word (user requirement: never cut a word in half). Default 18. */
@@ -109,6 +114,7 @@ export function chunkCaptions(
   // caption on screen just before the speaker says the first word.
   const leadInMs = options.leadInMs ?? 150;
   const gapFillMs = options.gapFillMs ?? 800;
+  const maxTailMs = options.maxTailMs ?? 300;
   const maxChars = options.maxChars ?? 18;
   const autoMergeFragments = options.autoMergeFragments ?? true;
   const fragmentGap = options.fragmentGapSeconds ?? 0.001;
@@ -258,7 +264,10 @@ export function chunkCaptions(
   for (let i = 0; i < captions.length - 1; i++) {
     const gap = captions[i + 1].startMs - captions[i].endMs;
     if (gap > 0 && gap <= gapFillMs) {
-      captions[i].endMs = captions[i + 1].startMs;
+      // Bridge toward the next caption, but never linger more than
+      // maxTailMs past the last spoken word — long padded tails made
+      // manual cuts land inside a caption and delete it.
+      captions[i].endMs = Math.min(captions[i + 1].startMs, captions[i].endMs + maxTailMs);
     }
   }
 

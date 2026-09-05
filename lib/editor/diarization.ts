@@ -5,9 +5,10 @@
  * this pass after transcription so that downstream reframing can pick
  * the active speaker when two faces don't fit in a 9:16 crop.
  *
- * Input: an audio blob extracted from the long-form source (usually a
- * WAV pulled out via ffmpeg). Output: per-word speaker labels aligned
- * to source-time seconds.
+ * Input: an audio blob extracted from the long-form source (16kHz mono
+ * Opus pulled out via ffmpeg — raw WAV hits Deepgram's upload window on
+ * long sources). Output: per-word speaker labels aligned to source-time
+ * seconds.
  *
  *   { words: [{ startSec, endSec, speaker }], speakers: ['0', '1', ...] }
  *
@@ -32,6 +33,8 @@ export type DiarizationFile = {
   audioDurationSec: number | null;
 };
 
+import { deepgramPost } from './deepgramFetch';
+
 const DEEPGRAM_DIARIZE_ENDPOINT =
   'https://api.deepgram.com/v1/listen?model=nova-3&punctuate=false&smart_format=false&utterances=false&diarize=true';
 
@@ -55,19 +58,22 @@ type RawDeepgramDiarizeResponse = {
 export async function diarizeWithDeepgram(
   audio: ArrayBuffer | Buffer | Uint8Array,
   apiKey: string,
-  options: { contentType?: string; signal?: AbortSignal } = {},
+  options: {
+    contentType?: string;
+    signal?: AbortSignal;
+    onLog?: (msg: string) => void;
+  } = {},
 ): Promise<DiarizationFile> {
   if (!apiKey) throw new Error('DEEPGRAM_API_KEY missing');
-  const contentType = options.contentType ?? 'audio/wav';
+  const contentType = options.contentType ?? 'audio/ogg';
 
-  const res = await fetch(DEEPGRAM_DIARIZE_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      Authorization: `Token ${apiKey}`,
-      'Content-Type': contentType,
-    },
-    body: audio as unknown as BodyInit,
+  const res = await deepgramPost({
+    url: DEEPGRAM_DIARIZE_ENDPOINT,
+    apiKey,
+    contentType,
+    body: audio,
     signal: options.signal,
+    onRetry: options.onLog,
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');

@@ -13,11 +13,30 @@ async function getPublisher() {
 // Best-effort failure bookkeeping: when the publish failed because the
 // network is down, the queue write usually fails too — that must not blow up
 // the rest of the tick. The post simply stays 'approved' and retries.
+//
+// A post reaching terminal 'failed' also pings Telegram. Before this, a dead
+// post was visible ONLY in the queue UI: on 2026-08-05 a due reel exhausted its
+// attempts on a 404 at 17:39 and the first Lars knew of it was noticing the post
+// never went up. A scheduled delivery that dies must say so on his phone.
 async function recordFailure(post: QueuePost, err: unknown) {
+  const patch = publishFailurePatch(post, err);
   try {
-    await updatePost(post.id, publishFailurePatch(post, err));
+    await updatePost(post.id, patch);
   } catch (writeErr: any) {
     console.error(`publish: could not record failure on ${post.id}: ${writeErr.message}`);
+  }
+  if (patch.status !== 'failed') return;
+  try {
+    const { sendMessage } = await import('@/lib/telegram');
+    await sendMessage(
+      `🚨 Post FAILED to go out: ${post.notes || post.id}\n` +
+        `Type: ${post.type}${post.manualPost ? ' (manual hand-off)' : ''} · scheduled ${post.scheduledTime}\n` +
+        `Last error after ${patch.publishAttempts} attempts: ${patch.publishError}\n\n` +
+        `It will not retry on its own. Fix the cause, then re-approve it in the queue.`,
+    );
+  } catch (notifyErr: any) {
+    // Never let the alert take down the tick — the status write already landed.
+    console.error(`publish: could not alert on failed post ${post.id}: ${notifyErr.message}`);
   }
 }
 

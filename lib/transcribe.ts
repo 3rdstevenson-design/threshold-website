@@ -5,6 +5,7 @@ import { execSync } from 'child_process';
 import OpenAI from 'openai';
 import { generateAndValidateCaption } from './caption';
 import { lintVoiceDna } from './voice/voiceDnaLint';
+import { deepgramPost } from './editor/deepgramFetch';
 
 const WHISPER_SIZE_LIMIT = 25 * 1024 * 1024;
 
@@ -22,6 +23,33 @@ export function resolveDraftFile(filename: string): string | null {
 }
 
 /**
+ * Read one hand-written caption sidecar verbatim. Shared by the reel sidecar
+ * lookup below and the carousel folder's `caption.txt` (see
+ * `readCarouselCaptionSidecar`) so both surfaces treat Lars's own words the
+ * same way: returned as-is, never rewritten.
+ */
+export function readSidecarFile(sidecarPath: string): string | null {
+  try {
+    if (!fs.existsSync(sidecarPath)) return null;
+    const text = fs.readFileSync(sidecarPath, 'utf-8').trim();
+    if (!text) return null;
+    // Warn-only lint: Lars's hand-written sidecars may be intentionally
+    // off-template. Never rewrite or reject them — just surface it.
+    const hard = lintVoiceDna(text).violations.filter((v) => v.hard);
+    if (hard.length > 0) {
+      console.warn(
+        `[voice-dna] sidecar ${path.basename(sidecarPath)} has ${hard.length} lint violation(s) (kept verbatim): ` +
+          hard.map((v) => `[${v.category}] "${v.match}"`).join('; '),
+      );
+    }
+    return text;
+  } catch {
+    /* ignore unreadable sidecar */
+    return null;
+  }
+}
+
+/**
  * A caption sidecar next to the video (`<name>.caption.txt`, falling back to
  * `<name>.txt`) lets a human-written, already-voice-DNA-clean caption bypass
  * transcription. This is how silent StoryReel / loop / timelapse reels get
@@ -31,62 +59,50 @@ export function readCaptionSidecar(filePath: string): string | null {
   const dir = path.dirname(filePath);
   const base = path.basename(filePath, path.extname(filePath));
   for (const cand of [`${base}.caption.txt`, `${base}.txt`]) {
-    const p = path.join(dir, cand);
-    try {
-      if (fs.existsSync(p)) {
-        const text = fs.readFileSync(p, 'utf-8').trim();
-        if (text) {
-          // Warn-only lint: Lars's hand-written sidecars may be intentionally
-          // off-template. Never rewrite or reject them — just surface it.
-          const hard = lintVoiceDna(text).violations.filter((v) => v.hard);
-          if (hard.length > 0) {
-            console.warn(
-              `[voice-dna] sidecar ${cand} has ${hard.length} lint violation(s) (kept verbatim): ` +
-                hard.map((v) => `[${v.category}] "${v.match}"`).join('; '),
-            );
-          }
-          return text;
-        }
-      }
-    } catch {
-      /* ignore unreadable sidecar */
-    }
+    const text = readSidecarFile(path.join(dir, cand));
+    if (text) return text;
   }
   return null;
 }
 
 /**
+ * The carousel equivalent: `Carousels/Final/<Title>/caption.txt`, written by
+ * the export scripts from the deck's own caption panel. For carousels the
+ * scanner's `filePath` is the folder, not a file.
+ */
+export function readCarouselCaptionSidecar(folderPath: string): string | null {
+  return readSidecarFile(path.join(folderPath, 'caption.txt'));
+}
+
+/**
  * Transcribe with Deepgram Nova-3 (same call shape as the video pipeline's
- * ingest-takes.ts). Extracts a loudnorm'd 16kHz mono WAV first when ffmpeg
- * is available — faint across-the-gym speech needs the boost — and falls
- * back to posting the container as-is when it isn't (Deepgram demuxes).
- * Returns '' when there's no speech, null on API failure.
+ * ingest-takes.ts). Extracts a loudnorm'd 16kHz mono Opus first when ffmpeg
+ * is available — faint across-the-gym speech needs the boost, and raw PCM
+ * WAV bodies hit Deepgram's upload window (408 SLOW_UPLOAD) past ~1 min —
+ * and falls back to posting the container as-is when it isn't (Deepgram
+ * demuxes). Returns '' when there's no speech, null on API failure.
  */
 async function transcribeWithDeepgram(filePath: string): Promise<string | null> {
   let bodyPath = filePath;
-  let tmpWav: string | null = null;
+  let tmpAudio: string | null = null;
   try {
-    tmpWav = path.join(os.tmpdir(), `dg-${Date.now()}.wav`);
+    tmpAudio = path.join(os.tmpdir(), `dg-${Date.now()}.ogg`);
     execSync(
-      `ffmpeg -y -i "${filePath}" -vn -ac 1 -ar 16000 -af "highpass=f=80,loudnorm=I=-18:TP=-2:LRA=11" -c:a pcm_s16le "${tmpWav}" 2>/dev/null`,
+      `ffmpeg -y -i "${filePath}" -vn -ac 1 -ar 16000 -af "highpass=f=80,loudnorm=I=-18:TP=-2:LRA=11" -c:a libopus -b:a 32k -application voip "${tmpAudio}" 2>/dev/null`,
     );
-    bodyPath = tmpWav;
+    bodyPath = tmpAudio;
   } catch {
-    if (tmpWav && fs.existsSync(tmpWav)) fs.unlinkSync(tmpWav);
-    tmpWav = null; // no ffmpeg — send the original container
+    if (tmpAudio && fs.existsSync(tmpAudio)) fs.unlinkSync(tmpAudio);
+    tmpAudio = null; // no ffmpeg — send the original container
   }
   try {
-    const res = await fetch(
-      'https://api.deepgram.com/v1/listen?model=nova-3&punctuate=true&smart_format=true&language=en',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
-          'Content-Type': bodyPath === tmpWav ? 'audio/wav' : 'application/octet-stream',
-        },
-        body: fs.readFileSync(bodyPath),
-      },
-    );
+    const res = await deepgramPost({
+      url: 'https://api.deepgram.com/v1/listen?model=nova-3&punctuate=true&smart_format=true&language=en',
+      apiKey: process.env.DEEPGRAM_API_KEY ?? '',
+      contentType: bodyPath === tmpAudio ? 'audio/ogg' : 'application/octet-stream',
+      body: fs.readFileSync(bodyPath),
+      onRetry: (msg) => console.warn(`[transcribe] ${msg}`),
+    });
     if (!res.ok) {
       console.warn(`[transcribe] Deepgram ${res.status}: ${(await res.text()).slice(0, 200)}`);
       return null;
@@ -97,7 +113,7 @@ async function transcribeWithDeepgram(filePath: string): Promise<string | null> 
     console.warn(`[transcribe] Deepgram error: ${e?.message ?? e}`);
     return null;
   } finally {
-    if (tmpWav && fs.existsSync(tmpWav)) fs.unlinkSync(tmpWav);
+    if (tmpAudio && fs.existsSync(tmpAudio)) fs.unlinkSync(tmpAudio);
   }
 }
 

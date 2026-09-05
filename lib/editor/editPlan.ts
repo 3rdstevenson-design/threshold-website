@@ -17,7 +17,7 @@
  */
 import { DEFAULT_FILLER_WORDS } from './fillerWords';
 
-export const EDIT_PLAN_VERSION = 3;
+export const EDIT_PLAN_VERSION = 4;
 
 /**
  * Stepped playback-speed presets offered by the UI. `speed` on a clip is
@@ -198,6 +198,42 @@ export type Caption = {
   emphasizedWordIndex?: number;
 };
 
+/** Which take a retake group keeps by default. 'ask' cuts like 'last' but
+ *  flags every group for review instead of only the uncertain ones. */
+export type RetakePreference = 'first' | 'last' | 'longest' | 'ask';
+
+/**
+ * Per-project tuning for the auto-cut stages. Stored on the plan so the
+ * server pipeline and the client "Analyze audio" re-run cut identically.
+ * All fields optional on disk — resolve with resolveCutSettings().
+ */
+export type CutSettings = {
+  /** Silences this long or longer get cut, in seconds. */
+  minSilenceSeconds: number;
+  retakePreference: RetakePreference;
+};
+
+export const DEFAULT_CUT_SETTINGS: CutSettings = {
+  minSilenceSeconds: 0.6,
+  retakePreference: 'last',
+};
+
+export function resolveCutSettings(plan: Pick<EditPlan, 'cutSettings'>): CutSettings {
+  return { ...DEFAULT_CUT_SETTINGS, ...(plan.cutSettings ?? {}) };
+}
+
+/**
+ * One range the auto-cut stages removed, in SOURCE seconds, tagged with
+ * which stage removed it. Purely an annotation for the timeline's
+ * removed-segment markers — the clips[] gaps remain the ground truth of
+ * what's cut. Rewritten wholesale on every auto-cut run.
+ */
+export type CutLogEntry = {
+  start: number; // source seconds
+  end: number;
+  reason: 'silence' | 'filler' | 'stutter' | 'retake';
+};
+
 export type HeaderConfig = {
   text: string;
   position: 'top' | 'bottom';
@@ -233,6 +269,8 @@ export type EditAction = {
     | 'set_custom_spellings'        // replace the custom-spellings list
     | 'flip_retake_choice'          // swap which take a retake group keeps
     | 'set_clip_speed'              // per-clip stepped playback speed
+    | 'set_cut_settings'            // patch the auto-cut tuning (silence threshold, retake pref)
+    | 'restore_gap'                 // re-insert removed source range(s) as clips
     | 'insert_overlay'             // free text-overlay layer (separate from transcript captions)
     | 'update_overlay'
     | 'set_overlay_time'
@@ -275,10 +313,11 @@ export type Overlay = {
 export type EditPlan = {
   /**
    * 1 = pre-retake plans; 2 = adds clip metadata + retakeGroups;
-   * 3 = adds per-clip speed. All additions are optional fields, so every
-   * older version keeps loading (validatePlan accepts ≤ current).
+   * 3 = adds per-clip speed; 4 = adds cutSettings + cutLog. All additions
+   * are optional fields, so every older version keeps loading
+   * (validatePlan accepts ≤ current).
    */
-  version: 1 | 2 | 3;
+  version: 1 | 2 | 3 | 4;
   slug: string;
   sourceVideo: string;   // path relative to my-video-projects root
   sourceDuration: number; // seconds
@@ -307,6 +346,16 @@ export type EditPlan = {
    * `flip_retake_choice` action.
    */
   retakeGroups?: RetakeGroup[];
+  /**
+   * Auto-cut tuning. Optional — DEFAULT_CUT_SETTINGS applies when absent
+   * (resolve with resolveCutSettings).
+   */
+  cutSettings?: Partial<CutSettings>;
+  /**
+   * What the last auto-cut run removed and why, for the timeline's
+   * removed-segment markers. Annotation only — see CutLogEntry.
+   */
+  cutLog?: CutLogEntry[];
   history: EditAction[];
 };
 
@@ -515,6 +564,8 @@ type EditActionInput =
   | { type: 'set_custom_spellings'; params: { spellings: SpellingCorrection[] } }
   | { type: 'flip_retake_choice'; params: { groupId: string; alternativeId: string } }
   | { type: 'set_clip_speed'; params: { clipId: string; speed: number } }
+  | { type: 'set_cut_settings'; params: Partial<CutSettings> }
+  | { type: 'restore_gap'; params: { ranges: { start: number; end: number }[] } }
   | { type: 'insert_overlay'; params: { startMs: number; endMs: number; text?: string } }
   | { type: 'update_overlay'; params: { overlayId: string; text: string } }
   | { type: 'set_overlay_time'; params: { overlayId: string; startMs: number; endMs: number } }
@@ -541,10 +592,13 @@ function applyActionInternal(plan: EditPlan, action: EditAction): EditPlan {
       return { ...plan, clips: next };
     }
     case 'delete_clip': {
-      // Cascade-delete any captions that fell inside the deleted clip's
-      // edited-time window, and shift captions that came after it left
-      // by the deleted duration. All in one atomic update so there's no
-      // visible window of stale captions.
+      // Collapse the deleted clip's edited-time window out of the caption
+      // track: captions fully inside are dropped, captions after shift
+      // left, and captions that STRADDLE a boundary are trimmed at the
+      // cut rather than deleted — a caption's padded tail hanging past
+      // the last spoken word must not take the whole caption with it
+      // when the user cuts right where they stop talking. All in one
+      // atomic update so there's no visible window of stale captions.
       const { clipId } = action.params as { clipId: string };
       const idx = plan.clips.findIndex((c) => c.id === clipId);
       if (idx === -1) return plan;
@@ -556,15 +610,47 @@ function applyActionInternal(plan: EditPlan, action: EditAction): EditPlan {
       const deletedMs = clipEditedMs(clip);
       const rangeEnd = rangeStart + deletedMs;
 
-      const captions = plan.captions
-        // Drop captions whose window overlaps the deleted region.
-        .filter((cap) => cap.endMs <= rangeStart || cap.startMs >= rangeEnd)
-        // Shift post-range captions left.
-        .map((cap) => (
-          cap.startMs >= rangeEnd
-            ? { ...cap, startMs: cap.startMs - deletedMs, endMs: cap.endMs - deletedMs }
-            : cap
-        ));
+      // Map an edited-time ms across the deletion: times inside the
+      // removed window pinch to its start; times after shift left.
+      const collapse = (t: number) =>
+        t <= rangeStart ? t : t >= rangeEnd ? t - deletedMs : rangeStart;
+      // Anything shorter than this after trimming isn't worth keeping.
+      const MIN_SURVIVING_MS = 120;
+
+      const captions: Caption[] = [];
+      for (const cap of plan.captions) {
+        const startMs = collapse(cap.startMs);
+        const endMs = collapse(cap.endMs);
+        if (endMs - startMs < MIN_SURVIVING_MS) continue;
+        let next: Caption = { ...cap, startMs, endMs };
+        if (cap.words && cap.words.length > 0) {
+          const survivors = cap.words.filter((w) => {
+            const mid = (w.startMs + w.endMs) / 2;
+            return mid < rangeStart || mid >= rangeEnd;
+          });
+          // All spoken words were in the deleted region — only padding
+          // survived, so the caption goes too.
+          if (survivors.length === 0) continue;
+          const words = survivors.map((w) => ({
+            ...w,
+            startMs: collapse(w.startMs),
+            endMs: collapse(w.endMs),
+          }));
+          next = { ...next, words };
+          if (survivors.length !== cap.words.length) {
+            // The cut removed spoken words — shrink the text to match.
+            next = { ...next, text: words.map((w) => w.text).join(' ') };
+            if (
+              typeof next.emphasizedWordIndex === 'number' &&
+              next.emphasizedWordIndex >= words.length
+            ) {
+              const { emphasizedWordIndex: _omit, ...rest } = next;
+              next = rest;
+            }
+          }
+        }
+        captions.push(next);
+      }
 
       return {
         ...plan,
@@ -861,6 +947,49 @@ function applyActionInternal(plan: EditPlan, action: EditAction): EditPlan {
           return { ...c, speed };
         }),
       };
+    }
+    case 'set_cut_settings': {
+      const patch = action.params as Partial<CutSettings>;
+      return { ...plan, cutSettings: { ...(plan.cutSettings ?? {}), ...patch } };
+    }
+    case 'restore_gap': {
+      // Re-insert removed source range(s) as clips at their chronological
+      // spot. Each range is clamped against existing clips so a stale
+      // marker can't double-cover source time. Captions at/after each
+      // insertion point shift right by the inserted duration (the inverse
+      // of delete_clip's shift) so downstream captions stay in sync.
+      const { ranges } = action.params as { ranges: { start: number; end: number }[] };
+      let clips = plan.clips;
+      let captions = plan.captions;
+      for (const range of ranges) {
+        let start = Math.max(0, range.start);
+        let end = Math.min(plan.sourceDuration, range.end);
+        for (const c of clips) {
+          // Trim the restore range against any overlap with existing clips.
+          if (c.sourceStart <= start && c.sourceEnd > start) start = Math.max(start, c.sourceEnd);
+          if (c.sourceStart < end && c.sourceEnd >= end) end = Math.min(end, c.sourceStart);
+        }
+        if (end - start < 0.05) continue;
+        const restored: Clip = {
+          id: randomId('clip'),
+          sourceStart: start,
+          sourceEnd: end,
+          reason: 'manual',
+        };
+        const insertIdx = clips.findIndex((c) => c.sourceStart > restored.sourceStart);
+        const idx = insertIdx === -1 ? clips.length : insertIdx;
+        let insertAtMs = 0;
+        for (let i = 0; i < idx; i++) insertAtMs += clipEditedMs(clips[i]);
+        const insertedMs = clipEditedMs(restored);
+        clips = [...clips.slice(0, idx), restored, ...clips.slice(idx)];
+        captions = captions.map((cap) =>
+          cap.startMs >= insertAtMs
+            ? { ...cap, startMs: cap.startMs + insertedMs, endMs: cap.endMs + insertedMs }
+            : cap,
+        );
+      }
+      if (clips === plan.clips) return plan;
+      return { ...plan, clips, captions };
     }
     case 'set_custom_spellings': {
       const { spellings } = action.params as { spellings: SpellingCorrection[] };

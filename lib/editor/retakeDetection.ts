@@ -22,6 +22,7 @@
 
 import * as fuzz from 'fuzzball';
 import type { Range, Word } from './autoCut';
+import type { RetakePreference } from './editPlan';
 
 export type Utterance = {
   words: Word[];
@@ -64,6 +65,13 @@ export type RetakeDetectionOptions = {
   minUtteranceWords?: number;
   /** Padding kept around cut boundaries, seconds. Default 0.2 (auto-editor's margin). */
   paddingSeconds?: number;
+  /**
+   * Which take of a group wins. Default 'last' (the redo is the intended
+   * one). 'ask' cuts like 'last' but flags EVERY group for review. All
+   * preferences fall back to a complete-looking take (and flag) when the
+   * preferred one looks truncated or anomalously low-confidence.
+   */
+  keeperPreference?: RetakePreference;
 };
 
 export function segmentUtterances(words: Word[], gapSeconds = 0.5): Utterance[] {
@@ -111,6 +119,7 @@ export function detectRetakes(
   const lookback = options?.lookback ?? 3;
   const minWords = options?.minUtteranceWords ?? 3;
   const padding = options?.paddingSeconds ?? 0.2;
+  const preference = options?.keeperPreference ?? 'last';
 
   // Union-find-lite: assign each utterance to a group when it matches one
   // of the previous `lookback` utterances; groups extend forward for 3×+.
@@ -148,45 +157,63 @@ export function detectRetakes(
     const sorted = Array.from(new Set(members)).sort((a, b) => a - b);
     const alts = sorted.map((i) => utterances[i]);
 
-    // Default keeper: the LAST take (the redo is the intended one).
-    let keptIndex = alts.length - 1;
+    // Candidate order by keeper preference; index 0 is the preferred take.
+    // 'ask' cuts like 'last' but flags every group below.
+    const order: number[] = (() => {
+      const idxs = alts.map((_, i) => i);
+      switch (preference) {
+        case 'first':
+          return idxs;
+        case 'longest':
+          // Most words wins; ties go to the later take.
+          return idxs.sort((a, b) =>
+            alts[b].words.length - alts[a].words.length || b - a);
+        case 'last':
+        case 'ask':
+        default:
+          return idxs.reverse();
+      }
+    })();
+    const prefLabel = preference === 'ask' ? 'last' : preference;
+
+    let keptIndex = order[0];
     let flagged = false;
-    let reason = 'kept last take';
+    let reason = `kept ${prefLabel} take`;
 
     const wordCounts = alts.map((u) => u.words.length);
     const median = [...wordCounts].sort((a, b) => a - b)[Math.floor(wordCounts.length / 2)];
-    const last = alts[keptIndex];
-    const lastConf = meanConfidence(last);
     const otherConfs = alts
-      .slice(0, -1)
+      .filter((_, i) => i !== keptIndex)
       .map(meanConfidence)
       .filter((c): c is number => typeof c === 'number');
     const bestOtherConf = otherConfs.length ? Math.max(...otherConfs) : undefined;
+    const looksShort = (i: number) =>
+      alts[i].words.length < Math.max(minWords, median * 0.6);
+    const looksLowConf = (i: number) => {
+      const conf = meanConfidence(alts[i]);
+      return typeof conf === 'number' && typeof bestOtherConf === 'number'
+        ? conf < bestOtherConf - 0.15
+        : false;
+    };
 
-    const lastLooksShort = last.words.length < Math.max(minWords, median * 0.6);
-    const lastLooksLowConf =
-      typeof lastConf === 'number' &&
-      typeof bestOtherConf === 'number' &&
-      lastConf < bestOtherConf - 0.15;
-
-    if (lastLooksShort || lastLooksLowConf) {
-      // Fall back to the last take that is NOT suspiciously short/low-conf.
-      for (let k = alts.length - 2; k >= 0; k--) {
-        const conf = meanConfidence(alts[k]);
-        const short = alts[k].words.length < Math.max(minWords, median * 0.6);
-        const lowConf =
-          typeof conf === 'number' && typeof bestOtherConf === 'number'
-            ? conf < bestOtherConf - 0.15
-            : false;
-        if (!short && !lowConf) {
+    const preferredShort = looksShort(keptIndex);
+    if (preferredShort || looksLowConf(keptIndex)) {
+      // Fall back to the next candidate that is NOT suspiciously short/low-conf.
+      for (const k of order.slice(1)) {
+        if (!looksShort(k) && !looksLowConf(k)) {
           keptIndex = k;
           break;
         }
       }
       flagged = true;
-      reason = lastLooksShort
-        ? 'last take looked truncated; kept last complete take — review'
-        : 'last take had anomalously low confidence; kept prior take — review';
+      reason = preferredShort
+        ? `${prefLabel} take looked truncated; kept ${prefLabel === 'first' ? 'first' : 'last'} complete take — review`
+        : `${prefLabel} take had anomalously low confidence; kept prior take — review`;
+    }
+
+    if (preference === 'ask') {
+      flagged = true;
+      if (!reason.includes('review')) reason = `${reason} — confirm (always ask)`;
     }
 
     detections.push({

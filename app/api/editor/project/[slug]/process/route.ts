@@ -102,7 +102,16 @@ export async function POST(
         });
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+      let msg = e instanceof Error ? e.message : String(e);
+      // The spawned ingest writes its own, more specific error into
+      // status.json (e.g. "Deepgram 408: SLOW_UPLOAD…") right before it
+      // exits nonzero. Don't clobber that detail with a generic wrapper —
+      // it's the difference between a diagnosable failure and
+      // "ingest exited 1".
+      const existing = readProject(slug)?.error;
+      if (existing && msg.startsWith('ingest exited') && !msg.includes(existing)) {
+        msg = `${msg} — ${existing}`;
+      }
       writeStatus(slug, { error: msg });
       emit('error', { msg });
     }

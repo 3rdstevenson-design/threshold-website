@@ -28,10 +28,19 @@ export async function DELETE(
   const removed: string[] = [];
   const errors: string[] = [];
 
+  // SOFT delete — move into data/trash/<slug>-<ts>/ instead of rmSync.
+  // The sidebar × used to hard-delete the whole project dir INCLUDING
+  // source.mp4 (2026-07-25: seven teleprompter sources were lost this
+  // way mid-reprocess and had to be re-AirDropped). Trash keeps the
+  // bytes until someone empties data/trash/ deliberately.
+  const trashDir = path.join(
+    VIDEO_PROJECT_ROOT, 'data', 'trash', `${slug}-${Date.now()}`,
+  );
   const tryRm = (p: string) => {
     try {
       if (fs.existsSync(p)) {
-        fs.rmSync(p, { recursive: true, force: true });
+        fs.mkdirSync(trashDir, { recursive: true });
+        fs.renameSync(p, path.join(trashDir, path.basename(p)));
         removed.push(path.relative(VIDEO_PROJECT_ROOT, p));
       }
     } catch (e) {

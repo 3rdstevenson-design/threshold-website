@@ -153,6 +153,7 @@ export async function renderWaveformPng(input: {
     `[0:a]aformat=channel_layouts=mono,showwavespic=s=${width}x${height}:colors=${color}[v]`,
     '-map', '[v]',
     '-frames:v', '1',
+    '-update', '1', // ffmpeg 8.x: required for single-image output (else image2 warns)
     input.outputPath,
   ]);
   if (r.code !== 0) throw new Error(`ffmpeg waveform failed: ${r.stderr.slice(-500)}`);
@@ -195,6 +196,7 @@ export async function renderFilmstripJpg(input: {
           '-ss', t.toFixed(3),
           '-i', input.videoPath,
           '-frames:v', '1',
+          '-update', '1', // ffmpeg 8.x: required for single-image output
           '-vf', `scale=-2:${frameHeight}:flags=fast_bilinear`,
           '-q:v', '5',
           frameFile(i),
@@ -223,6 +225,7 @@ export async function renderFilmstripJpg(input: {
       '-i', path.join(tmpDir, 'f_%03d.jpg'),
       '-vf', `tile=${frames}x1`,
       '-frames:v', '1',
+      '-update', '1', // ffmpeg 8.x: required for single-image output
       '-q:v', '5',
       input.outputPath,
     ]);
@@ -268,6 +271,7 @@ export async function extractThumb(
     '-ss', String(atSec),
     '-i', src,
     '-frames:v', '1',
+    '-update', '1', // ffmpeg 8.x: required for single-image output
     '-vf', `scale=${width}:-2`,
     '-q:v', '4',
     dst,

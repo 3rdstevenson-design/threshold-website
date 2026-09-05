@@ -1417,7 +1417,13 @@ function PlannerView({
 
 // ── Tab bar ────────────────────────────────────────────────────────────────────
 
-const TABS: PostStatus[] = ['pending', 'failed', 'published'];
+// sent_to_telegram and rejected used to be missing here entirely, which left
+// those posts unreachable from this page: PlannerView only surfaces approved
+// and published items inside the week being viewed, so 15 sent and 4 rejected
+// posts were invisible everywhere in the queue UI.
+const TABS: PostStatus[] = ['pending', 'failed', 'published', 'sent_to_telegram', 'rejected'];
+// Tabs that only show up when they hold something.
+const CONDITIONAL_TABS: PostStatus[] = ['failed', 'sent_to_telegram', 'rejected'];
 const TAB_LABELS: Record<PostStatus, string> = {
   pending: 'Pending', approved: 'Scheduled', rejected: 'Rejected', published: 'Published',
   processing: 'Processing', sent_to_telegram: 'Sent to Telegram', failed: 'Failed',
@@ -1430,8 +1436,8 @@ function TabBar({ active, counts, onSelect }: {
 }) {
   return (
     <div style={{ display: 'flex', gap: 4, borderBottom: `1px solid ${C.border}`, paddingBottom: 0 }}>
-      {/* Failed only appears when something actually failed — zero-count noise helps nobody. */}
-      {TABS.filter((tab) => tab !== 'failed' || counts.failed > 0 || active === 'failed').map((tab) => (
+      {/* Conditional tabs only appear when non-empty — zero-count noise helps nobody. */}
+      {TABS.filter((tab) => !CONDITIONAL_TABS.includes(tab) || counts[tab] > 0 || active === tab).map((tab) => (
         <button
           key={tab}
           onClick={() => onSelect(tab)}

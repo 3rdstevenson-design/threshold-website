@@ -635,6 +635,33 @@ export function clipsToCutRanges(clips: Clip[], duration: number): Range[] {
   return cuts;
 }
 
+/** Parts of `a` not covered by `b`. Both inputs must be sorted, non-overlapping. */
+export function subtractRanges(a: Range[], b: Range[]): Range[] {
+  const out: Range[] = [];
+  for (const r of a) {
+    let cursor = r.start;
+    for (const cut of b) {
+      if (cut.end <= cursor || cut.start >= r.end) continue;
+      if (cut.start > cursor) out.push({ start: cursor, end: cut.start });
+      cursor = Math.max(cursor, cut.end);
+      if (cursor >= r.end) break;
+    }
+    if (cursor < r.end) out.push({ start: cursor, end: r.end });
+  }
+  return out;
+}
+
+/**
+ * The source ranges newly removed by a stage: cut in `nextClips` but not
+ * already cut in `prevClips`. Feeds the plan's cutLog annotations.
+ */
+export function newCutRanges(prevClips: Clip[], nextClips: Clip[], duration: number): Range[] {
+  return subtractRanges(
+    clipsToCutRanges(nextClips, duration),
+    clipsToCutRanges(prevClips, duration),
+  );
+}
+
 /** Keep only the words whose midpoint falls inside any of the given clips. */
 export function filterWordsByClips(words: Word[], clips: Clip[]): Word[] {
   if (clips.length === 0) return [];

@@ -29,6 +29,7 @@ export type ProjectListEntry = {
     | 'clips-proposed'
     | 'editing'
     | 'rendered'
+    | 'stale'
     | 'error';
   updatedAt: string;
   durationSec?: number;
@@ -45,7 +46,8 @@ const STAGE_LABEL: Record<ProjectListEntry['stage'], string> = {
   'clips-proposed': 'Clips ready',
   editing: 'Editing',
   rendered: 'Exported',
-  error: 'Failed — tap to retry',
+  stale: 'Edited — re-export',
+  error: 'Failed — open to retry',
 };
 
 const STAGE_COLOR: Record<ProjectListEntry['stage'], string> = {
@@ -54,6 +56,7 @@ const STAGE_COLOR: Record<ProjectListEntry['stage'], string> = {
   'clips-proposed': C.gold,
   editing: C.purple,
   rendered: C.gold,
+  stale: C.red,
   error: C.red,
 };
 
