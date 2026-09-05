@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { TAKES_ROOT, DRAFTS_DIR } from './paths';
+import type { PipelineWarning, ReviewReason } from './pipelineReport';
 
 /**
  * Pipeline stages, in order of progress:
@@ -56,7 +57,18 @@ export interface ProjectStatus {
   sourceClipId?: string;
   /** True when clips-proposal.json exists on disk (long-form only). */
   hasClipsProposal: boolean;
+  /** Non-fatal problems from the last run (LLM unavailable, hook skipped…). */
+  warnings?: PipelineWarning[];
+  /** Set when the unattended pipeline paused for a human decision. */
+  review?: ReviewState | null;
 }
+
+export type ReviewState = {
+  required: boolean;
+  reasons: ReviewReason[];
+  createdAt: string;
+  resolvedAt?: string;
+};
 
 function derivedStage(slugDir: string, slug: string, category: Category): Stage {
   const has = (rel: string) => fs.existsSync(path.join(slugDir, rel));
@@ -156,6 +168,8 @@ export function readProject(slug: string): ProjectStatus | null {
     sourceSlug: stored.sourceSlug,
     sourceClipId: stored.sourceClipId,
     hasClipsProposal,
+    warnings: Array.isArray(stored.warnings) ? stored.warnings : undefined,
+    review: stored.review ?? null,
   };
 }
 

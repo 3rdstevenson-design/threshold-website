@@ -61,7 +61,7 @@ export function AutoCutSettingsPanel(props: Props) {
           </span>
           <input
             type="range"
-            min={300}
+            min={400}
             max={1500}
             step={50}
             value={ms}
@@ -69,7 +69,7 @@ export function AutoCutSettingsPanel(props: Props) {
             style={{ accentColor: C.gold, width: '100%' }}
           />
           <span style={{ fontSize: 10, opacity: 0.7 }}>
-            Pauses this long or longer are cut. Lower = tighter edit.
+            Pauses this long or longer are cut. Lower = tighter edit. 400ms is the floor: ingest only records silences that long.
           </span>
         </label>
 

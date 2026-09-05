@@ -140,48 +140,71 @@ export function parseDeepgramResponse(json: DeepgramApiResponse): DeepgramRespon
 // ── Drift measurement ──────────────────────────────────────────────
 
 /**
+ * chunkCaptions() deliberately starts every caption `leadInMs` (150) before
+ * its first word so text is on screen as speech lands. Drift must therefore
+ * be measured against the SPEECH onset, not caption.startMs — comparing to
+ * startMs reported a constant ~150ms "drift" on every caption, which sat
+ * exactly on the auto-correct threshold and made every run rewrite every
+ * caption while reporting success. Mirrors LEAD_IN_MS in
+ * my-video-projects/scripts/audit-render.ts.
+ */
+export const CAPTION_LEAD_IN_MS = 150;
+
+/** Where the first word is actually spoken, per the caption's own timing. */
+export function captionSpeechOnsetMs(cap: Caption, leadInMs: number = CAPTION_LEAD_IN_MS): number {
+  const w0 = cap.words?.[0];
+  if (w0 && typeof w0.startMs === 'number' && w0.startMs >= cap.startMs) return w0.startMs;
+  return cap.startMs + leadInMs;
+}
+
+export type MeasureOptions = { leadInMs?: number };
+
+/**
  * Measure caption-vs-Deepgram drift without modifying captions. Used to
  * gate whether auto-correction is needed.
  */
 export function measureCaptionDrift(
   captions: Caption[],
   deepgramWords: DeepgramWord[],
+  options: MeasureOptions = {},
 ): SyncDriftResult {
+  const leadInMs = options.leadInMs ?? CAPTION_LEAD_IN_MS;
   const perCaption: SyncDriftResult['perCaption'] = [];
   const drifts: number[] = [];
   let matchedCount = 0;
 
   for (const cap of captions) {
+    const expected = captionSpeechOnsetMs(cap, leadInMs);
     const capWords = cap.text.split(/\s+/).map(normalizeWord).filter(Boolean);
     if (capWords.length === 0) {
       perCaption.push({
         id: cap.id,
         text: cap.text,
-        expectedStartMs: cap.startMs,
+        expectedStartMs: expected,
         matchedStartMs: null,
         driftMs: null,
       });
       continue;
     }
     const needle = capWords[0];
-    const match = findClosestWord(deepgramWords, needle, cap.startMs, 2000, 5000);
+    const match = findClosestWord(deepgramWords, needle, expected, 2000, 5000);
     if (match === null) {
       perCaption.push({
         id: cap.id,
         text: cap.text,
-        expectedStartMs: cap.startMs,
+        expectedStartMs: expected,
         matchedStartMs: null,
         driftMs: null,
       });
       continue;
     }
-    const driftMs = Math.abs(match.startMs - cap.startMs);
+    const driftMs = Math.abs(match.startMs - expected);
     drifts.push(driftMs);
     matchedCount++;
     perCaption.push({
       id: cap.id,
       text: cap.text,
-      expectedStartMs: cap.startMs,
+      expectedStartMs: expected,
       matchedStartMs: match.startMs,
       driftMs,
     });
@@ -209,6 +232,8 @@ export type AutoCorrectOptions = {
   driftThresholdMs?: number;
   /** Search window for the first-word match, in ms. Default 2000. */
   searchWindowMs?: number;
+  /** Lead-in re-applied to rewritten captions so they keep the house feel. */
+  leadInMs?: number;
 };
 
 /**
@@ -227,6 +252,7 @@ export function autoCorrectCaptions(
 ): AutoCorrectResult {
   const threshold = options.driftThresholdMs ?? 80;
   const window = options.searchWindowMs ?? 2000;
+  const leadInMs = options.leadInMs ?? CAPTION_LEAD_IN_MS;
 
   let rewritten = 0;
   let untouched = 0;
@@ -241,10 +267,11 @@ export function autoCorrectCaptions(
     // 1. Find the caption's first word in the Deepgram stream. Fall back
     //    to a 2.5x extended window so heavily-drifted captions still get
     //    rewritten (otherwise they stay drifted forever).
+    const expected = captionSpeechOnsetMs(cap, leadInMs);
     const firstMatch = findClosestWord(
       deepgramWords,
       capNorms[0],
-      cap.startMs,
+      expected,
       window,
       window * 2.5,
     );
@@ -252,7 +279,7 @@ export function autoCorrectCaptions(
       untouched++;
       return cap;
     }
-    const firstDrift = Math.abs(firstMatch.startMs - cap.startMs);
+    const firstDrift = Math.abs(firstMatch.startMs - expected);
     if (firstDrift < threshold) {
       untouched++;
       return cap;
@@ -303,10 +330,13 @@ export function autoCorrectCaptions(
     }
 
     rewritten++;
+    // Preserve the lead-in: the caption appears `leadInMs` before the
+    // corrected onset, exactly as chunkCaptions would have placed it.
+    const displayStart = Math.max(0, newStart - leadInMs);
     return {
       ...cap,
-      startMs: newStart,
-      endMs: Math.max(newStart + 1, newEnd),
+      startMs: displayStart,
+      endMs: Math.max(displayStart + 1, newEnd),
       words: newWords,
     };
   });

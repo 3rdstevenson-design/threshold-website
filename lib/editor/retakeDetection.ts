@@ -65,6 +65,8 @@ export type RetakeDetectionOptions = {
   minUtteranceWords?: number;
   /** Padding kept around cut boundaries, seconds. Default 0.2 (auto-editor's margin). */
   paddingSeconds?: number;
+  /** Flag the keeper when its mean confidence trails the best sibling by more than this. Default 0.15. */
+  confidenceDelta?: number;
   /**
    * Which take of a group wins. Default 'last' (the redo is the intended
    * one). 'ask' cuts like 'last' but flags EVERY group for review. All
@@ -120,6 +122,7 @@ export function detectRetakes(
   const minWords = options?.minUtteranceWords ?? 3;
   const padding = options?.paddingSeconds ?? 0.2;
   const preference = options?.keeperPreference ?? 'last';
+  const confidenceDelta = options?.confidenceDelta ?? 0.15;
 
   // Union-find-lite: assign each utterance to a group when it matches one
   // of the previous `lookback` utterances; groups extend forward for 3×+.
@@ -192,7 +195,7 @@ export function detectRetakes(
     const looksLowConf = (i: number) => {
       const conf = meanConfidence(alts[i]);
       return typeof conf === 'number' && typeof bestOtherConf === 'number'
-        ? conf < bestOtherConf - 0.15
+        ? conf < bestOtherConf - confidenceDelta
         : false;
     };
 

@@ -74,7 +74,7 @@ export async function POST(
   // Clear any prior error immediately so a retry stops showing "Failed" in
   // the sidebar the instant the user re-runs (status surfaces 'error'
   // whenever the error field is set — see lib/editor/status.ts).
-  writeStatus(slug, { error: null });
+  writeStatus(slug, { error: null, warnings: [] });
 
   // The actual pipeline, DECOUPLED from this request. It runs on the server
   // event loop via the job runner and survives a client disconnect: it

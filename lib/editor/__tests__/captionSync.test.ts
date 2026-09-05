@@ -9,11 +9,21 @@ import {
 } from '../captionSync';
 import type { Caption } from '../editPlan';
 
+// Fixture captions carry word timing whose first word starts AT startMs,
+// i.e. no lead-in — so drift numbers below compare speech onset to speech
+// onset. Captions with no `words` are assumed to have the 150ms house
+// lead-in (see CAPTION_LEAD_IN_MS) and are covered by the lead-in suite.
 const cap = (id: string, startMs: number, endMs: number, text: string): Caption => ({
   id,
   startMs,
   endMs,
   text,
+  words: text.trim()
+    ? text.trim().split(/\s+/).map((t, i, arr) => {
+        const span = (endMs - startMs) / arr.length;
+        return { text: t, startMs: Math.round(startMs + span * i), endMs: Math.round(startMs + span * (i + 1)) };
+      })
+    : undefined,
 });
 
 describe('parseDeepgramResponse', () => {
@@ -83,6 +93,20 @@ describe('measureCaptionDrift', () => {
     expect(drift.matchedCount).toBe(1);
   });
 
+  it('measures against speech onset, not the 150ms-early caption start', () => {
+    // A chunkCaptions() caption: startMs is 150 before the first word.
+    const chunked: Caption = { id: 'c1', startMs: 850, endMs: 1500, text: 'Hello world',
+      words: [{ text: 'Hello', startMs: 1000, endMs: 1200 }, { text: 'world', startMs: 1200, endMs: 1500 }] };
+    const words = dgWords([{ w: 'hello', s: 1000, e: 1200 }, { w: 'world', s: 1200, e: 1500 }]);
+    expect(measureCaptionDrift([chunked], words).maxDriftMs).toBe(0);
+    // Same caption without word timing: onset is inferred as startMs + 150.
+    const bare: Caption = { id: 'c2', startMs: 850, endMs: 1500, text: 'Hello world' };
+    expect(measureCaptionDrift([bare], words).maxDriftMs).toBe(0);
+    // A genuinely late caption still reads as drift.
+    const late: Caption = { ...bare, id: 'c3', startMs: 1150 };
+    expect(measureCaptionDrift([late], words).maxDriftMs).toBe(300);
+  });
+
   it('skips captions with no match inside the search window', () => {
     const captions = [cap('c1', 10000, 10400, 'Nevermore said the raven')];
     const words = dgWords([{ w: 'hello', s: 100, e: 300 }]);
@@ -126,11 +150,26 @@ describe('autoCorrectCaptions', () => {
       searchWindowMs: 2000,
     });
     expect(r.rewritten).toBe(1);
-    expect(r.captions[0].startMs).toBe(100);
+    // Rewritten captions keep the house lead-in: onset 100 → display at 0.
+    expect(r.captions[0].startMs).toBe(0);
+    expect(r.captions[0].words?.[0].startMs).toBe(100);
     // endMs should shift to match the last matched word's end
     expect(r.captions[0].endMs).toBeGreaterThan(r.captions[0].startMs);
     // Original text preserved
     expect(r.captions[0].text).toBe('Hello world');
+  });
+
+  it('re-applies the lead-in when correcting a chunked caption', () => {
+    const chunked: Caption = { id: 'c1', startMs: 850, endMs: 1500, text: 'Hello world',
+      words: [{ text: 'Hello', startMs: 1000, endMs: 1200 }, { text: 'world', startMs: 1200, endMs: 1500 }] };
+    // Rendered audio says the words land 400ms later.
+    const words = dgWords([{ w: 'hello', s: 1400, e: 1600 }, { w: 'world', s: 1600, e: 1900 }]);
+    const r = autoCorrectCaptions([chunked], words, { driftThresholdMs: 80 });
+    expect(r.rewritten).toBe(1);
+    expect(r.captions[0].startMs).toBe(1250);
+    expect(r.captions[0].words?.[0].startMs).toBe(1400);
+    // And a second measurement now reads clean, instead of a constant 150.
+    expect(measureCaptionDrift(r.captions, words).maxDriftMs).toBe(0);
   });
 
   it('preserves caption id and text when rewriting', () => {

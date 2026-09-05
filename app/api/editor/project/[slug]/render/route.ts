@@ -27,11 +27,13 @@ import {
   VIDEO_PROJECT_ROOT,
   VIDEO_OUT_DIR,
 } from '@/lib/editor/paths';
-import { clipSpeed, editedDurationMs } from '@/lib/editor/editPlan';
+import { clipSpeed, editedDurationMs, type EditPlan } from '@/lib/editor/editPlan';
+import { buildConcatFilter, CONCAT_ENCODE_ARGS } from '@/lib/editor/concatFilter';
+import { ffmpegProgress } from '@/lib/editor/progressParse';
 import { readPlan } from '@/lib/editor/planStore';
 import { atempoChain, run, runStreaming } from '@/lib/editor/ffmpeg';
 import { writeStatus } from '@/lib/editor/status';
-import { readReframeFile, buildReframeFilter } from '@/lib/editor/reframe';
+import { readReframeFile, buildReframeFilter, type ReframeFile } from '@/lib/editor/reframe';
 import { startJob, subscribe, type Emit } from '@/lib/editor/jobRunner';
 
 export const dynamic = 'force-dynamic';
@@ -116,69 +118,30 @@ export async function POST(
       if (reframe) {
         log(`Reframing to 9:16 (${reframe.keyframes.length} keyframes, source ${reframe.sourceWidth}×${reframe.sourceHeight}).`);
       }
-      const clipPaths: string[] = [];
-      const cutWindow = 15; // 0 → 15%
-      for (let i = 0; i < plan.clips.length; i++) {
-        const c = plan.clips[i];
-        const dur = c.sourceEnd - c.sourceStart;
-        const speed = clipSpeed(c);
-        const clipFile = path.join(tmpDir, `clip_${String(i).padStart(4, '0')}.mp4`);
-        log(
-          `  clip ${i + 1}/${plan.clips.length}: ${c.sourceStart.toFixed(2)}s → ${c.sourceEnd.toFixed(2)}s (${dur.toFixed(2)}s${speed !== 1 ? ` @ ${speed}x` : ''})`,
-        );
-
-        // Re-encode each clip to avoid keyframe-alignment issues at arbitrary
-        // cut boundaries. Uses a fast preset + tight GOP so the resulting
-        // concat looks smooth.
-        const baseArgs = [
+      if (process.env.EDITOR_LEGACY_CONCAT === '1') {
+        await legacyPerClipConcat({ plan, sourceAbs, tmpDir, concatPath, reframe, log, signal, emitProgress });
+      } else {
+        // Single continuous encode — the same graph polish uses. The
+        // per-clip encode + `concat -c copy` it replaces accumulated AAC
+        // priming error at every splice (progressive caption drift).
+        const graph = buildConcatFilter(plan.clips, { reframe });
+        const totalMs = editedDurationMs(plan);
+        let lastPct = -1;
+        const rConcat = await runStreaming('ffmpeg', [
           '-y',
-          '-ss', String(c.sourceStart),
           '-i', sourceAbs,
-          '-t', String(dur),
-        ];
-        const vfParts: string[] = [];
-        if (reframe) {
-          // Reframe filter is in child-source time; the cut output's `t`
-          // starts at 0, so shift by sourceStart when evaluating.
-          vfParts.push(buildReframeFilter(reframe, 1080, 1920, c.sourceStart));
-        }
-        if (speed !== 1) {
-          // Per-clip speed: retime video PTS and audio tempo together so
-          // the cut clip's real duration matches clipEditedMs(). Captions
-          // are laid out in edited time, so the Remotion overlay pass
-          // stays in sync without knowing about speed at all.
-          vfParts.push(`setpts=PTS/${speed}`);
-          baseArgs.push('-af', atempoChain(speed));
-        }
-        if (vfParts.length > 0) baseArgs.push('-vf', vfParts.join(','));
-        baseArgs.push(
-          '-c:v', 'libx264', '-preset', 'fast', '-crf', '20',
-          '-c:a', 'aac', '-b:a', '128k',
-          '-g', '30', '-keyint_min', '30',
-          '-pix_fmt', 'yuv420p',
-          clipFile,
-        );
-        const r = await run('ffmpeg', baseArgs, { signal });
-        if (r.code !== 0) throw new Error(`ffmpeg cut failed on clip ${i}: ${r.stderr.slice(-300)}`);
-        clipPaths.push(clipFile);
-        emitProgress(((i + 1) / plan.clips.length) * cutWindow, 'cutting');
+          '-filter_complex', graph.filterComplex,
+          '-map', graph.videoLabel, '-map', graph.audioLabel,
+          ...CONCAT_ENCODE_ARGS,
+          '-progress', 'pipe:1', '-nostats',
+          concatPath,
+        ], (line) => {
+          const pct = ffmpegProgress(line, totalMs);
+          if (pct !== null && pct !== lastPct) { lastPct = pct; emitProgress(1 + pct * 0.19, 'cutting'); }
+        }, { signal });
+        if (rConcat.code !== 0) throw new Error(`ffmpeg trim+concat failed: ${rConcat.stderr.slice(-300)}`);
+        log(`Concat → ${path.relative(VIDEO_PROJECT_ROOT, concatPath)} (single pass, ${plan.clips.length} clip(s))`);
       }
-
-      // Concat demuxer
-      const listPath = path.join(tmpDir, 'list.txt');
-      fs.writeFileSync(
-        listPath,
-        clipPaths.map((p) => `file '${p.replace(/'/g, "'\\''")}'`).join('\n'),
-      );
-      log('Concatenating clips…');
-      const rConcat = await run('ffmpeg', [
-        '-y',
-        '-f', 'concat', '-safe', '0', '-i', listPath,
-        '-c', 'copy',
-        concatPath,
-      ], { signal });
-      if (rConcat.code !== 0) throw new Error(`ffmpeg concat failed: ${rConcat.stderr.slice(-300)}`);
-      log(`Concat → ${path.relative(VIDEO_PROJECT_ROOT, concatPath)}`);
       emitProgress(20, 'concat');
 
       // ─── Phase B: Remotion overlay ────────────────────────────
@@ -313,4 +276,56 @@ export async function POST(
       Connection: 'keep-alive',
     },
   });
+}
+
+
+/**
+ * The pre-2026-09 export path, kept one phase behind EDITOR_LEGACY_CONCAT=1
+ * for A/B comparison. Per-clip re-encode then `concat -c copy` — known to
+ * accumulate ~20–40ms of caption drift per splice.
+ */
+async function legacyPerClipConcat(input: {
+  plan: EditPlan;
+  sourceAbs: string;
+  tmpDir: string;
+  concatPath: string;
+  reframe: ReframeFile | null;
+  log: (m: string) => void;
+  signal: AbortSignal;
+  emitProgress: (pct: number, phase: string) => void;
+}): Promise<void> {
+  const { plan, sourceAbs, tmpDir, concatPath, reframe, log, signal, emitProgress } = input;
+  const clipPaths: string[] = [];
+  const cutWindow = 15;
+  for (let i = 0; i < plan.clips.length; i++) {
+    const c = plan.clips[i];
+    const dur = c.sourceEnd - c.sourceStart;
+    const speed = clipSpeed(c);
+    const clipFile = path.join(tmpDir, `clip_${String(i).padStart(4, '0')}.mp4`);
+    const baseArgs = ['-y', '-ss', String(c.sourceStart), '-i', sourceAbs, '-t', String(dur)];
+    const vfParts: string[] = [];
+    if (reframe) vfParts.push(buildReframeFilter(reframe, 1080, 1920, c.sourceStart));
+    if (speed !== 1) {
+      vfParts.push(`setpts=PTS/${speed}`);
+      baseArgs.push('-af', atempoChain(speed));
+    }
+    if (vfParts.length > 0) baseArgs.push('-vf', vfParts.join(','));
+    baseArgs.push(
+      '-c:v', 'libx264', '-preset', 'fast', '-crf', '20',
+      '-c:a', 'aac', '-b:a', '128k',
+      '-g', '30', '-keyint_min', '30',
+      '-pix_fmt', 'yuv420p',
+      clipFile,
+    );
+    const r = await run('ffmpeg', baseArgs, { signal });
+    if (r.code !== 0) throw new Error(`ffmpeg cut failed on clip ${i}: ${r.stderr.slice(-300)}`);
+    clipPaths.push(clipFile);
+    emitProgress(((i + 1) / plan.clips.length) * cutWindow, 'cutting');
+  }
+  const listPath = path.join(tmpDir, 'list.txt');
+  fs.writeFileSync(listPath, clipPaths.map((p) => `file '${p.replace(/'/g, "'\\''")}'`).join('\n'));
+  log('Concatenating clips (legacy demuxer)…');
+  const rConcat = await run('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', listPath, '-c', 'copy', concatPath], { signal });
+  if (rConcat.code !== 0) throw new Error(`ffmpeg concat failed: ${rConcat.stderr.slice(-300)}`);
+  log(`Concat → ${path.relative(VIDEO_PROJECT_ROOT, concatPath)}`);
 }

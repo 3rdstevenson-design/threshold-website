@@ -35,6 +35,7 @@ import {
   type Caption,
 } from './editPlan';
 import {
+  DEFAULT_DISFLUENCY_MODEL,
   detectDisfluencies,
   disfluencyToRemoveRanges,
   type DisfluencyRange,
@@ -42,7 +43,11 @@ import {
 import { buildPolishedPlan } from './polishPlan';
 import { run, runStreaming } from './ffmpeg';
 import { ffmpegProgress, remotionProgress, newRemotionState, expectedStageMs } from './progressParse';
-import { readStageHistory } from './pipelineReport';
+import { readStageHistory, ReportWriter, type PipelineWarning } from './pipelineReport';
+import { readProject, writeStatus } from './status';
+import { decideAuditGate } from './auditGate';
+import { buildConcatFilter, CONCAT_ENCODE_ARGS } from './concatFilter';
+import { readReframeFile } from './reframe';
 import type { Word } from './autoCut';
 import {
   transcribeWithDeepgram,
@@ -80,10 +85,13 @@ export type RunPolishStreamInput = {
   send: (event: string, data: unknown) => void;
   /** Aborts the pipeline + kills spawned children on client disconnect. */
   signal?: AbortSignal;
+  /** Open telemetry report from the calling pipeline (talking-head run). */
+  report?: ReportWriter;
 };
 
 type AuditReport = {
   overallStatus: 'clean' | 'warn' | 'fail';
+  gate?: { verdict: 'pass' | 'fail'; by: string; reason: string };
   structural: {
     ok: boolean;
     durationMs: number;
@@ -150,6 +158,18 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   const stage = (name: PolishStageName) =>
     send('stage', { name, expectedMs: expectedStageMs(name, sourceSecForEta, stageHistory) });
   const progress = (stageName: PolishStageName, pct: number) => send('progress', { stage: stageName, pct });
+  // Telemetry + warnings. The caller may pass an open report (the talking-
+  // head pipeline does) so stage timings for the whole run land in one file.
+  const report = input.report ?? new ReportWriter(slug, { durationSec: sourceSecForEta || undefined });
+  const warnings: PipelineWarning[] = [];
+  const warn = (w: Omit<PipelineWarning, 'at'>) => {
+    warnings.push(w);
+    report.warn(w);
+    send('warning', w);
+    log(`⚠ ${w.message}`);
+    writeStatus(slug, { warnings: [...(readProject(slug)?.warnings ?? []), { ...w, at: new Date().toISOString() }] });
+  };
+  const stageT = (name: PolishStageName) => { report.stage(name); stage(name); };
 
   const slugDir = path.join(TAKES_ROOT, slug);
   const publicSlugDir = path.join(VIDEO_PROJECT_ROOT, 'public', 'takes', slug);
@@ -167,7 +187,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   const auditAudioPath = path.join(slugDir, 'audit.ogg');
 
   // ── Phase 1: loading ─────────────────────────────────────────────
-  stage('loading');
+  stageT('loading');
   const basePlan = readPlan(slug);
   if (!basePlan) throw new Error('no edit plan — run Analyze first');
   if (basePlan.clips.length === 0) throw new Error('edit plan has no clips');
@@ -184,7 +204,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   log(`Loaded ${words.length} words and ${basePlan.clips.length} clip(s).`);
 
   // ── Phase 2: detecting (or approve-from-proposal) ────────────────
-  stage('detecting');
+  stageT('detecting');
   let ranges: DisfluencyRange[] = [];
   if (approvedRangeIds !== null) {
     if (!fs.existsSync(proposalPath)) {
@@ -204,39 +224,58 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
         `(out of ${approvedRangeIds.length} approved, ${prop.proposed?.length ?? 0} proposed).`,
     );
   } else {
+    // The LLM pass is an enhancement layer on top of the deterministic cuts.
+    // When it can't run (no key, out of credits, 5xx after retries) the
+    // reel still ships with rule-based cuts and a visible warning — it used
+    // to fail the whole run ("credit balance too low", 2026-08-25).
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
-    const result = await detectDisfluencies({
-      words,
-      clips: basePlan.clips,
-      apiKey,
-      onLog: log,
+    let result: Awaited<ReturnType<typeof detectDisfluencies>> | null = null;
+    if (!apiKey) {
+      warn({ stage: 'detecting', code: 'llm-unavailable', message: 'ANTHROPIC_API_KEY not configured — skipped the Claude disfluency pass; rule-based cuts only.' });
+    } else {
+      try {
+        result = await detectDisfluencies({ words, clips: basePlan.clips, apiKey, onLog: log });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        warn({ stage: 'detecting', code: 'llm-unavailable', message: `Claude disfluency pass failed (${msg.slice(0, 160)}) — rule-based cuts only.` });
+      }
+    }
+    ranges = result?.ranges ?? [];
+    const rejectedByKind: Record<string, number> = {};
+    for (const r of result?.proposed ?? []) if (r.rejected) rejectedByKind[r.kind] = (rejectedByKind[r.kind] ?? 0) + 1;
+    report.merge('disfluency', {
+      model: result ? DEFAULT_DISFLUENCY_MODEL : null,
+      proposed: result?.proposed.length ?? 0,
+      kept: ranges.length,
+      rejectedByKind,
+      ...(result ? {} : { error: warnings.find((w) => w.code === 'llm-unavailable')?.message }),
     });
-    ranges = result.ranges;
     // Persist proposal for observability / re-approval.
-    try {
-      fs.writeFileSync(
-        proposalPath,
-        JSON.stringify(
-          {
-            generatedAt: new Date().toISOString(),
-            wordCount: result.wordCount,
-            scopedSeconds: result.scopedSeconds,
-            proposed: result.proposed,
-            keptIds: result.ranges.map((r) => r.id),
-            raw: result.raw,
-          },
-          null,
-          2,
-        ),
-      );
-    } catch (e) {
-      log(`(non-fatal) failed to persist disfluency-proposal.json: ${e instanceof Error ? e.message : e}`);
+    if (result) {
+      try {
+        fs.writeFileSync(
+          proposalPath,
+          JSON.stringify(
+            {
+              generatedAt: new Date().toISOString(),
+              wordCount: result.wordCount,
+              scopedSeconds: result.scopedSeconds,
+              proposed: result.proposed,
+              keptIds: result.ranges.map((r) => r.id),
+              raw: result.raw,
+            },
+            null,
+            2,
+          ),
+        );
+      } catch (e) {
+        log(`(non-fatal) failed to persist disfluency-proposal.json: ${e instanceof Error ? e.message : e}`);
+      }
     }
   }
 
   // ── Phase 3: polishing (build polished plan + write v2 artifacts) ─
-  stage('polishing');
+  stageT('polishing');
   const extraSkipRanges = disfluencyToRemoveRanges(ranges);
   const { plan: polishedPlan, stats } = buildPolishedPlan({
     basePlan,
@@ -262,7 +301,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   );
 
   // ── Phase 4: concatenating ───────────────────────────────────────
-  stage('concatenating');
+  stageT('concatenating');
   const sourceAbs = path.resolve(VIDEO_PROJECT_ROOT, polishedPlan.sourceVideo);
   if (!fs.existsSync(sourceAbs)) {
     throw new Error(`source missing: ${polishedPlan.sourceVideo}`);
@@ -280,27 +319,15 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   // are no per-boundary artifacts to accumulate.
   {
     const clips = polishedPlan.clips;
-    const n = clips.length;
-    const vSplits = clips.map((_, i) => `[vs${i}]`).join('');
-    const aSplits = clips.map((_, i) => `[as${i}]`).join('');
-    const parts: string[] = [
-      `[0:v]split=${n}${vSplits}`,
-      `[0:a]asplit=${n}${aSplits}`,
-    ];
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < clips.length; i++) {
       const c = clips[i];
       log(
-        `  clip ${i + 1}/${n}: ` +
+        `  clip ${i + 1}/${clips.length}: ` +
           `${c.sourceStart.toFixed(2)}s → ${c.sourceEnd.toFixed(2)}s ` +
           `(${(c.sourceEnd - c.sourceStart).toFixed(2)}s)`,
       );
-      parts.push(
-        `[vs${i}]trim=start=${c.sourceStart}:end=${c.sourceEnd},setpts=PTS-STARTPTS[v${i}]`,
-        `[as${i}]atrim=start=${c.sourceStart}:end=${c.sourceEnd},asetpts=PTS-STARTPTS[a${i}]`,
-      );
     }
-    const pairs = clips.map((_, i) => `[v${i}][a${i}]`).join('');
-    parts.push(`${pairs}concat=n=${n}:v=1:a=1[v][a]`);
+    const graph = buildConcatFilter(clips, { reframe: readReframeFile(path.join(slugDir, 'reframe.json')) });
 
     log('Cutting + concatenating v2 clips (single pass)…');
     const totalMs = editedDurationMs(polishedPlan);
@@ -308,13 +335,9 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
     const rConcat = await runStreaming('ffmpeg', [
       '-y',
       '-i', sourceAbs,
-      '-filter_complex', parts.join(';'),
-      '-map', '[v]', '-map', '[a]',
-      '-c:v', 'libx264', '-preset', 'fast', '-crf', '20',
-      '-g', '30', '-keyint_min', '30',
-      '-pix_fmt', 'yuv420p',
-      '-r', '30',
-      '-c:a', 'aac', '-b:a', '128k',
+      '-filter_complex', graph.filterComplex,
+      '-map', graph.videoLabel, '-map', graph.audioLabel,
+      ...CONCAT_ENCODE_ARGS,
       '-progress', 'pipe:1', '-nostats',
       concatV2Path,
     ], (line) => {
@@ -328,15 +351,15 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   }
 
   // ── Phase 5: rendering (Remotion) ────────────────────────────────
-  stage('rendering');
+  stageT('rendering');
   await renderV2({ slug, finalV2Path, log, signal, onProgress: (pct) => progress('rendering', pct) });
 
   // ── Phase 6: auditing (Whisper drift) ────────────────────────────
-  stage('auditing');
+  stageT('auditing');
   const auditReport = await runAuditRender({ slug, log, signal });
 
   // ── Phase 7: sync-auditing (Deepgram) ────────────────────────────
-  stage('sync-auditing');
+  stageT('sync-auditing');
   const deepgramKey = process.env.DEEPGRAM_API_KEY;
   let dgWords: DeepgramWord[] = [];
   let dgReport: AuditReport['deepgram'] = undefined;
@@ -345,7 +368,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   // number (captions rebuilt FROM Deepgram words, so near-tautological),
   // this one genuinely cross-checks render sync, and it's what the
   // whisper-gate veto below keys on.
-  let preCorrectDg: { maxDriftMs: number; matchedCount: number; captionCount: number } | null = null;
+  let preCorrectDg: { maxDriftMs: number; meanDriftMs: number; matchedCount: number; captionCount: number } | null = null;
   if (!deepgramKey) {
     log('DEEPGRAM_API_KEY not set — skipping sync-audit layer.');
   } else {
@@ -370,6 +393,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
       const drift = measureCaptionDrift(captionsNow, dgWords);
       preCorrectDg = {
         maxDriftMs: drift.maxDriftMs,
+        meanDriftMs: drift.meanDriftMs,
         matchedCount: drift.matchedCount,
         captionCount: drift.captionCount,
       };
@@ -394,7 +418,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   // ── Phase 8: auto-correcting ─────────────────────────────────────
   if (dgReport && dgReport.maxDriftMs > DEEPGRAM_DRIFT_THRESHOLD_MS) {
     const report = dgReport;
-    stage('auto-correcting');
+    stageT('auto-correcting');
     log(
       `Drift ${report.maxDriftMs}ms > ${DEEPGRAM_DRIFT_THRESHOLD_MS}ms — ` +
         'running caption auto-correct.',
@@ -442,7 +466,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
       await renderV2({ slug, finalV2Path, log, signal, onProgress: (pct) => progress('rendering', pct) });
       // Re-run the Whisper audit so the overall status reflects the new
       // render. Overwrites audit.json in place.
-      stage('auditing');
+      stageT('auditing');
       const reAudit = await runAuditRender({ slug, log, signal });
       auditReport.overallStatus = reAudit.overallStatus;
       auditReport.structural = reAudit.structural;
@@ -497,36 +521,39 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
     }
   }
 
-  // Deepgram veto on the whisper max-drift gate. whisper.cpp small.en
-  // word matching produces isolated (and locally correlated) spikes on
-  // disfluent regions — a caption it scored at 1250ms measured 200ms
-  // against Nova-3 on the same render (2026-07-25). When the whisper
-  // audit fails ONLY on drift (structure ok, mean sane) while the
-  // independent pre-correct Deepgram pass saw every caption within
-  // DEEPGRAM_VETO_MS, trust Deepgram: downgrade to 'warn' so the render
-  // promotes instead of dead-ending in final-v2-FAILED.mp4.
-  if (
-    auditReport.overallStatus === 'fail' &&
-    auditReport.structural.ok &&
-    (auditReport.drift?.meanDriftMs ?? Infinity) <= 600 &&
-    preCorrectDg !== null &&
-    preCorrectDg.maxDriftMs <= DEEPGRAM_VETO_MS &&
-    preCorrectDg.captionCount > 0 &&
-    preCorrectDg.matchedCount / preCorrectDg.captionCount >= 0.9
-  ) {
-    log(
-      `Whisper audit fail overruled: Deepgram measured max ${preCorrectDg.maxDriftMs}ms ` +
-        `across ${preCorrectDg.matchedCount}/${preCorrectDg.captionCount} captions ` +
-        `(≤ ${DEEPGRAM_VETO_MS}ms veto bound) — treating as warn.`,
-    );
-    auditReport.overallStatus = 'warn';
-    try {
-      fs.writeFileSync(auditPath, JSON.stringify(auditReport, null, 2));
-    } catch {}
-  }
+  // ── Gate decision: Deepgram primary, whisper advisory ────────────
+  // (Replaces the older "Deepgram veto" special case: whisper.cpp small.en
+  // produced isolated 1000ms+ spikes on disfluent regions that Nova-3 put
+  // at ~200ms, and whisper's per-caption 150ms warn bar sat exactly on the
+  // caption lead-in, so 18 of 28 in-sync renders were dead-ended as
+  // final-v2-FAILED.mp4. See auditGate.ts for the policy.)
+  const gate = decideAuditGate({
+    deepgram: dgReport
+      ? { maxDriftMs: dgReport.maxDriftMs, meanDriftMs: dgReport.meanDriftMs, matchedCount: dgReport.matchedCount, captionCount: dgReport.captionCount }
+      : null,
+    whisper: {
+      overallStatus: auditReport.overallStatus,
+      structuralOk: auditReport.structural.ok,
+      meanDriftMs: auditReport.drift?.meanDriftMs ?? null,
+      maxDriftMs: auditReport.drift?.maxDriftMs ?? null,
+    },
+  });
+  log(`Audit gate: ${gate.verdict.toUpperCase()} by ${gate.by} — ${gate.reason}`);
+  report.merge('audit', {
+    deepgramPre: preCorrectDg,
+    deepgramPost: dgReport?.autoCorrected ? { maxDriftMs: dgReport.maxDriftMs, meanDriftMs: dgReport.meanDriftMs, matchedCount: dgReport.matchedCount, captionCount: dgReport.captionCount } : null,
+    whisper: { status: auditReport.overallStatus, meanDriftMs: auditReport.drift?.meanDriftMs, maxDriftMs: auditReport.drift?.maxDriftMs },
+    gate: { verdict: gate.verdict, by: gate.by === 'structural' ? 'none' : gate.by, reason: gate.reason },
+  });
+  auditReport.gate = gate;
+  // The whisper overallStatus is what the UI badge shows; align it with
+  // the gate so a Deepgram pass never reads as "fail" in the editor.
+  if (gate.verdict === 'pass' && auditReport.overallStatus === 'fail') auditReport.overallStatus = 'warn';
+  if (gate.verdict === 'fail') auditReport.overallStatus = 'fail';
+  try { fs.writeFileSync(auditPath, JSON.stringify(auditReport, null, 2)); } catch {}
 
   // ── Phase 9: promoting ───────────────────────────────────────────
-  stage('promoting');
+  stageT('promoting');
   const promoted = maybePromote({
     slug,
     auditReport,
@@ -539,12 +566,17 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
   });
 
   // ── Done ─────────────────────────────────────────────────────────
-  stage('done');
+  stageT('done');
+  const reviewNow = readProject(slug)?.review ?? null;
+  if (reviewNow?.required) send('review-required', { reasons: reviewNow.reasons });
+  report.finish({ promoted, review: { paused: !!reviewNow?.required, reasons: reviewNow?.reasons ?? [] } });
   send('audit', summarizeAudit(auditReport, promoted));
   send('done', {
     ok: true,
     overallStatus: auditReport.overallStatus,
     promoted,
+    review: reviewNow?.required ? reviewNow : null,
+    warnings,
   });
 }
 
@@ -656,12 +688,20 @@ function maybePromote(input: {
 }): boolean {
   const { auditReport, log } = input;
   if (auditReport.overallStatus === 'fail') {
-    log('Audit failed — keeping v2 artifacts for inspection; not promoting.');
-    try {
-      if (fs.existsSync(input.finalV2Path)) {
-        fs.renameSync(input.finalV2Path, input.finalV2FailedPath);
-      }
-    } catch {}
+    // Keep final-v2.mp4 under its own name (no more silent -FAILED rename)
+    // and park the project in needs-review so the failure is visible and
+    // one tap away from "Approve & promote".
+    log('Audit gate failed — keeping final-v2.mp4 for review; not promoting.');
+    try { if (fs.existsSync(input.finalV2FailedPath)) fs.unlinkSync(input.finalV2FailedPath); } catch {}
+    const reason = auditReport.gate?.reason ?? 'audit failed';
+    const prev = readProject(input.slug)?.review;
+    writeStatus(input.slug, {
+      review: {
+        required: true,
+        reasons: [...(prev?.required ? prev.reasons.filter((r) => r.code !== 'audit-fail') : []), { code: 'audit-fail', detail: reason }],
+        createdAt: prev?.required ? prev.createdAt : new Date().toISOString(),
+      },
+    });
     return false;
   }
 

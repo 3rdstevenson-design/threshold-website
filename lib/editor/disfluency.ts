@@ -26,11 +26,43 @@ import type { Word, Range } from './autoCut';
 import type { Clip } from './editPlan';
 
 /**
- * Per-range length cap. Anything longer than this is almost certainly
- * an abandoned multi-clause take, not a disfluency — we drop those.
- * (Disfluencies rarely span more than 2–3 seconds.)
+ * Per-range length cap for repeats / contextual fillers / uncategorised
+ * cuts. Disfluencies of those kinds rarely span more than 2–3 seconds.
  */
 export const MAX_RANGE_SECONDS = 4.0;
+
+/**
+ * Per-range cap for verbal restarts and abandoned clauses. These are the
+ * "false start, then say it again properly" cases — exactly what the
+ * rule-based retake detector misses when the redo uses different words —
+ * and they legitimately run 4–8s. The old single 4s cap plus shortest-first
+ * fill threw them away first (img-5921: 6 proposed, 1 kept).
+ */
+export const MAX_RESTART_RANGE_SECONDS = 8.0;
+
+/** Coarse category derived from Claude's free-text `reason`. */
+export type DisfluencyKind = 'restart' | 'abandoned' | 'repeat' | 'filler' | 'other';
+
+export function classifyReason(reason: string): DisfluencyKind {
+  const r = reason.toLowerCase();
+  if (/restart|false start|re-?start|retake|redo|started over|begins again/.test(r)) return 'restart';
+  if (/abandon|trail|incomplete|unfinished|cut off|dropped clause/.test(r)) return 'abandoned';
+  if (/repeat|duplicate|same idea|said twice|redundan|repetit/.test(r)) return 'repeat';
+  if (/filler|you know|i guess|like i said|i mean|contextual/.test(r)) return 'filler';
+  return 'other';
+}
+
+/** Greedy-fill priority under the ratio cap: lower runs first. */
+const KIND_PRIORITY: Record<DisfluencyKind, number> = {
+  restart: 0,
+  abandoned: 1,
+  repeat: 2,
+  filler: 3,
+  other: 4,
+};
+
+/** Env-overridable so a newer model can be trialled without a redeploy of code. */
+export const DEFAULT_DISFLUENCY_MODEL = process.env.EDITOR_DISFLUENCY_MODEL || 'claude-sonnet-4-6';
 
 /**
  * Upper bound on how much of the scoped content Polish will remove.
@@ -55,6 +87,8 @@ export type DisfluencyRange = {
   endIdx: number;
   /** Preview of the actual words this range would cut, for UI display. */
   preview: string;
+  /** Coarse category from `reason` — drives per-kind caps and the review flag. */
+  kind: DisfluencyKind;
   /** True if the cap logic dropped this range (kept here for transparency). */
   rejected?: 'too-long' | 'total-cap';
 };
@@ -97,9 +131,10 @@ DO NOT cut:
 - Punctuation-only tokens (just ignore them)
 
 HARD CONSTRAINTS — these are ceilings, not targets:
-- Keep each range SHORT and LOCAL. A real disfluency rarely spans more than 2–3 seconds or ~8 words. If you are about to mark a range of a dozen+ words, you are almost certainly cutting content (an abandoned alternate take) rather than a disfluency — reconsider. Ranges over ~4 seconds will be dropped by a post-filter.
-- Do NOT flag more than ~25% of the total words. If you find yourself wanting to, you have crossed from disfluency-editing into rewriting — stop and return fewer cuts. A post-filter will keep only the shortest ranges until the total is back under 25%.
-- Prefer MANY SHORT cuts over FEW LONG cuts. Three 1-second cuts > one 5-second cut.
+- Keep repeats and contextual fillers SHORT and LOCAL (rarely more than 2–3 seconds or ~8 words); a post-filter drops those over ~4 seconds.
+- A VERBAL RESTART or ABANDONED CLAUSE may legitimately run longer — the speaker said a whole sentence, stopped, and said it again properly. Mark the ENTIRE abandoned attempt (up to ~8 seconds), and start the reason with "restart:" or "abandoned:" so the post-filter applies the longer cap. Never mark the successful take.
+- Do NOT flag more than ~25% of the total words. If you find yourself wanting to, you have crossed from disfluency-editing into rewriting — stop and return fewer cuts. Under the cap, restarts and abandoned clauses are kept first, then repeats, then fillers.
+- Start every reason with its kind: "restart:", "abandoned:", "repeat:", or "filler:".
 
 Be CONSERVATIVE. If in doubt, do NOT cut. Removing a legitimate word is worse than leaving a disfluency.
 
@@ -148,7 +183,7 @@ export async function detectDisfluencies(input: {
     .join('\n');
 
   const anthropic = new Anthropic({ apiKey: input.apiKey });
-  const model = input.model ?? 'claude-sonnet-4-6';
+  const model = input.model ?? DEFAULT_DISFLUENCY_MODEL;
 
   const userMessage = input.performanceContext
     ? `${input.performanceContext}\n\n---\n\nHere is the word-level transcript (1-indexed). Identify disfluency ranges to cut.\n\n${numbered}`
@@ -198,6 +233,7 @@ export async function detectDisfluencies(input: {
       startIdx: cut.startIdx,
       endIdx: cut.endIdx,
       preview,
+      kind: classifyReason(cut.reason),
     });
   }
 
@@ -216,38 +252,47 @@ export async function detectDisfluencies(input: {
   return { ranges: kept, proposed, raw, wordCount: scopedWords.length, scopedSeconds };
 }
 
+/** Per-range cap by kind. Exported for tests. */
+export function maxRangeSecondsFor(kind: DisfluencyKind): number {
+  return kind === 'restart' || kind === 'abandoned' ? MAX_RESTART_RANGE_SECONDS : MAX_RANGE_SECONDS;
+}
+
 /**
  * Enforce the two hard ceilings on Claude's proposal:
- *  1. Drop any single range longer than MAX_RANGE_SECONDS
+ *  1. Drop any single range longer than its kind's cap (4s for repeats /
+ *     fillers / other, 8s for restarts and abandoned clauses).
  *  2. If the remaining total cut exceeds MAX_CUT_RATIO of the scoped
- *     seconds, keep only the shortest ranges (disfluencies tend to be
- *     short) until the total is back under the cap.
+ *     seconds, greedily keep ranges by (kind priority, then LONGEST first
+ *     within a kind) until the cap is hit. Restarts and abandoned takes
+ *     are the finds that matter most; a 5s false start beats three
+ *     0.4s "you know"s.
  *
  * Mutates `proposed` (tagging dropped entries with `.rejected`) and
- * returns the kept list in chronological order.
+ * returns the kept list in chronological order. Exported for tests.
  */
-function applyAggressivenessCaps(
+export function applyAggressivenessCaps(
   proposed: DisfluencyRange[],
   scopedSeconds: number,
-  log: (m: string) => void,
+  log: (m: string) => void = () => {},
 ): DisfluencyRange[] {
   const withinLength: DisfluencyRange[] = [];
   for (const r of proposed) {
     const dur = r.endSec - r.startSec;
-    if (dur > MAX_RANGE_SECONDS) {
+    const cap = maxRangeSecondsFor(r.kind);
+    if (dur > cap) {
       r.rejected = 'too-long';
-      log(`  ✗ dropped ${dur.toFixed(1)}s range (> ${MAX_RANGE_SECONDS}s cap) — ${r.reason}`);
+      log(`  ✗ dropped ${dur.toFixed(1)}s ${r.kind} range (> ${cap}s cap) — ${r.reason}`);
       continue;
     }
     withinLength.push(r);
   }
 
   const maxCutSeconds = scopedSeconds * MAX_CUT_RATIO;
-  // Shortest-first for the greedy fill — real disfluencies skew short,
-  // so we prefer them when the cap forces us to choose.
-  const byLength = [...withinLength].sort(
-    (a, b) => (a.endSec - a.startSec) - (b.endSec - b.startSec),
-  );
+  const byLength = [...withinLength].sort((a, b) => {
+    const pk = KIND_PRIORITY[a.kind] - KIND_PRIORITY[b.kind];
+    if (pk !== 0) return pk;
+    return (b.endSec - b.startSec) - (a.endSec - a.startSec);
+  });
   const keptIds = new Set<string>();
   let cumulative = 0;
   for (const r of byLength) {

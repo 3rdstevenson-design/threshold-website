@@ -1,0 +1,67 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`real corpus: reel-img6418.json > cut stages produce a stable result 1`] = `
+{
+  "clips": 13,
+  "cutLog": [
+    "silence@0.00-0.39",
+    "silence@6.68-7.56",
+    "silence@13.35-18.39",
+    "silence@28.77-31.79",
+    "silence@38.46-42.13",
+    "silence@49.76-51.29",
+    "silence@57.06-73.98",
+    "silence@87.84-90.03",
+    "filler@3.82-4.34",
+    "stutter@42.88-43.92",
+    "stutter@79.53-83.37",
+    "stutter@84.09-85.37",
+    "stutter@94.78-96.14",
+  ],
+  "fillers": 1,
+  "keptSeconds": 57.46,
+  "retakeFlagged": 0,
+  "retakeGroups": 0,
+  "silences": 8,
+  "stutters": 4,
+}
+`;
+
+exports[`real corpus: short-screenrecording.json > cut stages produce a stable result 1`] = `
+{
+  "clips": 2,
+  "cutLog": [
+    "silence@0.00-0.42",
+    "silence@14.33-16.08",
+    "filler@3.90-4.34",
+  ],
+  "fillers": 1,
+  "keptSeconds": 13.47,
+  "retakeFlagged": 0,
+  "retakeGroups": 0,
+  "silences": 2,
+  "stutters": 0,
+}
+`;
+
+exports[`real corpus: teleprompter-retake.json > cut stages produce a stable result 1`] = `
+{
+  "clips": 7,
+  "cutLog": [
+    "silence@49.41-49.63",
+    "silence@71.42-72.70",
+    "silence@74.07-74.38",
+    "silence@103.17-103.47",
+    "filler@45.63-46.08",
+    "stutter@115.59-118.32",
+    "retake@40.60-45.63",
+    "retake@46.08-47.70",
+  ],
+  "fillers": 1,
+  "keptSeconds": 116.14,
+  "retakeFlagged": 0,
+  "retakeGroups": 1,
+  "silences": 4,
+  "stutters": 1,
+}
+`;

@@ -26,6 +26,7 @@ export type ProposalRange = {
   startIdx: number;
   endIdx: number;
   preview: string;
+  kind?: 'restart' | 'abandoned' | 'repeat' | 'filler' | 'other';
   rejected?: 'too-long' | 'total-cap';
 };
 

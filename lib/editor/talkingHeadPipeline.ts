@@ -33,7 +33,7 @@ import { chunkCaptions } from './captionChunker';
 import { writeStatus } from './status';
 import { runPolishStream } from './polishPipeline';
 import { ingestProgress, expectedStageMs } from './progressParse';
-import { readStageHistory } from './pipelineReport';
+import { readStageHistory, ReportWriter } from './pipelineReport';
 
 export type SendFn = (event: string, data: unknown) => void;
 
@@ -58,7 +58,9 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
     send('stage', { name, expectedMs: expectedStageMs(name, sourceSecForEta, stageHistory) });
 
   try { sourceSecForEta = await probeDurationSec(sourceAbsPath); } catch { /* fallback ratios */ }
-  stage('preparing');
+  const report = new ReportWriter(slug, { durationSec: sourceSecForEta || undefined });
+  const stageT = (name: string) => { report.stage(name); stage(name); };
+  stageT('preparing');
   log(`Processing ${slug}\u2026`);
 
   // ── Phase: transcribing (or skip) ─────────────────────────────────
@@ -66,7 +68,7 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
   if (skipTranscribe && fs.existsSync(analysisPath)) {
     log('Reusing existing analysis.json (skipTranscribe).');
   } else {
-    stage('transcribing');
+    stageT('transcribing');
     await runIngest({
       slug,
       sourceRel: path.relative(VIDEO_PROJECT_ROOT, sourceAbsPath),
@@ -89,7 +91,15 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
   const words = analysis.words ?? [];
   const silences = analysis.silences ?? [];
   if (words.length === 0) {
+    report.finish({ error: 'analysis.json has no words' });
     throw new Error('analysis.json has no words \u2014 audio may be silent or too short');
+  }
+  {
+    const confs = words.map((w) => (w as Word & { confidence?: number }).confidence).filter((c): c is number => typeof c === 'number');
+    report.set('transcript', {
+      wordCount: words.length,
+      meanConfidence: confs.length ? Math.round((confs.reduce((a, b) => a + b, 0) / confs.length) * 1000) / 1000 : null,
+    });
   }
 
   // Make sure there's a plan to mutate. If none exists yet, bootstrap one.
@@ -116,9 +126,16 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
     fillerWords: plan.fillerWords,
     settings: plan.cutSettings,
     onStage: (name, stats) => {
-      stage(name);
+      stageT(name);
       send('stage-stats', { stage: name, stats });
     },
+  });
+  report.set('cuts', {
+    silences: cut.stages.silences.cutCount,
+    fillers: cut.stages.fillers.cutCount,
+    stutters: cut.stages.stutters.phrasesRemoved + cut.stages.stutters.singleWordsRemoved + cut.stages.stutters.fragmentsRemoved,
+    retakes: { groups: cut.stages.retakes.groupsFound, flagged: cut.stages.retakes.flaggedGroups, cut: cut.stages.retakes.cutCount },
+    secondsRemoved: Math.round((cut.stages.silences.secondsRemoved + cut.stages.fillers.secondsRemoved + cut.stages.stutters.secondsRemoved + cut.stages.retakes.secondsRemoved) * 100) / 100,
   });
   log(`Silences: ${cut.stages.silences.cutCount} cut · -${cut.stages.silences.secondsRemoved.toFixed(2)}s.`);
   log(`Fillers: ${cut.stages.fillers.cutCount} cut · -${cut.stages.fillers.secondsRemoved.toFixed(2)}s.`);
@@ -144,7 +161,7 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
   workingPlan = { ...workingPlan, retakeGroups: cut.retakeGroups, cutLog: cut.cutLog };
 
   // ── Phase: captioning ────────────────────────────────────────────
-  stage('captioning');
+  stageT('captioning');
   const captions = chunkCaptions(words, workingPlan.clips, {
     customSpellings: workingPlan.customSpellings ?? [],
   });
@@ -156,12 +173,18 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
   log(`Captions: ${captions.length} chunk(s) over ${workingPlan.clips.length} clip(s).`);
 
   // ── Phase: polish ────────────────────────────────────────────────
-  await runPolishStream({
-    slug,
-    approvedRangeIds: approvedRangeIds ?? null,
-    send,
-    signal,
-  });
+  try {
+    await runPolishStream({
+      slug,
+      approvedRangeIds: approvedRangeIds ?? null,
+      send,
+      signal,
+      report,
+    });
+  } catch (e) {
+    report.finish({ error: e instanceof Error ? e.message : String(e) });
+    throw e;
+  }
 
   writeStatus(slug, { error: null });
 }

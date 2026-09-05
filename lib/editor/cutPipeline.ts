@@ -115,6 +115,8 @@ export function runCutStages(input: {
     detector: (survivingWords) => {
       const detection = detectRetakesFromWords(survivingWords, {
         keeperPreference: settings.retakePreference,
+        confidenceDelta: settings.retakeConfidenceDelta,
+        lookback: settings.retakeLookback,
       });
       return {
         removeRanges: detection.removeRanges,

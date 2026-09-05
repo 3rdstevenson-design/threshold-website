@@ -211,15 +211,28 @@ export type CutSettings = {
   /** Silences this long or longer get cut, in seconds. */
   minSilenceSeconds: number;
   retakePreference: RetakePreference;
+  /**
+   * A preferred retake is rejected (and the group flagged) when its mean
+   * Deepgram word confidence trails the best sibling by more than this.
+   */
+  retakeConfidenceDelta: number;
+  /** How many prior utterances a retake candidate is compared against. */
+  retakeLookback: number;
 };
 
 export const DEFAULT_CUT_SETTINGS: CutSettings = {
   minSilenceSeconds: 0.6,
   retakePreference: 'last',
+  retakeConfidenceDelta: 0.15,
+  retakeLookback: 3,
 };
 
+/** ingest-takes.ts runs silencedetect at 0.4s; anything lower is a no-op. */
+export const MIN_SILENCE_FLOOR_SECONDS = 0.4;
+
 export function resolveCutSettings(plan: Pick<EditPlan, 'cutSettings'>): CutSettings {
-  return { ...DEFAULT_CUT_SETTINGS, ...(plan.cutSettings ?? {}) };
+  const merged = { ...DEFAULT_CUT_SETTINGS, ...(plan.cutSettings ?? {}) };
+  return { ...merged, minSilenceSeconds: Math.max(MIN_SILENCE_FLOOR_SECONDS, merged.minSilenceSeconds) };
 }
 
 /**
