@@ -30,10 +30,11 @@ import { applyAction, createPlan, type EditPlan } from './editPlan';
 import { type Silence, type Word } from './autoCut';
 import { runCutStages } from './cutPipeline';
 import { chunkCaptions } from './captionChunker';
-import { writeStatus } from './status';
+import { readProject, writeStatus } from './status';
 import { runPolishStream } from './polishPipeline';
 import { ingestProgress, expectedStageMs } from './progressParse';
 import { readStageHistory, ReportWriter } from './pipelineReport';
+import { applyHookToPlan, proposeHook, DEFAULT_HOOK_MODEL, type HookProposal } from './hookProposal';
 
 export type SendFn = (event: string, data: unknown) => void;
 
@@ -47,10 +48,16 @@ export type RunTalkingHeadInput = {
   approvedRangeIds?: string[] | null;
   /** Aborts the whole pipeline + kills spawned children on client disconnect. */
   signal?: AbortSignal;
+  /**
+   * 'auto' (default): pause in needs-review when flags are raised.
+   * 'approved': a human already looked; run through to promote.
+   */
+  gate?: 'auto' | 'approved';
 };
 
 export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promise<void> {
   const { slug, sourceAbsPath, send, skipTranscribe, approvedRangeIds, signal } = input;
+  const gate = input.gate ?? 'auto';
   const log = (msg: string) => send('log', { msg });
   const stageHistory = readStageHistory();
   let sourceSecForEta = 0;
@@ -172,6 +179,50 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
   writePlan(workingPlan);
   log(`Captions: ${captions.length} chunk(s) over ${workingPlan.clips.length} clip(s).`);
 
+  // ── Phase: hooking (on-screen hook card) ─────────────────────────
+  // Runs on the deterministic cut so the model reads the kept opening.
+  // Never fatal: failures become a warning + (in auto mode) a review flag.
+  stageT('hooking');
+  let hook: HookProposal | null = null;
+  const hookPath = path.join(TAKES_ROOT, slug, 'hook-proposal.json');
+  const userOwnedHeader = !!workingPlan.header && workingPlan.hook?.source !== 'auto';
+  if (userOwnedHeader) {
+    log('Header is user-authored; skipping hook proposal.');
+    report.set('hook', { model: null, candidates: 0, chosen: null, type: null, score: null, applied: false, skippedBecause: 'user header' });
+  } else if (!process.env.ANTHROPIC_API_KEY) {
+    const w = { stage: 'hooking', code: 'llm-unavailable', message: 'ANTHROPIC_API_KEY not configured — no hook card proposed.' };
+    report.warn(w); send('warning', w); log(`⚠ ${w.message}`);
+    writeStatus(slug, { warnings: [...(readProject(slug)?.warnings ?? []), { ...w, at: new Date().toISOString() }] });
+  } else {
+    try {
+      hook = await proposeHook({ words, clips: workingPlan.clips, apiKey: process.env.ANTHROPIC_API_KEY, onLog: log });
+      const applied = applyHookToPlan(workingPlan, hook);
+      workingPlan = applied.plan;
+      hook.applied = applied.applied;
+      if (applied.skippedBecause) hook.skippedBecause = applied.skippedBecause;
+      writePlan(workingPlan);
+      fs.writeFileSync(hookPath, JSON.stringify(hook, null, 2));
+      const chosen = hook.candidates.find((c) => c.id === hook!.chosenId) ?? null;
+      report.set('hook', {
+        model: hook.model,
+        candidates: hook.candidates.length,
+        chosen: chosen?.text ?? null,
+        type: chosen?.type ?? null,
+        score: chosen?.score ?? null,
+        applied: hook.applied,
+        ...(hook.skippedBecause ? { skippedBecause: hook.skippedBecause } : {}),
+      });
+      send('hook', { text: chosen?.text ?? null, type: chosen?.type ?? null, score: chosen?.score ?? null, applied: hook.applied, flags: hook.flags });
+      log(hook.applied && chosen ? `Hook card: "${chosen.text}" (${chosen.type}, ${chosen.score}/12)` : `Hook card not applied (${hook.skippedBecause ?? (hook.flags.join(', ') || 'no candidate')}).`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      const w = { stage: 'hooking', code: 'llm-unavailable', message: `Hook proposal failed (${msg.slice(0, 160)}) — no hook card.` };
+      report.warn(w); send('warning', w); log(`⚠ ${w.message}`);
+      writeStatus(slug, { warnings: [...(readProject(slug)?.warnings ?? []), { ...w, at: new Date().toISOString() }] });
+      report.set('hook', { model: DEFAULT_HOOK_MODEL, candidates: 0, chosen: null, type: null, score: null, applied: false, skippedBecause: msg.slice(0, 120) });
+    }
+  }
+
   // ── Phase: polish ────────────────────────────────────────────────
   try {
     await runPolishStream({
@@ -180,6 +231,8 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
       send,
       signal,
       report,
+      gate,
+      hook,
     });
   } catch (e) {
     report.finish({ error: e instanceof Error ? e.message : String(e) });

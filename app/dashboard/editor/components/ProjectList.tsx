@@ -31,6 +31,7 @@ export type ProjectListEntry = {
     | 'transcribed'
     | 'clips-proposed'
     | 'editing'
+    | 'needs-review'
     | 'rendered'
     | 'stale'
     | 'error';
@@ -41,6 +42,8 @@ export type ProjectListEntry = {
   category: Category;
   sourceSlug?: string;
   hasClipsProposal?: boolean;
+  /** Pending human decision from the unattended pipeline. */
+  review?: { required: boolean; reasons: { code: string; detail: string; count?: number }[] } | null;
   /** True while a server-side pipeline job is running or queued for this slug. */
   active?: boolean;
   activeStage?: string | null;
@@ -56,6 +59,7 @@ const STAGE_LABEL: Record<ProjectListEntry['stage'], string> = {
   transcribed: 'Ready to edit',
   'clips-proposed': 'Clips ready',
   editing: 'Editing',
+  'needs-review': 'Needs review',
   rendered: 'Exported',
   stale: 'Edited — re-export',
   error: 'Failed — open to retry',
@@ -66,6 +70,7 @@ const STAGE_COLOR: Record<ProjectListEntry['stage'], string> = {
   transcribed: C.purple,
   'clips-proposed': C.gold,
   editing: C.purple,
+  'needs-review': C.gold,
   rendered: C.gold,
   stale: C.red,
   error: C.red,
@@ -167,7 +172,10 @@ export function ProjectList(props: Props) {
   }, [props]);
 
   const filteredProjects = useMemo(
-    () => props.projects.filter((p) => (p.category ?? 'talking-head') === category),
+    () => props.projects
+      .filter((p) => (p.category ?? 'talking-head') === category)
+      // Paused-for-review rows first: they're the ones waiting on a human.
+      .sort((a, b) => Number(b.stage === 'needs-review') - Number(a.stage === 'needs-review')),
     [props.projects, category],
   );
 
@@ -553,7 +561,9 @@ export function ProjectList(props: Props) {
                       ? liveStage === 'queued'
                         ? liveLabel
                         : `${liveLabel} · ${livePct}%`
-                      : STAGE_LABEL[p.stage]}
+                      : p.stage === 'needs-review' && p.review?.reasons?.length
+                        ? `Needs review · ${p.review.reasons.length}`
+                        : STAGE_LABEL[p.stage]}
                   </div>
                   <div style={{ fontSize: 11, color: C.silver, marginTop: 4 }}>
                     {fmtDuration(p.durationSec)} · {fmtRelative(p.updatedAt)}

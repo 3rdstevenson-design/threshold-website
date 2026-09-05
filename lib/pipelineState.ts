@@ -17,6 +17,7 @@ import { OFFLINE_ERROR_PREFIX } from './publishFailure';
 export type PipelineStage =
   | 'processing'    // editor pipeline running (ingest/transcribe/edit)
   | 'edit-failed'   // editor pipeline error or interrupted — needs Retry in editor
+  | 'edit-review'   // auto edit paused on flags (retake/cut/hook/audit) — approve in editor
   | 'rendered'      // final MP4/slides on disk, not yet in the queue
   | 'captioning'    // queued, caption still generating
   | 'needs-review'  // captioned, waiting for Lars to approve + schedule
@@ -27,13 +28,14 @@ export type PipelineStage =
   | 'rejected';
 
 export const STAGE_ORDER: PipelineStage[] = [
-  'edit-failed', 'failed', 'processing', 'rendered', 'captioning',
+  'edit-failed', 'failed', 'edit-review', 'processing', 'rendered', 'captioning',
   'needs-review', 'publishing', 'scheduled', 'published', 'rejected',
 ];
 
 export const STAGE_LABELS: Record<PipelineStage, string> = {
   'processing': 'Processing in editor',
   'edit-failed': 'Editor failed',
+  'edit-review': 'Auto edit paused for review',
   'rendered': 'Rendered — not queued yet',
   'captioning': 'Generating caption',
   'needs-review': 'Needs review',
@@ -306,7 +308,22 @@ export function derivePipeline(input: {
   for (const pr of projects) {
     const expected = lower(`${pr.slug}.mp4`);
     if (postsByNotes.has(expected) || filesByName.has(expected)) continue;
-    if (pr.stage === 'error') {
+    if (pr.stage === 'needs-review') {
+      const reasons = pr.review?.reasons ?? [];
+      items.push({
+        key: `project:${pr.slug}`,
+        title: pr.slug,
+        kind: 'reel',
+        ...(pr.hasThumb ? { preview: { kind: 'editor-thumb' as const, slug: pr.slug } } : {}),
+        stage: 'edit-review',
+        sinceISO: pr.review?.createdAt ?? pr.updatedAt,
+        stuck: false,
+        detail: reasons.length
+          ? reasons.map((r) => r.detail).join(' · ')
+          : 'Paused for review — open the project and approve.',
+        editorSlug: pr.slug,
+      });
+    } else if (pr.stage === 'error') {
       items.push({
         key: `project:${pr.slug}`,
         title: pr.slug,

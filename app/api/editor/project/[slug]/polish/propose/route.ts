@@ -30,6 +30,19 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 
+/**
+ * GET — the proposal already on disk from the last run (no LLM call), so the
+ * review panel can open on what the unattended pipeline actually saw.
+ */
+export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+  const unauth = checkAuth(req);
+  if (unauth) return unauth;
+  if (!validateSlug(params.slug)) return new Response(JSON.stringify({ error: 'invalid slug' }), { status: 400 });
+  const p = path.join(TAKES_ROOT, params.slug, 'disfluency-proposal.json');
+  if (!fs.existsSync(p)) return new Response(JSON.stringify({ error: 'no proposal yet' }), { status: 404 });
+  return new Response(fs.readFileSync(p, 'utf8'), { headers: { 'Content-Type': 'application/json' } });
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: { slug: string } },

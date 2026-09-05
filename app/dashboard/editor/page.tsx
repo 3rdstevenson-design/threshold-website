@@ -42,7 +42,7 @@ import {
 import { LongFormView } from './components/LongFormView';
 import type { InboxEntry } from '@/lib/editor/inbox';
 import { dashKey, useEditor } from './components/useEditor';
-import { clipEditedMs } from '@/lib/editor/editPlan';
+import { clipEditedMs, sourceMsToEditedMs } from '@/lib/editor/editPlan';
 import { HOOK_HOLD_FLAG_PCT } from '@/lib/retentionMath';
 import type { ProcessStage, AuditSummary } from './components/Toolbar';
 import { MobileSheet } from './components/MobileSheet';
@@ -480,6 +480,21 @@ export default function EditorPage() {
         if (ev === 'error' && msg) {
           patchProject(slug, { processStage: 'error', processError: msg });
         }
+        if (ev === 'warning' && typeof data.message === 'string') {
+          const m = data.message;
+          updateProject(slug, (p) => ({ processLog: [...p.processLog.slice(-300), `⚠ ${m}`] }));
+        }
+        if (ev === 'hook' && typeof data.text === 'string') {
+          const t = data.text;
+          updateProject(slug, (p) => ({ processLog: [...p.processLog.slice(-300), `Hook card: "${t}"${data.applied ? '' : ' (not applied)'}`] }));
+          reloadEditor();
+        }
+        if (ev === 'review-required') {
+          const reasons = Array.isArray(data.reasons) ? (data.reasons as { detail?: string }[]) : [];
+          updateProject(slug, (p) => ({
+            processLog: [...p.processLog.slice(-300), `⏸ Needs review: ${reasons.map((r) => r.detail).filter(Boolean).join(' · ')}`],
+          }));
+        }
   }, [patchProject, updateProject, reloadEditor]);
 
   /** Tail work after a process stream ends, however it ended. */
@@ -600,6 +615,82 @@ export default function EditorPage() {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, [fetchProjects]);
 
+  /**
+   * Approve & render / Approve & promote — the human decision the unattended
+   * pipeline paused for. Goes through /approve (polish on the CURRENT plan),
+   * never /process, so retake flips and header edits made in review survive.
+   */
+  const runApprove = useCallback(async (slug: string, opts: { approvedRangeIds?: string[]; promoteOnly?: boolean } = {}) => {
+    if (!slug || inFlightRef.current.has(slug)) return;
+    if (opts.promoteOnly) {
+      try {
+        const res = await fetch(`/api/editor/project/${slug}/approve`, {
+          method: 'POST',
+          headers: { 'x-dashboard-key': dashKey(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ promoteOnly: true }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) patchProject(slug, { processError: j.error ?? `approve failed (${res.status})` });
+        else { reloadEditor(); }
+      } finally {
+        fetchProjects();
+      }
+      return;
+    }
+    inFlightRef.current.add(slug);
+    patchProject(slug, { processStage: 'preparing', processProgress: null, processError: null, processLog: [], auditSummary: null });
+    try {
+      const res = await fetch(`/api/editor/project/${slug}/approve`, {
+        method: 'POST',
+        headers: { 'x-dashboard-key': dashKey(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(opts.approvedRangeIds ? { approvedRangeIds: opts.approvedRangeIds } : {}),
+      });
+      if (!res.ok || !res.body) {
+        let err = `approve failed (${res.status})`;
+        try { err = (await res.json()).error ?? err; } catch {}
+        patchProject(slug, { processStage: 'error', processError: err });
+        return;
+      }
+      await consumeSSE(res.body, handleProcessEvent(slug));
+    } catch (e) {
+      patchProject(slug, { processStage: 'error', processError: e instanceof Error ? e.message : String(e) });
+    } finally {
+      finishProcessStream(slug);
+    }
+  }, [patchProject, handleProcessEvent, finishProcessStream, fetchProjects, reloadEditor]);
+
+  /** Open the LLM cut review from the proposal already on disk (no re-run). */
+  const loadExistingProposal = useCallback(async (slug: string) => {
+    try {
+      const res = await fetch(`/api/editor/project/${slug}/polish/propose`, { headers: { 'x-dashboard-key': dashKey() }, cache: 'no-store' });
+      if (!res.ok) return false;
+      const body = await res.json();
+      const p: DisfluencyProposal = {
+        proposed: body.proposed ?? [],
+        keptIds: body.keptIds ?? [],
+        scopedSeconds: Number(body.scopedSeconds) || 0,
+        wordCount: Number(body.wordCount) || 0,
+        generatedAt: body.generatedAt ?? new Date().toISOString(),
+      };
+      patchProject(slug, { proposal: p, approvedIds: new Set(p.keptIds) });
+      return true;
+    } catch { return false; }
+  }, [patchProject]);
+
+  /** Seek the preview to the first flagged retake group and select its clip. */
+  const jumpToFlaggedRetake = useCallback(() => {
+    if (!plan) return;
+    const g = (plan.retakeGroups ?? []).find((x) => x.flagged);
+    if (!g) return;
+    const kept = g.alternatives.find((a) => a.id === g.keptAlternativeId) ?? g.alternatives[0];
+    if (!kept) return;
+    const edited = sourceMsToEditedMs(plan, kept.sourceStart * 1000 + 50);
+    if (edited !== null) {
+      previewRef.current?.seekEditedMs(edited);
+      setPlayheadEditedMs(edited);
+    }
+  }, [plan, setPlayheadEditedMs]);
+
   const previewPolishCuts = useCallback(async () => {
     if (!selectedSlug) return;
     const slug = selectedSlug;
@@ -655,8 +746,10 @@ export default function EditorPage() {
     const slug = selectedSlug;
     const ids = Array.from(approvedIds);
     patchProject(slug, { proposal: null, approvedIds: new Set() });
-    await runProcess(slug, ids);
-  }, [selectedSlug, approvedIds, patchProject, runProcess]);
+    // Polish on the current plan with the reviewed set — not a full
+    // re-process, which would replace the reviewed clips wholesale.
+    await runApprove(slug, { approvedRangeIds: ids });
+  }, [selectedSlug, approvedIds, patchProject, runApprove]);
 
   const cancelReviewedPolish = useCallback(() => {
     if (!selectedSlug) return;
@@ -948,6 +1041,57 @@ export default function EditorPage() {
   // clips, captions) is produced by the pipeline itself.
   const canProcess = !!selectedSlug && !processing;
 
+  // "Needs review" banner: the unattended pipeline paused on flags. One line
+  // per reason with a jump into the right tool, and a single primary action.
+  const reviewBanner = (() => {
+    if (!selected || selected.stage !== 'needs-review' || !selected.review?.required || processing) return null;
+    const reasons = selected.review.reasons;
+    const auditOnly = reasons.length > 0 && reasons.every((r) => r.code === 'audit-fail');
+    const slug = selected.slug;
+    const jump = (code: string) => {
+      if (code === 'retake-flagged') { jumpToFlaggedRetake(); if (isMobile) setActiveSheet('cut'); }
+      else if (code === 'disfluency-long-rejected') { void loadExistingProposal(slug); if (isMobile) setActiveSheet('words'); }
+      else if (code === 'hook-lint' || code === 'hook-low-score') { if (isMobile) setActiveSheet('header'); else document.querySelector<HTMLInputElement>('input[placeholder^="Topic summary"]')?.focus(); }
+      else if (code === 'audit-fail') { if (isMobile) setActiveSheet('cut'); }
+    };
+    const label = (code: string) =>
+      code === 'retake-flagged' ? 'Check retake'
+      : code === 'disfluency-long-rejected' ? 'Review cuts'
+      : code === 'hook-lint' || code === 'hook-low-score' ? 'Edit hook'
+      : 'View audit';
+    return (
+      <div role="status" style={{ padding: '10px 20px', background: `${C.gold}18`, borderBottom: `1px solid ${C.gold}66`, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', color: C.gold, fontWeight: 700 }}>Needs review</span>
+          <span style={{ fontSize: 11, color: C.silver, flex: 1 }}>
+            {auditOnly ? 'The render finished but the sync audit failed. Watch it, then promote or re-render.' : 'The auto edit paused before rendering. Resolve what you want, then approve.'}
+          </span>
+          <button
+            onClick={() => runApprove(slug, { promoteOnly: auditOnly })}
+            style={{ background: C.gold, color: C.bg, border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+          >{auditOnly ? 'Approve & promote' : 'Approve & render'}</button>
+          {auditOnly && (
+            <button
+              onClick={() => runApprove(slug)}
+              style={{ background: 'transparent', color: C.silver, border: `1px solid ${C.border}`, borderRadius: 8, padding: '7px 12px', fontSize: 11, cursor: 'pointer' }}
+            >Re-render</button>
+          )}
+        </div>
+        <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {reasons.map((r, i) => (
+            <li key={i} style={{ fontSize: 11, color: C.white, lineHeight: 1.4 }}>
+              {r.detail}
+              <button
+                onClick={() => jump(r.code)}
+                style={{ marginLeft: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.gold, borderRadius: 6, padding: '1px 8px', fontSize: 10, cursor: 'pointer' }}
+              >{label(r.code)}</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  })();
+
   const clearProcessLog = useCallback(
     () => selectedSlug && patchProject(selectedSlug, { processLog: [] }),
     [selectedSlug, patchProject],
@@ -1106,6 +1250,7 @@ export default function EditorPage() {
                     horizontal scrubbing timeline, and a bottom tab bar whose
                     tabs open tool sheets (instead of a tall stacked column). */}
                 <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                  {reviewBanner}
                   <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bg, padding: '6px 8px' }}>
                     <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10, display: 'flex', gap: 6 }}>
                       <button
@@ -1262,7 +1407,7 @@ export default function EditorPage() {
                 </MobileSheet>
 
                 <MobileSheet open={activeSheet === 'header'} title="Header" onClose={() => setActiveSheet(null)}>
-                  <HeaderConfigForm header={plan.header} onChange={actions.setHeader} />
+                  <HeaderConfigForm header={plan.header} onChange={actions.setHeader} slug={selectedSlug} autoHeader={plan.hook?.source === 'auto'} onPlanChanged={reloadEditor} />
                 </MobileSheet>
 
                 <MobileSheet open={activeSheet === 'text'} title="Text Overlays" onClose={() => setActiveSheet(null)}>
@@ -1344,7 +1489,8 @@ export default function EditorPage() {
                     </div>
                   );
                 })()}
-                <HeaderConfigForm header={plan.header} onChange={actions.setHeader} />
+                {reviewBanner}
+                <HeaderConfigForm header={plan.header} onChange={actions.setHeader} slug={selectedSlug} autoHeader={plan.hook?.source === 'auto'} onPlanChanged={reloadEditor} />
                 <Toolbar
                   hasSelectedClip={!!selectedClipId}
                   onSplit={() => actions.splitAt(playheadEditedMs)}

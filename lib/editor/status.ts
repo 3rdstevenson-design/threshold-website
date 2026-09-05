@@ -20,6 +20,7 @@ export type Stage =
   | 'transcribed'
   | 'clips-proposed'
   | 'editing'
+  | 'needs-review'
   | 'rendered'
   | 'stale'
   | 'error';
@@ -139,7 +140,13 @@ export function readProject(slug: string): ProjectStatus | null {
   // (re)run and on success, so a project only sits in 'error' until it's
   // re-processed. (Previously this checked stored.stage === 'error', which
   // the catch blocks never set — so failures were invisible.)
-  const stage = stored.error ? 'error' : derivedStage(slugDir, slug, category);
+  // Precedence: a recorded error, then a pending human decision (the
+  // unattended pipeline paused on a flag), then the file-derived stage.
+  const stage: Stage = stored.error
+    ? 'error'
+    : stored.review?.required
+      ? 'needs-review'
+      : derivedStage(slugDir, slug, category);
   const hasThumb = fs.existsSync(path.join(slugDir, 'thumb.jpg'));
   const hasClipsProposal = fs.existsSync(path.join(slugDir, 'clips-proposal.json'));
 

@@ -17,7 +17,7 @@
  */
 import { DEFAULT_FILLER_WORDS } from './fillerWords';
 
-export const EDIT_PLAN_VERSION = 4;
+export const EDIT_PLAN_VERSION = 5;
 
 /**
  * Stepped playback-speed presets offered by the UI. `speed` on a clip is
@@ -330,13 +330,20 @@ export type EditPlan = {
    * are optional fields, so every older version keeps loading
    * (validatePlan accepts ≤ current).
    */
-  version: 1 | 2 | 3 | 4;
+  version: 1 | 2 | 3 | 4 | 5;
   slug: string;
   sourceVideo: string;   // path relative to my-video-projects root
   sourceDuration: number; // seconds
   clips: Clip[];
   captions: Caption[];
   header: HeaderConfig | null;
+  /**
+   * Provenance of `header`. 'auto' = written by the hook generator and
+   * safe to overwrite on the next run; 'user' = hand-edited, never touched.
+   * Absent on plans predating the hook stage (treated as user-owned when
+   * a header exists).
+   */
+  hook?: { source: 'auto' | 'user'; proposalId: string | null; appliedAt: string };
   /** Free user-added text overlays — a separate layer from transcript captions. */
   overlays?: Overlay[];
   fillerWords: string[];
@@ -803,10 +810,16 @@ function applyActionInternal(plan: EditPlan, action: EditAction): EditPlan {
       return { ...plan, overlays: (plan.overlays ?? []).filter((o) => o.id !== overlayId) };
     }
     case 'set_header': {
-      return { ...plan, header: action.params as HeaderConfig };
+      const params = action.params as HeaderConfig & { __source?: 'auto' | 'user'; __proposalId?: string | null };
+      const { __source, __proposalId, ...header } = params;
+      return {
+        ...plan,
+        header,
+        hook: { source: __source ?? 'user', proposalId: __proposalId ?? null, appliedAt: new Date().toISOString() },
+      };
     }
     case 'clear_header': {
-      return { ...plan, header: null };
+      return { ...plan, header: null, hook: undefined };
     }
     case 'update_filler_words': {
       const { fillerWords } = action.params as { fillerWords: string[] };

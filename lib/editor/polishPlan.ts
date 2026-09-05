@@ -21,6 +21,7 @@ import {
   Clip,
   Caption,
   clipEditedMs,
+  editedMsToSource,
   randomId,
 } from './editPlan';
 import { chunkCaptions } from './captionChunker';
@@ -79,9 +80,13 @@ export function buildPolishedPlan(input: {
   // 5. Re-chunk captions from the full word list against the polished
   // clips. We reuse the round-1 chunker for visual consistency with
   // every other part of the editor.
-  const captions: Caption[] = chunkCaptions(input.words, polishedClips, {
-    customSpellings: input.basePlan.customSpellings,
-  });
+  const captions: Caption[] = carryCaptionEdits(
+    input.basePlan,
+    polishedClips,
+    chunkCaptions(input.words, polishedClips, {
+      customSpellings: input.basePlan.customSpellings,
+    }),
+  );
 
   const editedDurationMs = polishedClips.reduce(
     (sum, c) => sum + clipEditedMs(c),
@@ -146,4 +151,57 @@ function clipsToRemoveRanges(clips: Clip[], duration: number): Range[] {
     out.push({ start: last.sourceEnd, end: duration });
   }
   return out;
+}
+
+
+/**
+ * Caption text edits made in the editor (during review, say) used to be
+ * lost here because polish re-chunks from the raw words. Carry them over.
+ *
+ * Edits are found in the base plan's history (`update_caption` actions).
+ * Because update_caption re-derives words[] from the new text, the only
+ * invariant across runs is SOURCE time: map each edited base caption's
+ * start back to source ms through the base clips, map each fresh chunk's
+ * start through the polished clips, and match within a tolerance. Timing
+ * always comes from the fresh chunk. Exported for tests.
+ */
+export function carryCaptionEdits(
+  basePlan: Pick<EditPlan, 'captions' | 'clips' | 'history'>,
+  polishedClips: Clip[],
+  fresh: Caption[],
+  toleranceMs = 60,
+): Caption[] {
+  const editedIds = new Set<string>();
+  for (const a of basePlan.history ?? []) {
+    if (a.type === 'update_caption') {
+      const id = (a.params as { captionId?: string }).captionId;
+      if (id) editedIds.add(id);
+    }
+  }
+  if (editedIds.size === 0) return fresh;
+  const basePlanForMap = { clips: basePlan.clips } as EditPlan;
+  const polishedForMap = { clips: polishedClips } as EditPlan;
+  const edited: { sourceMs: number; cap: Caption }[] = [];
+  for (const c of basePlan.captions) {
+    if (!editedIds.has(c.id)) continue;
+    const m = editedMsToSource(basePlanForMap, c.startMs);
+    if (m) edited.push({ sourceMs: m.sourceMs, cap: c });
+  }
+  if (edited.length === 0) return fresh;
+  const used = new Set<number>();
+  return fresh.map((f) => {
+    const m = editedMsToSource(polishedForMap, f.startMs);
+    if (!m) return f;
+    let best = -1;
+    let bestD = Infinity;
+    for (let i = 0; i < edited.length; i++) {
+      if (used.has(i)) continue;
+      const d = Math.abs(edited[i].sourceMs - m.sourceMs);
+      if (d <= toleranceMs && d < bestD) { best = i; bestD = d; }
+    }
+    if (best < 0) return f;
+    used.add(best);
+    const hit = edited[best].cap;
+    return { ...f, text: hit.text, ...(hit.style ? { style: hit.style } : {}) };
+  });
 }

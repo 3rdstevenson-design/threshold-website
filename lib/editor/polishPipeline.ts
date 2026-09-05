@@ -47,6 +47,8 @@ import { readStageHistory, ReportWriter, type PipelineWarning } from './pipeline
 import { readProject, writeStatus } from './status';
 import { decideAuditGate } from './auditGate';
 import { buildConcatFilter, CONCAT_ENCODE_ARGS } from './concatFilter';
+import { collectFlags } from './reviewFlags';
+import type { HookProposal } from './hookProposal';
 import { readReframeFile } from './reframe';
 import type { Word } from './autoCut';
 import {
@@ -87,6 +89,14 @@ export type RunPolishStreamInput = {
   signal?: AbortSignal;
   /** Open telemetry report from the calling pipeline (talking-head run). */
   report?: ReportWriter;
+  /**
+   * 'auto' pauses in needs-review (before the render) when the cut stages
+   * raised flags; 'approved' means a human already decided — run through.
+   * Default 'approved' so the manual Polish button behaves as before.
+   */
+  gate?: 'auto' | 'approved';
+  /** Hook proposal from the hooking stage, for flag collection. */
+  hook?: HookProposal | null;
 };
 
 type AuditReport = {
@@ -152,6 +162,7 @@ const AUTO_CORRECT_PER_CAPTION_MS = 80;
 
 export async function runPolishStream(input: RunPolishStreamInput): Promise<void> {
   const { slug, approvedRangeIds, send, signal } = input;
+  const gateMode = input.gate ?? 'approved';
   const log = (msg: string) => send('log', { msg });
   const stageHistory = readStageHistory();
   const sourceSecForEta = readPlan(slug)?.sourceDuration ?? 0;
@@ -272,6 +283,36 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
         log(`(non-fatal) failed to persist disfluency-proposal.json: ${e instanceof Error ? e.message : e}`);
       }
     }
+  }
+
+  // ── Gate: pause for a human before the expensive render? ─────────
+  // Reads the just-written proposal (or the prior one when approving from
+  // a proposal) so the "long range rejected" flag sees the same data the
+  // review panel shows.
+  if (gateMode === 'auto') {
+    let proposedForFlags: DisfluencyRange[] = [];
+    try {
+      if (fs.existsSync(proposalPath)) {
+        proposedForFlags = (JSON.parse(fs.readFileSync(proposalPath, 'utf8')) as { proposed?: DisfluencyRange[] }).proposed ?? [];
+      }
+    } catch { /* ignore */ }
+    const flags = collectFlags({
+      retakeGroups: basePlan.retakeGroups,
+      disfluencyProposed: proposedForFlags,
+      hook: input.hook ?? null,
+    });
+    if (flags.length > 0) {
+      const review = { required: true, reasons: flags, createdAt: new Date().toISOString() };
+      writeStatus(slug, { review });
+      for (const f of flags) log(`⏸ review: ${f.code} — ${f.detail}`);
+      log('Paused before render: open the project, resolve the flags, then Approve & render.');
+      report.finish({ review: { paused: true, reasons: flags }, promoted: false });
+      send('review-required', { reasons: flags });
+      stage('done');
+      send('done', { ok: true, paused: true, review, warnings });
+      return;
+    }
+    log('No review flags — continuing unattended.');
   }
 
   // ── Phase 3: polishing (build polished plan + write v2 artifacts) ─

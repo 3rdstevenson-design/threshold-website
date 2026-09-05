@@ -29,7 +29,8 @@ import { resolveSource } from '@/lib/editor/sourceResolver';
 import { readProject, writeStatus } from '@/lib/editor/status';
 import { runLongFormPipeline } from '@/lib/editor/longFormPipeline';
 import { runTalkingHeadPipeline } from '@/lib/editor/talkingHeadPipeline';
-import { getJob, startJob, subscribe, type Emit, type Job } from '@/lib/editor/jobRunner';
+import { getJob, startJob, type Emit } from '@/lib/editor/jobRunner';
+import { observeJob as observe } from '@/lib/editor/jobStream';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -148,45 +149,4 @@ export async function GET(
     });
   }
   return observe(job, req);
-}
-
-/** SSE response that only OBSERVES `job`. Closing the tab unsubscribes us but
- *  leaves the job running server-side. */
-function observe(job: Job, req: NextRequest): Response {
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    start(controller) {
-      let closed = false;
-      let unsub: () => void = () => {};
-      const close = () => {
-        if (closed) return;
-        closed = true;
-        unsub();
-        try { controller.close(); } catch {}
-      };
-      const onEvent = (e: { event: string; data: unknown }) => {
-        try {
-          controller.enqueue(
-            encoder.encode(`event: ${e.event}\ndata: ${JSON.stringify(e.data)}\n\n`),
-          );
-        } catch {}
-        if (e.event === 'done' || e.event === 'error') close();
-      };
-      unsub = subscribe(job, onEvent);
-      // A job that already finished replays its terminal event above and is
-      // now closed; guard the case where the buffer rolled past it.
-      if (job.settled) close();
-      // Client disconnected (tab closed / navigated away): stop observing,
-      // but DO NOT abort the job.
-      req.signal.addEventListener('abort', close, { once: true });
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
-    },
-  });
 }

@@ -9,7 +9,7 @@ import { dashKey } from '../editor/components/useEditor';
 //    component doesn't import Node-only modules; keep in sync) ───────────────
 
 type PipelineStage =
-  | 'processing' | 'edit-failed' | 'rendered' | 'captioning' | 'needs-review'
+  | 'processing' | 'edit-failed' | 'edit-review' | 'rendered' | 'captioning' | 'needs-review'
   | 'scheduled' | 'publishing' | 'failed' | 'published' | 'rejected';
 
 type PipelineAction =
@@ -51,6 +51,7 @@ interface PipelineResponse {
 const STAGE_SECTIONS: { stage: PipelineStage; label: string; color: string }[] = [
   { stage: 'processing',   label: 'Processing in editor',      color: '#C0C0C0' },
   { stage: 'edit-failed',  label: 'Editor failed',             color: '#E86A6A' },
+  { stage: 'edit-review',  label: 'Auto edit paused — review', color: '#C9A84C' },
   { stage: 'rendered',     label: 'Rendered — awaiting queue', color: '#E0A030' },
   { stage: 'captioning',   label: 'Generating caption',        color: '#9B30D9' },
   { stage: 'needs-review', label: 'Needs review',              color: '#C9A84C' },
