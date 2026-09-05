@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { listProjects } from '@/lib/editor/status';
+import { activeJobs } from '@/lib/editor/jobRunner';
 import { sweepInterruptedJobs } from '@/lib/editor/jobPersistence';
 import { scanLocalFiles } from '@/lib/localScan';
 import { readQueueWithMeta } from '@/lib/queue';
@@ -17,7 +18,8 @@ export async function GET() {
   // show a dead job as "Processing in editor".
   sweepInterruptedJobs();
 
-  const projects = listProjects();
+  const live = activeJobs();
+  const projects = listProjects().map((p) => ({ ...p, active: p.slug in live }));
   const files = scanLocalFiles();
 
   let posts: QueuePost[] = [];

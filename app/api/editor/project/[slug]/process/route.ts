@@ -29,7 +29,7 @@ import { resolveSource } from '@/lib/editor/sourceResolver';
 import { readProject, writeStatus } from '@/lib/editor/status';
 import { runLongFormPipeline } from '@/lib/editor/longFormPipeline';
 import { runTalkingHeadPipeline } from '@/lib/editor/talkingHeadPipeline';
-import { startJob, subscribe, type Emit } from '@/lib/editor/jobRunner';
+import { getJob, startJob, subscribe, type Emit, type Job } from '@/lib/editor/jobRunner';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -103,6 +103,7 @@ export async function POST(
       }
     } catch (e) {
       let msg = e instanceof Error ? e.message : String(e);
+      if (signal.aborted) msg = 'Canceled. Press Process to re-run.';
       // The spawned ingest writes its own, more specific error into
       // status.json (e.g. "Deepgram 408: SLOW_UPLOAD…") right before it
       // exits nonzero. Don't clobber that detail with a generic wrapper —
@@ -118,9 +119,40 @@ export async function POST(
   };
 
   const job = startJob(slug, run);
+  return observe(job, req);
+}
 
-  // This response only OBSERVES the job. Closing the tab unsubscribes us but
-  // leaves the job running server-side.
+/**
+ * GET /api/editor/project/[slug]/process — attach-only.
+ *
+ * Re-subscribes a freshly loaded page (or a backgrounded phone) to a job
+ * that is already running, replaying the buffered events so the log, stage
+ * and progress reappear. Never starts a job: POST is idempotent only while a
+ * job is unsettled, and a settled one lingers 30s, so reusing POST for
+ * reattach would kick off a brand-new full pipeline on a finished project.
+ */
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { slug: string } },
+) {
+  const unauth = checkAuth(req);
+  if (unauth) return unauth;
+  if (!validateSlug(params.slug)) {
+    return new Response(JSON.stringify({ error: 'invalid slug' }), { status: 400 });
+  }
+  const job = getJob(params.slug);
+  if (!job) {
+    return new Response(JSON.stringify({ active: false }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  return observe(job, req);
+}
+
+/** SSE response that only OBSERVES `job`. Closing the tab unsubscribes us but
+ *  leaves the job running server-side. */
+function observe(job: Job, req: NextRequest): Response {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     start(controller) {

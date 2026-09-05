@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { C } from './brand';
 import type { AutoCutStats } from './useEditor';
 
@@ -73,8 +74,12 @@ type Props = {
   onProcess: () => void;
   processing: boolean;
   processStage: ProcessStage;
+  /** Real within-stage progress (server `progress` events) + expected wall-clock. */
+  processProgress?: LiveProgress | null;
   processError: string | null;
   onDismissProcessError: () => void;
+  /** Aborts the running server-side job (frees the serial queue). */
+  onCancelProcess?: () => void;
   canProcess: boolean;
 
   // Audit badge + promote-anyway escape hatch.
@@ -169,10 +174,12 @@ export function Toolbar(props: Props) {
 
       <ProcessButton
         stage={props.processStage}
+        progress={props.processProgress ?? null}
         error={props.processError}
         running={props.processing}
         onClick={props.onProcess}
         onDismissError={props.onDismissProcessError}
+        onCancel={props.onCancelProcess}
         disabled={!props.canProcess}
       />
 
@@ -295,6 +302,76 @@ export const PROCESS_PROGRESS: Record<ProcessStage, number> = {
   error: 0,
 };
 
+export type LiveProgress = {
+  /** 0-100 within the current stage, or null when the stage emits none. */
+  pct: number | null;
+  stage: string;
+  /** Expected wall-clock for this stage (server estimate), or null. */
+  expectedMs: number | null;
+  stageStartedAt: number;
+};
+
+const STAGE_ORDER = Object.keys(PROCESS_PROGRESS) as ProcessStage[];
+
+/** Weight of the NEXT stage after `stage`, i.e. the top of its window. */
+function nextStageWeight(stage: ProcessStage): number {
+  const i = STAGE_ORDER.indexOf(stage);
+  const cur = PROCESS_PROGRESS[stage];
+  for (let k = i + 1; k < STAGE_ORDER.length; k++) {
+    const w = PROCESS_PROGRESS[STAGE_ORDER[k]];
+    if (w > cur) return w;
+  }
+  return 100;
+}
+
+/**
+ * Overall 0-100 for the bar. The static stage weight is the floor of the
+ * stage's window; real `progress` events (or, failing those, an elapsed-vs-
+ * expected tween that asymptotes at 90% of the window) fill it. Before this
+ * the bar sat at a fixed number for the whole multi-minute transcribe.
+ */
+export function overallPct(stage: ProcessStage, progress: LiveProgress | null, now: number = Date.now()): number {
+  const base = PROCESS_PROGRESS[stage];
+  if (stage === 'idle' || stage === 'error' || stage === 'done' || stage === 'queued') return base;
+  const top = nextStageWeight(stage);
+  const window = Math.max(0, top - base);
+  if (!progress || progress.stage !== stage) return base;
+  let frac: number;
+  if (progress.pct !== null) {
+    frac = Math.max(0, Math.min(1, progress.pct / 100));
+  } else if (progress.expectedMs && progress.expectedMs > 0) {
+    const elapsed = Math.max(0, now - progress.stageStartedAt);
+    // 1 - e^(-t/T): reaches ~63% at T, ~86% at 2T, never 100%.
+    frac = 0.9 * (1 - Math.exp(-elapsed / progress.expectedMs));
+  } else {
+    return base;
+  }
+  return Math.round(base + window * frac);
+}
+
+/** Seconds left for the current stage, from real pct or the expected time. */
+export function stageEtaSec(progress: LiveProgress | null, now: number = Date.now()): number | null {
+  if (!progress) return null;
+  const elapsed = Math.max(0, now - progress.stageStartedAt);
+  if (progress.pct !== null && progress.pct > 3) {
+    const total = elapsed / (progress.pct / 100);
+    return Math.max(0, Math.round((total - elapsed) / 1000));
+  }
+  if (progress.expectedMs) return Math.max(0, Math.round((progress.expectedMs - elapsed) / 1000));
+  return null;
+}
+
+/** Re-render every second while a stage is being tweened. */
+export function useProgressTick(active: boolean): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!active) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [active]);
+  return now;
+}
+
 export const PROCESS_LABEL: Record<ProcessStage, string> = {
   idle: '✨ Process video',
   queued: 'Waiting',
@@ -327,26 +404,36 @@ export const PROCESS_LABEL: Record<ProcessStage, string> = {
  */
 function ProcessButton({
   stage,
+  progress,
   error,
   running,
   onClick,
   onDismissError,
+  onCancel,
   disabled,
 }: {
   stage: ProcessStage;
+  progress: LiveProgress | null;
   error: string | null;
   running: boolean;
   onClick: () => void;
   onDismissError: () => void;
+  onCancel?: () => void;
   disabled: boolean;
 }) {
-  const pct = PROCESS_PROGRESS[stage];
-  const label = PROCESS_LABEL[stage];
+  const now = useProgressTick(running);
+  const pct = overallPct(stage, progress, now);
+  const eta = running ? stageEtaSec(progress, now) : null;
+  const baseLabel = PROCESS_LABEL[stage];
+  const label = running && stage !== 'queued'
+    ? `${baseLabel} · ${pct}%${eta !== null && eta > 0 ? ` · ~${eta < 60 ? `${eta}s` : `${Math.round(eta / 60)}m`}` : ''}`
+    : baseLabel;
   const isIdle = stage === 'idle';
   const isError = stage === 'error';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'stretch', gap: 4 }}>
       <button
         onClick={onClick}
         disabled={running || disabled}
@@ -387,7 +474,18 @@ function ProcessButton({
         )}
         <span style={{ position: 'relative', zIndex: 1 }}>{label}</span>
       </button>
-      {isError && error && (
+      {running && onCancel && (
+        <button
+          onClick={onCancel}
+          title="Stop this job and free the queue"
+          style={{
+            background: 'transparent', border: `1px solid ${C.border}`, color: C.silver,
+            borderRadius: 8, padding: '0 10px', fontSize: 11, cursor: 'pointer', marginRight: 8,
+          }}
+        >Cancel</button>
+      )}
+      </div>
+      {(isError || isIdle) && error && (
         <div
           role="alert"
           style={{

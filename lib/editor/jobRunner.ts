@@ -46,6 +46,24 @@ export type Job = {
   buffer: JobEvent[];
   subscribers: Set<Subscriber>;
   settled: boolean;
+  /** ISO timestamp of startJob(). */
+  startedAt: string;
+  /** Most recent `stage` event name, for reattach snapshots. */
+  lastStage: string | null;
+  /** Date.now() when `lastStage` was set. */
+  stageStartedAt: number;
+  /** Most recent `progress` event (0-100 within the current stage). */
+  lastProgressPct: number | null;
+};
+
+export type JobSnapshot = {
+  active: boolean;
+  stage: string | null;
+  startedAt: string;
+  stageStartedAt: number;
+  progressPct: number | null;
+  /** 0 = running; N = N-1 jobs ahead in the serial queue. */
+  queuePosition: number;
 };
 
 const MAX_BUFFER = 600;
@@ -63,6 +81,54 @@ const jobs =
 export function isJobActive(slug: string): boolean {
   const j = jobs.get(slug);
   return !!j && !j.settled;
+}
+
+/** The live job for `slug`, including one that settled within the last 30s. */
+export function getJob(slug: string): Job | null {
+  return jobs.get(slug) ?? null;
+}
+
+/**
+ * Cheap read for list endpoints: lets the editor reattach to a running job
+ * after a reload (no client-side state survives one) and lets the pipeline
+ * health view tell "still running" from "stuck".
+ */
+export function getJobSnapshot(slug: string): JobSnapshot | null {
+  const j = jobs.get(slug);
+  if (!j || j.settled) return null;
+  const q = processQueue.status();
+  const idx = q.waiting.indexOf(slug);
+  return {
+    active: true,
+    stage: j.lastStage,
+    startedAt: j.startedAt,
+    stageStartedAt: j.stageStartedAt,
+    progressPct: j.lastProgressPct,
+    queuePosition: q.runningSlug === slug ? 0 : idx >= 0 ? idx + 1 : 0,
+  };
+}
+
+/** Every unsettled job, keyed by slug. */
+export function activeJobs(): Record<string, JobSnapshot> {
+  const out: Record<string, JobSnapshot> = {};
+  for (const slug of Array.from(jobs.keys())) {
+    const snap = getJobSnapshot(slug);
+    if (snap) out[slug] = snap;
+  }
+  return out;
+}
+
+/**
+ * Abort a running or queued job. The pipelines thread the job's signal into
+ * every ffmpeg/whisper/Remotion spawn (killOnAbort) and processQueue drops a
+ * still-queued waiter, so this is the one legitimate way a job dies early.
+ * Returns false when nothing is running for the slug.
+ */
+export function cancelJob(slug: string): boolean {
+  const j = jobs.get(slug);
+  if (!j || j.settled) return false;
+  j.controller.abort();
+  return true;
 }
 
 /**
@@ -91,6 +157,10 @@ export function startJob(
     buffer: [],
     subscribers: new Set(),
     settled: false,
+    startedAt: new Date().toISOString(),
+    lastStage: null,
+    stageStartedAt: Date.now(),
+    lastProgressPct: null,
   };
   jobs.set(slug, job);
   // Durable in-flight marker — removed on settle. Covers queued-but-not-yet-
@@ -99,6 +169,17 @@ export function startJob(
 
   const emit: Emit = (event, data) => {
     const e: JobEvent = { event, data };
+    if (event === 'stage') {
+      const name = (data as { name?: unknown } | null)?.name;
+      if (typeof name === 'string' && name !== job.lastStage) {
+        job.lastStage = name;
+        job.stageStartedAt = Date.now();
+        job.lastProgressPct = null;
+      }
+    } else if (event === 'progress') {
+      const pct = (data as { pct?: unknown } | null)?.pct;
+      if (typeof pct === 'number') job.lastProgressPct = pct;
+    }
     job.buffer.push(e);
     if (job.buffer.length > MAX_BUFFER) job.buffer.shift();
     job.subscribers.forEach((sub) => {

@@ -41,6 +41,8 @@ import {
 } from './disfluency';
 import { buildPolishedPlan } from './polishPlan';
 import { run, runStreaming } from './ffmpeg';
+import { ffmpegProgress, remotionProgress, newRemotionState, expectedStageMs } from './progressParse';
+import { readStageHistory } from './pipelineReport';
 import type { Word } from './autoCut';
 import {
   transcribeWithDeepgram,
@@ -143,7 +145,11 @@ const AUTO_CORRECT_PER_CAPTION_MS = 80;
 export async function runPolishStream(input: RunPolishStreamInput): Promise<void> {
   const { slug, approvedRangeIds, send, signal } = input;
   const log = (msg: string) => send('log', { msg });
-  const stage = (name: PolishStageName) => send('stage', { name });
+  const stageHistory = readStageHistory();
+  const sourceSecForEta = readPlan(slug)?.sourceDuration ?? 0;
+  const stage = (name: PolishStageName) =>
+    send('stage', { name, expectedMs: expectedStageMs(name, sourceSecForEta, stageHistory) });
+  const progress = (stageName: PolishStageName, pct: number) => send('progress', { stage: stageName, pct });
 
   const slugDir = path.join(TAKES_ROOT, slug);
   const publicSlugDir = path.join(VIDEO_PROJECT_ROOT, 'public', 'takes', slug);
@@ -297,7 +303,9 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
     parts.push(`${pairs}concat=n=${n}:v=1:a=1[v][a]`);
 
     log('Cutting + concatenating v2 clips (single pass)…');
-    const rConcat = await run('ffmpeg', [
+    const totalMs = editedDurationMs(polishedPlan);
+    let lastPct = -1;
+    const rConcat = await runStreaming('ffmpeg', [
       '-y',
       '-i', sourceAbs,
       '-filter_complex', parts.join(';'),
@@ -307,8 +315,12 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
       '-pix_fmt', 'yuv420p',
       '-r', '30',
       '-c:a', 'aac', '-b:a', '128k',
+      '-progress', 'pipe:1', '-nostats',
       concatV2Path,
-    ], { signal });
+    ], (line) => {
+      const pct = ffmpegProgress(line, totalMs);
+      if (pct !== null && pct !== lastPct) { lastPct = pct; progress('concatenating', pct); }
+    }, { signal });
     if (rConcat.code !== 0) {
       throw new Error(`ffmpeg trim+concat failed: ${rConcat.stderr.slice(-300)}`);
     }
@@ -317,7 +329,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
 
   // ── Phase 5: rendering (Remotion) ────────────────────────────────
   stage('rendering');
-  await renderV2({ slug, finalV2Path, log, signal });
+  await renderV2({ slug, finalV2Path, log, signal, onProgress: (pct) => progress('rendering', pct) });
 
   // ── Phase 6: auditing (Whisper drift) ────────────────────────────
   stage('auditing');
@@ -427,7 +439,7 @@ export async function runPolishStream(input: RunPolishStreamInput): Promise<void
       // Re-render with new caption timings (concat stays the same — only
       // the Remotion overlay changes).
       log('Re-rendering with corrected caption timings…');
-      await renderV2({ slug, finalV2Path, log, signal });
+      await renderV2({ slug, finalV2Path, log, signal, onProgress: (pct) => progress('rendering', pct) });
       // Re-run the Whisper audit so the overall status reflects the new
       // render. Overwrites audit.json in place.
       stage('auditing');
@@ -543,8 +555,11 @@ async function renderV2(input: {
   finalV2Path: string;
   log: (msg: string) => void;
   signal?: AbortSignal;
+  onProgress?: (pct: number) => void;
 }): Promise<void> {
   const inputProps = JSON.stringify({ slug: input.slug });
+  const remo = newRemotionState();
+  let lastPct = -1;
   const r = await runStreaming(
     'npx',
     [
@@ -555,7 +570,11 @@ async function renderV2(input: {
       '--props',
       inputProps,
     ],
-    input.log,
+    (line) => {
+      input.log(line);
+      const pct = remotionProgress(remo, line);
+      if (pct !== null && pct !== lastPct) { lastPct = pct; input.onProgress?.(pct); }
+    },
     { cwd: VIDEO_PROJECT_ROOT, signal: input.signal },
   );
   if (r.code !== 0) {

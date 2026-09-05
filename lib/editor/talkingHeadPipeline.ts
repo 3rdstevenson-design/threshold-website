@@ -32,6 +32,8 @@ import { runCutStages } from './cutPipeline';
 import { chunkCaptions } from './captionChunker';
 import { writeStatus } from './status';
 import { runPolishStream } from './polishPipeline';
+import { ingestProgress, expectedStageMs } from './progressParse';
+import { readStageHistory } from './pipelineReport';
 
 export type SendFn = (event: string, data: unknown) => void;
 
@@ -50,8 +52,12 @@ export type RunTalkingHeadInput = {
 export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promise<void> {
   const { slug, sourceAbsPath, send, skipTranscribe, approvedRangeIds, signal } = input;
   const log = (msg: string) => send('log', { msg });
-  const stage = (name: string) => send('stage', { name });
+  const stageHistory = readStageHistory();
+  let sourceSecForEta = 0;
+  const stage = (name: string) =>
+    send('stage', { name, expectedMs: expectedStageMs(name, sourceSecForEta, stageHistory) });
 
+  try { sourceSecForEta = await probeDurationSec(sourceAbsPath); } catch { /* fallback ratios */ }
   stage('preparing');
   log(`Processing ${slug}\u2026`);
 
@@ -64,7 +70,11 @@ export async function runTalkingHeadPipeline(input: RunTalkingHeadInput): Promis
     await runIngest({
       slug,
       sourceRel: path.relative(VIDEO_PROJECT_ROOT, sourceAbsPath),
-      onLog: log,
+      onLog: (line) => {
+        log(line);
+        const pct = ingestProgress(line);
+        if (pct !== null) send('progress', { stage: 'transcribing', pct });
+      },
       signal,
     });
   }

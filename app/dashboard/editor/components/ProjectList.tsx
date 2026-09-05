@@ -4,10 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { C } from './brand';
 import { dashKey } from './useEditor';
 import {
-  PROCESS_PROGRESS,
   PROCESS_LABEL,
+  overallPct,
+  useProgressTick,
+  type LiveProgress,
   type ProcessStage,
 } from './Toolbar';
+import type { InboxEntry } from '@/lib/editor/inbox';
 import {
   useUploads,
   enqueueUploads,
@@ -38,7 +41,15 @@ export type ProjectListEntry = {
   category: Category;
   sourceSlug?: string;
   hasClipsProposal?: boolean;
+  /** True while a server-side pipeline job is running or queued for this slug. */
+  active?: boolean;
+  activeStage?: string | null;
+  queuePosition?: number;
 };
+
+/** Category chosen at upload time. 'auto' lets the server pick by duration. */
+export type UploadAs = Category | 'auto';
+const UPLOAD_AS_KEY = 'editor_upload_as';
 
 const STAGE_LABEL: Record<ProjectListEntry['stage'], string> = {
   ingesting: 'Processing…',
@@ -95,7 +106,7 @@ type Props = {
   // bar overlay instead of the static server-derived stage badge. For
   // 'queued' entries, `queuePosition` drives the "Waiting #N" badge
   // so the user knows how many videos are ahead of this one.
-  processingBySlug?: Record<string, { stage: ProcessStage; queuePosition: number }>;
+  processingBySlug?: Record<string, { stage: ProcessStage; queuePosition: number; progress?: LiveProgress | null }>;
   /**
    * Controlled tab — when present, the parent decides which tab is
    * active (useful for switching into Talking Head after extracting
@@ -105,18 +116,36 @@ type Props = {
   onCategoryChange?: (c: Category) => void;
   /** Render the Instagram-Edits-style 2-column grid + upload FAB instead of the sidebar list. */
   isMobile?: boolean;
+  /** Files the AirDrop watcher is still classifying (or skipped/errored) — not projects yet. */
+  inbox?: InboxEntry[];
 };
 
 export function ProjectList(props: Props) {
   // Uploads live in the module-level uploadManager — byte progress, per-file
   // retry, and transfers that survive navigating away from this component.
   const uploads = useUploads();
+  const anyProcessing = !!props.processingBySlug && Object.keys(props.processingBySlug).length > 0;
+  const tick = useProgressTick(anyProcessing);
   const uploading = uploads.some(
     (u) => u.status === 'queued' || u.status === 'uploading' || u.status === 'stalled',
   );
   const [deleting, setDeleting] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const dragDepth = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+  const [busySlug, setBusySlug] = useState<string | null>(null);
+
+  // "Upload as" — chosen at enqueue time so a file never silently inherits
+  // whichever tab happened to be open. Defaults to the active tab; 'auto'
+  // lets the server pick long-form for anything ≥ 12 min.
+  const [uploadAs, setUploadAs] = useState<UploadAs | null>(null);
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(UPLOAD_AS_KEY);
+      if (v === 'auto' || v === 'talking-head' || v === 'long-form') setUploadAs(v);
+    } catch {}
+  }, []);
 
   // Always SSR as 'talking-head' and sync from localStorage after mount
   // to avoid a hydration mismatch on the active-tab style.
@@ -154,22 +183,86 @@ export function ProjectList(props: Props) {
     registerOnUploaded((slug, cat) => props.onUploaded(slug, cat as Category));
   }, [props]);
 
+  const effectiveUploadAs: UploadAs = uploadAs ?? category;
+  const chooseUploadAs = useCallback((v: UploadAs) => {
+    setUploadAs(v);
+    try { localStorage.setItem(UPLOAD_AS_KEY, v); } catch {}
+  }, []);
+  const enqueue = useCallback((files: File[]) => {
+    if (!files.length) return;
+    enqueueUploads(files, effectiveUploadAs === 'auto' ? null : effectiveUploadAs);
+  }, [effectiveUploadAs]);
+
   const onFilePicked = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     // Adding more files mid-batch is fine — they append to the queue.
-    if (files.length) enqueueUploads(files, category);
+    enqueue(files);
     e.currentTarget.value = '';
-  }, [category]);
+  }, [enqueue]);
 
-  const onDrop = useCallback((e: React.DragEvent) => {
+  // Whole-panel drop target. Only react to real file drags (the timeline's
+  // dnd-kit drags also bubble dragenter/dragover but carry no Files).
+  const isFileDrag = (e: React.DragEvent) => Array.from(e.dataTransfer?.types ?? []).includes('Files');
+  const onDragEnter = useCallback((e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
     e.preventDefault();
+    dragDepth.current += 1;
+    setDragOver(true);
+  }, []);
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    e.preventDefault();
+  }, []);
+  const onDragLeave = useCallback((e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (dragDepth.current === 0) setDragOver(false);
+  }, []);
+  const onDrop = useCallback((e: React.DragEvent) => {
+    if (!isFileDrag(e)) return;
+    e.preventDefault();
+    dragDepth.current = 0;
     setDragOver(false);
     const files = e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
-    if (files.length) enqueueUploads(files, category);
-  }, [category]);
+    enqueue(files);
+  }, [enqueue]);
+  const dropHandlers = { onDragEnter, onDragOver, onDragLeave, onDrop };
+
+  const cancelProcessing = useCallback(async (slug: string) => {
+    setMenuFor(null);
+    setBusySlug(slug);
+    try {
+      await fetch(`/api/editor/project/${slug}/cancel`, { method: 'POST', headers: { 'x-dashboard-key': dashKey() } });
+      props.onRefresh();
+    } finally {
+      setBusySlug(null);
+    }
+  }, [props]);
+
+  const moveCategory = useCallback(async (slug: string, to: Category) => {
+    setMenuFor(null);
+    setBusySlug(slug);
+    try {
+      const res = await fetch(`/api/editor/projects/${slug}`, {
+        method: 'PATCH',
+        headers: { 'x-dashboard-key': dashKey(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: to }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        window.alert(j.error ?? `Could not move project (HTTP ${res.status})`);
+        return;
+      }
+      setCategory(to);
+      props.onRefresh();
+    } finally {
+      setBusySlug(null);
+    }
+  }, [props, setCategory]);
 
   const deleteProject = useCallback(async (slug: string) => {
-    if (!window.confirm(`Delete project "${slug}"? This removes the source video, analysis, edit plan, and any renders. Cannot be undone.`)) return;
+    setMenuFor(null);
+    if (!window.confirm(`Move project "${slug}" to trash? The source video, analysis, edit plan, and renders go to my-video-projects/data/trash/ and can be restored by hand.`)) return;
     setDeleting(slug);
     try {
       await fetch(`/api/editor/projects/${slug}`, {
@@ -183,8 +276,8 @@ export function ProjectList(props: Props) {
   }, [props]);
 
   const uploadHint = category === 'long-form'
-    ? 'Drop a 30-60 min podcast or interview here. I\u2019ll find viral clips.'
-    : 'Drop one or more videos here — they upload, then process one at a time. Or AirDrop to ~/Videos/Reels-Inbox/.';
+    ? 'Drop a 30-60 min podcast or interview anywhere on this panel. I\u2019ll find viral clips. Large files resume if the connection drops.'
+    : 'Drop one or more videos anywhere on this panel — they upload, then process one at a time. Or AirDrop to ~/Videos/Reels-Inbox/.';
   const uploadLabel = category === 'long-form' ? '\u2191 Upload long-form' : '\u2191 Upload video';
 
   // MOBILE — Instagram Edits-style project grid: 2-column thumbnail cards with
@@ -192,15 +285,25 @@ export function ProjectList(props: Props) {
   // Reuses every handler/state above; only the presentation differs.
   if (props.isMobile) {
     return (
-      <div style={{ position: 'relative', flex: 1, minHeight: 0, height: '100%', display: 'flex', flexDirection: 'column', background: C.bg }}>
+      <div {...dropHandlers} style={{ position: 'relative', flex: 1, minHeight: 0, height: '100%', display: 'flex', flexDirection: 'column', background: C.bg }}>
+        {dragOver && <DropOverlay />}
         <div style={{ display: 'flex', borderBottom: `1px solid ${C.border}`, flex: '0 0 auto', background: C.bg }}>
           <TabButton active={category === 'talking-head'} onClick={() => setCategory('talking-head')} label="Talking Head" />
           <TabButton active={category === 'long-form'} onClick={() => setCategory('long-form')} label="Long-Form" badgeCount={unreviewedLongFormCount} />
         </div>
 
+        <div style={{ flex: '0 0 auto', padding: '8px 14px', borderBottom: `1px solid ${C.border}` }}>
+          <UploadAsControl value={effectiveUploadAs} onChange={chooseUploadAs} />
+        </div>
+
         {uploads.length > 0 && (
           <div style={{ flex: '0 0 auto', borderBottom: `1px solid ${C.border}` }}>
-            <UploadList uploads={uploads} compact />
+            <UploadList uploads={uploads} compact onPickFile={() => fileInputRef.current?.click()} />
+          </div>
+        )}
+        {!!props.inbox?.length && (
+          <div style={{ flex: '0 0 auto', borderBottom: `1px solid ${C.border}`, padding: '8px 14px' }}>
+            <InboxStrip entries={props.inbox} />
           </div>
         )}
 
@@ -217,7 +320,7 @@ export function ProjectList(props: Props) {
               const active = props.selectedSlug === p.slug;
               const liveEntry = props.processingBySlug?.[p.slug];
               const liveStage = liveEntry?.stage;
-              const livePct = liveStage ? PROCESS_PROGRESS[liveStage] : 0;
+              const livePct = liveStage ? overallPct(liveStage, liveEntry?.progress ?? null, tick) : 0;
               const baseLabel = liveStage ? PROCESS_LABEL[liveStage] : null;
               const liveLabel = liveStage === 'queued' && liveEntry && liveEntry.queuePosition > 0
                 ? `${baseLabel} #${liveEntry.queuePosition}`
@@ -246,9 +349,19 @@ export function ProjectList(props: Props) {
                       </div>
                     )}
                     <span
-                      onClick={(e) => { e.stopPropagation(); deleteProject(p.slug); }}
+                      onClick={(e) => { e.stopPropagation(); setMenuFor(menuFor === p.slug ? null : p.slug); }}
                       style={{ position: 'absolute', top: 6, right: 6, width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(13,13,24,0.7)', border: `1px solid ${C.border}`, borderRadius: 6, color: C.silver, fontSize: 15, lineHeight: 1 }}
-                    >×</span>
+                    >⋯</span>
+                    {menuFor === p.slug && (
+                      <RowMenu
+                        project={p}
+                        busy={busySlug === p.slug}
+                        onCancel={() => cancelProcessing(p.slug)}
+                        onMove={(to) => moveCategory(p.slug, to)}
+                        onDelete={() => deleteProject(p.slug)}
+                        onClose={() => setMenuFor(null)}
+                      />
+                    )}
                   </div>
                   <div style={{ padding: '8px 8px 10px' }}>
                     <div style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.slug}</div>
@@ -280,13 +393,15 @@ export function ProjectList(props: Props) {
   }
 
   return (
-    <aside style={{
+    <aside {...dropHandlers} style={{
+      position: 'relative',
       borderRight: `1px solid ${C.border}`,
       background: C.surface,
       overflowY: 'auto',
       display: 'flex',
       flexDirection: 'column',
     }}>
+      {dragOver && <DropOverlay />}
       {/* Category tabs */}
       <div style={{
         display: 'flex',
@@ -308,14 +423,9 @@ export function ProjectList(props: Props) {
 
       {/* Upload / dropzone */}
       <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
         style={{
           padding: '16px 18px',
           borderBottom: `1px solid ${C.border}`,
-          background: dragOver ? `${C.purple}22` : 'transparent',
-          transition: 'background 0.15s',
         }}
       >
         <div style={{ fontSize: 11, letterSpacing: 2, color: C.silver, textTransform: 'uppercase', marginBottom: 8 }}>
@@ -337,12 +447,20 @@ export function ProjectList(props: Props) {
         >
           {uploadLabel}
         </button>
+        <div style={{ marginTop: 8 }}>
+          <UploadAsControl value={effectiveUploadAs} onChange={chooseUploadAs} />
+        </div>
         <div style={{ fontSize: 11, color: C.silver, marginTop: 8, lineHeight: 1.5 }}>
           {uploadHint}
         </div>
         {uploads.length > 0 && (
           <div style={{ marginTop: 8 }}>
-            <UploadList uploads={uploads} />
+            <UploadList uploads={uploads} onPickFile={() => fileInputRef.current?.click()} />
+          </div>
+        )}
+        {!!props.inbox?.length && (
+          <div style={{ marginTop: 10 }}>
+            <InboxStrip entries={props.inbox} />
           </div>
         )}
         <input
@@ -368,7 +486,7 @@ export function ProjectList(props: Props) {
           const active = props.selectedSlug === p.slug;
           const liveEntry = props.processingBySlug?.[p.slug];
           const liveStage = liveEntry?.stage;
-          const livePct = liveStage ? PROCESS_PROGRESS[liveStage] : 0;
+          const livePct = liveStage ? overallPct(liveStage, liveEntry?.progress ?? null, tick) : 0;
           const baseLabel = liveStage ? PROCESS_LABEL[liveStage] : null;
           const liveLabel = liveStage === 'queued' && liveEntry && liveEntry.queuePosition > 0
             ? `${baseLabel} #${liveEntry.queuePosition}`
@@ -442,10 +560,20 @@ export function ProjectList(props: Props) {
                   </div>
                 </div>
               </button>
+              {menuFor === p.slug && (
+                <RowMenu
+                  project={p}
+                  busy={busySlug === p.slug}
+                  onCancel={() => cancelProcessing(p.slug)}
+                  onMove={(to) => moveCategory(p.slug, to)}
+                  onDelete={() => deleteProject(p.slug)}
+                  onClose={() => setMenuFor(null)}
+                />
+              )}
               <button
-                onClick={(e) => { e.stopPropagation(); deleteProject(p.slug); }}
+                onClick={(e) => { e.stopPropagation(); setMenuFor(menuFor === p.slug ? null : p.slug); }}
                 disabled={deleting === p.slug}
-                title="Delete project"
+                title="Project actions"
                 style={{
                   position: 'absolute',
                   top: 8,
@@ -462,7 +590,7 @@ export function ProjectList(props: Props) {
                   opacity: deleting === p.slug ? 0.5 : 0.85,
                 }}
               >
-                ×
+                ⋯
               </button>
               {liveStage && (
                 <div style={{
@@ -487,6 +615,116 @@ export function ProjectList(props: Props) {
         })}
       </div>
     </aside>
+  );
+}
+
+/** AirDrop inbox entries that are not projects yet (or never will be). */
+function InboxStrip({ entries }: { entries: InboxEntry[] }) {
+  const label = (e: InboxEntry) =>
+    e.state === 'classifying' ? 'Classifying…'
+    : e.state === 'auto-draft' ? `Auto-draft (${e.class ?? 'loop'})`
+    : e.state === 'skipped' ? `Skipped: ${e.reason ?? 'no reason'}`
+    : e.state === 'error' ? `Failed: ${e.reason ?? 'unknown'}`
+    : e.state;
+  const color = (e: InboxEntry) =>
+    e.state === 'error' ? C.red : e.state === 'skipped' ? C.silver : e.state === 'classifying' ? C.purple : C.gold;
+  return (
+    <div>
+      <div style={{ fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: C.silver, marginBottom: 4 }}>
+        AirDrop inbox
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {entries.slice(0, 6).map((e) => (
+          <div key={e.file} style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 11 }}>
+            <span style={{ flex: 1, minWidth: 0, color: C.white, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {e.file}
+            </span>
+            <span style={{ color: color(e), fontSize: 10, flexShrink: 0, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {label(e)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DropOverlay() {
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 30, pointerEvents: 'none',
+      background: `${C.purple}33`, border: `2px dashed ${C.purple}`, borderRadius: 8,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: C.white, fontSize: 14, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase',
+    }}>
+      Drop to upload
+    </div>
+  );
+}
+
+function UploadAsControl({ value, onChange }: { value: UploadAs; onChange: (v: UploadAs) => void }) {
+  const opts: { v: UploadAs; label: string; title: string }[] = [
+    { v: 'talking-head', label: 'Talking head', title: 'Cuts + captions + polish' },
+    { v: 'long-form', label: 'Long-form', title: 'Transcribe + diarize + clip proposals' },
+    { v: 'auto', label: 'Auto', title: 'Long-form if ≥ 12 min, else talking head' },
+  ];
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <span style={{ fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: C.silver, flexShrink: 0 }}>Upload as</span>
+      <div style={{ display: 'flex', flex: 1, border: `1px solid ${C.border}`, borderRadius: 6, overflow: 'hidden' }}>
+        {opts.map((o) => (
+          <button
+            key={o.v}
+            title={o.title}
+            onClick={() => onChange(o.v)}
+            style={{
+              flex: 1, padding: '5px 4px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none',
+              background: value === o.v ? C.purple : 'transparent',
+              color: value === o.v ? C.white : C.silver,
+            }}
+          >{o.label}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RowMenu({ project, busy, onCancel, onMove, onDelete, onClose }: {
+  project: ProjectListEntry;
+  busy: boolean;
+  onCancel: () => void;
+  onMove: (to: Category) => void;
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  const other: Category = project.category === 'long-form' ? 'talking-head' : 'long-form';
+  const item = (label: string, onClick: () => void, danger = false, disabled = false) => (
+    <button
+      onClick={(e) => { e.stopPropagation(); if (!disabled) onClick(); }}
+      disabled={disabled || busy}
+      style={{
+        display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontSize: 12,
+        background: 'transparent', border: 'none', color: danger ? C.red : C.white,
+        cursor: disabled || busy ? 'not-allowed' : 'pointer', opacity: disabled ? 0.45 : 1,
+      }}
+    >{label}</button>
+  );
+  return (
+    <>
+      <div onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'absolute', top: 36, right: 8, zIndex: 41, minWidth: 190,
+          background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 8,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.45)', overflow: 'hidden',
+        }}
+      >
+        {item('Cancel processing', onCancel, false, !project.active)}
+        {item(other === 'long-form' ? 'Move to Long-Form' : 'Move to Talking Head', () => onMove(other), false, !!project.active)}
+        {item('Move to trash…', onDelete, true)}
+      </div>
+    </>
   );
 }
 
@@ -554,20 +792,23 @@ function fmtEta(sec: number | null) {
   return `${Math.floor(sec / 60)}m ${sec % 60}s left`;
 }
 
-function UploadList({ uploads, compact }: { uploads: UploadJob[]; compact?: boolean }) {
+function UploadList({ uploads, compact, onPickFile }: { uploads: UploadJob[]; compact?: boolean; onPickFile?: () => void }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: compact ? '8px 14px' : 0 }}>
       {uploads.map((u) => {
-        const active = u.status === 'uploading' || u.status === 'stalled';
+        const active = u.status === 'uploading' || u.status === 'stalled' || u.status === 'finishing';
         const barColor =
           u.status === 'error' ? C.red
           : u.status === 'stalled' ? '#E0A030'
+          : u.status === 'resumable' ? C.gold
           : u.status === 'done' ? 'var(--status-success-fg)'
           : C.purple;
         const statusLine =
           u.status === 'queued' ? 'Waiting…'
           : u.status === 'stalled' ? `Stalled at ${u.pct}% — still trying…`
           : u.status === 'uploading' ? `${fmtMB(u.sent)} / ${fmtMB(u.size)} MB · ${u.pct}%${u.etaSec !== null ? ` · ${fmtEta(u.etaSec)}` : ''}`
+          : u.status === 'finishing' ? 'Assembling on the server…'
+          : u.status === 'resumable' ? 'Interrupted — pick the same file again to resume'
           : u.status === 'done' ? 'Uploaded ✓'
           : u.status === 'canceled' ? 'Canceled'
           : `Failed: ${u.error ?? 'unknown error'}`;
@@ -580,7 +821,16 @@ function UploadList({ uploads, compact }: { uploads: UploadJob[]; compact?: bool
               }}>
                 {u.name}
               </span>
-              {(u.status === 'error' || u.status === 'canceled') && (
+              {u.status === 'resumable' && onPickFile && (
+                <button
+                  onClick={onPickFile}
+                  style={{
+                    background: 'none', border: `1px solid ${C.gold}`, color: C.gold,
+                    borderRadius: 6, padding: '2px 8px', fontSize: 10, cursor: 'pointer', flexShrink: 0,
+                  }}
+                >Resume…</button>
+              )}
+              {(u.status === 'error' || u.status === 'canceled' || u.status === 'stalled') && (
                 <button
                   onClick={() => retryUpload(u.id)}
                   style={{

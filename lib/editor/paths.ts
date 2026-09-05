@@ -21,6 +21,10 @@ export const DRAFTS_DIR = path.join(os.homedir(), 'Code', 'Social Media', 'Reels
 // auto-queues any new .mp4 into the Instagram queue with a placeholder caption.
 export const VIDEO_OUT_DIR = path.join(os.homedir(), 'Code', 'Social Media', 'Reels', 'Final');
 
+// Chunked upload staging. Parts land here until `finish` assembles them into
+// data/takes/<slug>/source.mp4. Stale dirs are swept after 48h.
+export const UPLOADS_ROOT = path.join(VIDEO_PROJECT_ROOT, 'data', 'uploads');
+
 export const STUDIO_PORT = 3001;
 
 /**

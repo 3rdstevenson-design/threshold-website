@@ -34,6 +34,9 @@ import { applyAction, createPlan, type Clip, type EditPlan } from './editPlan';
 import { writePlan, readPlan } from './planStore';
 import { chunkCaptions } from './captionChunker';
 import type { Word, Silence } from './autoCut';
+import { ingestProgress, expectedStageMs } from './progressParse';
+import { readStageHistory } from './pipelineReport';
+import { probeDurationSec } from './ffmpeg';
 
 export type SendFn = (event: string, data: unknown) => void;
 
@@ -58,7 +61,11 @@ export async function runLongFormPipeline(input: {
 }): Promise<void> {
   const { slug, sourceAbsPath, send, skipTranscribe, signal } = input;
   const log = (msg: string) => send('log', { msg });
-  const stage = (name: string) => send('stage', { name });
+  const stageHistory = readStageHistory();
+  let sourceSecForEta = 0;
+  try { sourceSecForEta = await probeDurationSec(sourceAbsPath); } catch { /* fallback ratios */ }
+  const stage = (name: string) =>
+    send('stage', { name, expectedMs: expectedStageMs(name, sourceSecForEta, stageHistory) });
   const slugDir = path.join(TAKES_ROOT, slug);
   const analysisPath = path.join(slugDir, 'analysis.json');
 
@@ -70,7 +77,11 @@ export async function runLongFormPipeline(input: {
     await runIngest({
       slug,
       sourceRel: path.relative(VIDEO_PROJECT_ROOT, sourceAbsPath),
-      onLog: log,
+      onLog: (line) => {
+        log(line);
+        const pct = ingestProgress(line);
+        if (pct !== null) send('progress', { stage: 'transcribing', pct });
+      },
       signal,
     });
   }

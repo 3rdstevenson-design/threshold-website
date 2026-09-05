@@ -85,6 +85,9 @@ const RENDERED_UNQUEUED_MAX_MS = 15 * 60 * 1000;
 const CAPTIONING_MAX_MS = 10 * 60 * 1000;
 const PROCESSING_PUBLISH_MAX_MS = 45 * 60 * 1000; // mirrors the reaper
 const OVERDUE_MAX_MS = 2 * 60 * 60 * 1000;
+/** An editor project still "ingesting" with NO live job for this long is
+ *  stranded (the job died without writing status.json.error). */
+const INGESTING_NO_JOB_MAX_MS = 30 * 60 * 1000;
 
 const PLACEHOLDER_RE = /add caption before approving/i;
 
@@ -99,7 +102,7 @@ function age(now: Date, iso: string | null | undefined): number {
 }
 
 export function derivePipeline(input: {
-  projects: ProjectStatus[];
+  projects: (ProjectStatus & { active?: boolean })[];
   files: LocalFile[];
   posts: QueuePost[];
   /** Queue served from the offline snapshot — suppress publish-stuckness. */
@@ -330,6 +333,8 @@ export function derivePipeline(input: {
         editorSlug: pr.slug,
       });
     } else {
+      const strandedIngest =
+        pr.stage === 'ingesting' && !pr.active && age(now, pr.updatedAt) > INGESTING_NO_JOB_MAX_MS;
       items.push({
         key: `project:${pr.slug}`,
         title: pr.slug,
@@ -337,9 +342,10 @@ export function derivePipeline(input: {
         ...(pr.hasThumb ? { preview: { kind: 'editor-thumb' as const, slug: pr.slug } } : {}),
         stage: 'processing',
         sinceISO: pr.updatedAt,
-        stuck: false,
+        stuck: strandedIngest,
         detail:
-          pr.stage === 'ingesting' ? 'Ingesting + transcribing.'
+          strandedIngest ? 'Marked as ingesting but no job is running — open the editor and press Process.'
+          : pr.stage === 'ingesting' ? (pr.active ? 'Ingesting + transcribing (job running).' : 'Ingesting + transcribing.')
           : pr.stage === 'clips-proposed' ? 'Clips proposed — review them in the editor.'
           : pr.stage === 'transcribed' ? 'Transcribed — ready to edit.'
           : 'Being edited.',

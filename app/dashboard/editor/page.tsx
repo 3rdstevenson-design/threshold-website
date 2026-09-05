@@ -40,6 +40,7 @@ import {
   type DisfluencyProposal,
 } from './components/DisfluencyReviewPanel';
 import { LongFormView } from './components/LongFormView';
+import type { InboxEntry } from '@/lib/editor/inbox';
 import { dashKey, useEditor } from './components/useEditor';
 import { clipEditedMs } from '@/lib/editor/editPlan';
 import { HOOK_HOLD_FLAG_PCT } from '@/lib/retentionMath';
@@ -70,6 +71,12 @@ type ProjectUIState = {
   processStage: ProcessStage;
   /** Queue position while processStage === 'queued'. 0 when running. */
   queuePosition: number;
+  /**
+   * Real within-stage progress from the server (`progress` events) plus the
+   * stage's expected wall-clock so stages that emit no progress lines can
+   * be tweened client-side instead of sitting on a fixed number.
+   */
+  processProgress: { pct: number | null; stage: string; expectedMs: number | null; stageStartedAt: number } | null;
   processError: string | null;
   processLog: string[];
   auditSummary: AuditSummary | null;
@@ -85,6 +92,7 @@ const DEFAULT_PROJECT_STATE: ProjectUIState = {
   renderError: null,
   processStage: 'idle',
   queuePosition: 0,
+  processProgress: null,
   processError: null,
   processLog: [],
   auditSummary: null,
@@ -96,6 +104,7 @@ const DEFAULT_PROJECT_STATE: ProjectUIState = {
 export default function EditorPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<ProjectListEntry[]>([]);
+  const [inbox, setInbox] = useState<InboxEntry[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   // Always SSR as 'talking-head' to avoid a hydration mismatch: server
@@ -143,18 +152,22 @@ export default function EditorPage() {
   // the pipeline. Fed to ProjectList so the sidebar row shows a progress
   // bar + phase label even when that project isn't selected.
   const processingBySlug = useMemo(() => {
-    const m: Record<string, { stage: ProcessStage; queuePosition: number }> = {};
+    const m: Record<string, { stage: ProcessStage; queuePosition: number; progress: ProjectUIState['processProgress'] }> = {};
     for (const [slug, s] of Object.entries(projectStates)) {
       if (
         s.processStage !== 'idle' &&
         s.processStage !== 'error' &&
         s.processStage !== 'done'
       ) {
-        m[slug] = { stage: s.processStage, queuePosition: s.queuePosition };
+        m[slug] = { stage: s.processStage, queuePosition: s.queuePosition, progress: s.processProgress };
       }
     }
     return m;
   }, [projectStates]);
+
+  // Slugs with an open SSE observer in THIS tab. Used to avoid double-
+  // attaching when the projects poll reports a job as active.
+  const inFlightRef = useRef<Set<string>>(new Set());
 
   const patchProject = useCallback(
     (slug: string, patch: Partial<ProjectUIState>) => {
@@ -237,6 +250,7 @@ export default function EditorPage() {
       if (!res.ok) return;
       const data = await res.json();
       setProjects(data.projects ?? []);
+      setInbox(Array.isArray(data.inbox) ? data.inbox : []);
     } finally {
       setLoadingProjects(false);
     }
@@ -346,42 +360,13 @@ export default function EditorPage() {
     }
   }, [playheadEditedMs, plan, selectedClipId, setSelectedClipId]);
 
-  const runProcess = useCallback(async (slug: string, approvedRangeIds?: string[]) => {
-    if (!slug) return;
-    // Slug is passed explicitly so this can be called from onUploaded
-    // (before setSelectedSlug has re-rendered) as well as the manual
-    // Process-video button. All SSE callbacks close over this local,
-    // so progress keeps writing to the correct project slot even if
-    // the user switches projects mid-process.
-    patchProject(slug, {
-      processStage: 'preparing',
-      processError: null,
-      processLog: [],
-      auditSummary: null,
-    });
-    try {
-      const init: RequestInit = {
-        method: 'POST',
-        headers: {
-          'x-dashboard-key': dashKey(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(
-          approvedRangeIds ? { approvedRangeIds } : {},
-        ),
-      };
-      const res = await fetch(
-        `/api/editor/project/${slug}/process`,
-        init,
-      );
-      if (!res.ok || !res.body) {
-        patchProject(slug, {
-          processStage: 'error',
-          processError: `process failed (${res.status})`,
-        });
-        return;
-      }
-      await consumeSSE(res.body, (ev, data) => {
+  /**
+   * One SSE handler per slug, shared by runProcess (POST) and attachProcess
+   * (GET reattach). Everything closes over `slug` so progress keeps writing
+   * to the correct project slot even if the user switches projects.
+   */
+  const handleProcessEvent = useCallback((slug: string) => (ev: string, data: Record<string, unknown>) => {
+
         const msg = typeof data.msg === 'string' ? data.msg : null;
         if (ev === 'log' && msg) {
           updateProject(slug, (p) => ({
@@ -389,10 +374,22 @@ export default function EditorPage() {
           }));
         }
         if (ev === 'stage' && typeof data.name === 'string') {
-          patchProject(slug, { processStage: data.name as ProcessStage });
+          const expectedMs = typeof data.expectedMs === 'number' ? data.expectedMs : null;
+          patchProject(slug, {
+            processStage: data.name as ProcessStage,
+            processProgress: { pct: null, stage: data.name, expectedMs, stageStartedAt: Date.now() },
+          });
           if (data.name !== 'queued') {
             patchProject(slug, { queuePosition: 0 });
           }
+        }
+        if (ev === 'progress' && typeof data.pct === 'number') {
+          const pct = data.pct;
+          updateProject(slug, (p) => ({
+            processProgress: p.processProgress
+              ? { ...p.processProgress, pct }
+              : { pct, stage: typeof data.stage === 'string' ? data.stage : p.processStage, expectedMs: null, stageStartedAt: Date.now() },
+          }));
         }
         if (ev === 'queue' && typeof data.position === 'number') {
           patchProject(slug, { queuePosition: data.position });
@@ -483,23 +480,125 @@ export default function EditorPage() {
         if (ev === 'error' && msg) {
           patchProject(slug, { processStage: 'error', processError: msg });
         }
+  }, [patchProject, updateProject, reloadEditor]);
+
+  /** Tail work after a process stream ends, however it ended. */
+  const finishProcessStream = useCallback((slug: string) => {
+    inFlightRef.current.delete(slug);
+    fetchProjects();
+    setTimeout(
+      () =>
+        updateProject(slug, (p) => ({
+          processStage: p.processStage === 'done' ? 'idle' : p.processStage,
+          processProgress: p.processStage === 'done' ? null : p.processProgress,
+        })),
+      2000,
+    );
+  }, [fetchProjects, updateProject]);
+
+  /**
+   * Reattach to a job that is already running server-side (after a reload,
+   * a backgrounded phone, or one kicked off by the AirDrop watcher). GET
+   * replays the buffered events; it never starts a job.
+   */
+  const attachProcess = useCallback(async (slug: string) => {
+    if (inFlightRef.current.has(slug)) return;
+    inFlightRef.current.add(slug);
+    updateProject(slug, (p) => ({
+      processStage: p.processStage === 'idle' || p.processStage === 'error' || p.processStage === 'done' ? 'preparing' : p.processStage,
+      processError: null,
+      processLog: [],
+      auditSummary: null,
+    }));
+    try {
+      const res = await fetch(`/api/editor/project/${slug}/process`, {
+        headers: { 'x-dashboard-key': dashKey() },
+        cache: 'no-store',
       });
+      if (res.status === 404) {
+        // Job finished between the poll and the attach — the poll will
+        // pick up the durable stage.
+        patchProject(slug, { processStage: 'idle', processProgress: null });
+        return;
+      }
+      if (!res.ok || !res.body) {
+        patchProject(slug, { processStage: 'error', processError: `attach failed (${res.status})` });
+        return;
+      }
+      await consumeSSE(res.body, handleProcessEvent(slug));
     } catch (e) {
-      patchProject(slug, {
-        processStage: 'error',
-        processError: e instanceof Error ? e.message : String(e),
-      });
+      // A dropped connection isn't a pipeline failure — the next poll will
+      // re-attach if the job is still active.
+      updateProject(slug, (p) => ({
+        processLog: [...p.processLog.slice(-300), `[attach] connection lost: ${e instanceof Error ? e.message : String(e)}`],
+      }));
     } finally {
-      fetchProjects();
-      setTimeout(
-        () =>
-          updateProject(slug, (p) => ({
-            processStage: p.processStage === 'done' ? 'idle' : p.processStage,
-          })),
-        2000,
-      );
+      finishProcessStream(slug);
     }
-  }, [patchProject, updateProject, fetchProjects, reloadEditor]);
+  }, [handleProcessEvent, patchProject, updateProject, finishProcessStream]);
+
+  const runProcess = useCallback(async (slug: string, approvedRangeIds?: string[]) => {
+    if (!slug) return;
+    if (inFlightRef.current.has(slug)) return;
+    inFlightRef.current.add(slug);
+    let reattaching = false;
+    patchProject(slug, {
+      processStage: 'preparing',
+      processProgress: null,
+      processError: null,
+      processLog: [],
+      auditSummary: null,
+    });
+    try {
+      const init: RequestInit = {
+        method: 'POST',
+        headers: {
+          'x-dashboard-key': dashKey(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          approvedRangeIds ? { approvedRangeIds } : {},
+        ),
+      };
+      const res = await fetch(
+        `/api/editor/project/${slug}/process`,
+        init,
+      );
+      if (!res.ok || !res.body) {
+        patchProject(slug, {
+          processStage: 'error',
+          processError: `process failed (${res.status})`,
+        });
+        return;
+      }
+      await consumeSSE(res.body, handleProcessEvent(slug));
+    } catch (e) {
+      // The stream broke, not necessarily the job. Re-attach; if the job is
+      // gone, attach reports 404 and the durable stage takes over.
+      reattaching = true;
+      inFlightRef.current.delete(slug);
+      updateProject(slug, (p) => ({
+        processLog: [...p.processLog.slice(-300), `[stream] ${e instanceof Error ? e.message : String(e)} — reattaching`],
+      }));
+      void attachProcess(slug);
+    } finally {
+      if (!reattaching) finishProcessStream(slug);
+    }
+  }, [patchProject, updateProject, handleProcessEvent, attachProcess, finishProcessStream]);
+
+  // Reattach: whenever the projects poll says a job is active server-side
+  // and this tab isn't observing it, open the GET stream. Covers reloads,
+  // watcher-started jobs, and a phone coming back from the background.
+  useEffect(() => {
+    for (const p of projects) {
+      if (p.active && !inFlightRef.current.has(p.slug)) void attachProcess(p.slug);
+    }
+  }, [projects, attachProcess]);
+  useEffect(() => {
+    const onVis = () => { if (document.visibilityState === 'visible') fetchProjects(); };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [fetchProjects]);
 
   const previewPolishCuts = useCallback(async () => {
     if (!selectedSlug) return;
@@ -829,10 +928,22 @@ export default function EditorPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [plan, actions, playheadEditedMs, selectedClipId, selectedCaptionId, editedDurationMs, rendering, processing, selectedSlug, runRender, runProcess, showShortcuts]);
 
+  const cancelProcess = useCallback(async (slug: string) => {
+    try {
+      await fetch(`/api/editor/project/${slug}/cancel`, { method: 'POST', headers: { 'x-dashboard-key': dashKey() } });
+    } catch { /* the stream's error event reports the outcome */ }
+  }, []);
+
   const selected = useMemo(
     () => projects.find((p) => p.slug === selectedSlug) ?? null,
     [projects, selectedSlug],
   );
+  // A server-recorded failure (status.json.error — e.g. "Interrupted by a
+  // dashboard restart", a Deepgram 408, a canceled job) used to be shown
+  // only for long-form projects; talking-head projects showed "Failed" in
+  // the sidebar and a pristine idle Process button. Surface it here too.
+  const surfacedProcessError =
+    processError ?? (processStage === 'idle' && selected?.stage === 'error' && selected.error ? selected.error : null);
   // Process needs a selected project; everything downstream (analysis,
   // clips, captions) is produced by the pipeline itself.
   const canProcess = !!selectedSlug && !processing;
@@ -941,6 +1052,7 @@ export default function EditorPage() {
               runProcess(slug);
             }}
             processingBySlug={processingBySlug}
+            inbox={inbox}
             loading={loadingProjects}
             activeCategory={activeCategory}
             onCategoryChange={onCategoryChange}
@@ -1080,10 +1192,12 @@ export default function EditorPage() {
                     onProcess={() => selectedSlug && runProcess(selectedSlug)}
                     processing={processing}
                     processStage={processStage}
-                    processError={processError}
+                    processProgress={current.processProgress}
+                    processError={surfacedProcessError}
                     onDismissProcessError={() =>
                       selectedSlug && patchProject(selectedSlug, { processError: null })
                     }
+                    onCancelProcess={() => selectedSlug && cancelProcess(selectedSlug)}
                     canProcess={canProcess}
                     auditSummary={auditSummary}
                     onPromoteAnyway={promoteV2Anyway}
@@ -1246,10 +1360,12 @@ export default function EditorPage() {
                   onProcess={() => selectedSlug && runProcess(selectedSlug)}
                   processing={processing}
                   processStage={processStage}
-                  processError={processError}
+                  processProgress={current.processProgress}
+                  processError={surfacedProcessError}
                   onDismissProcessError={() =>
                     selectedSlug && patchProject(selectedSlug, { processError: null })
                   }
+                  onCancelProcess={() => selectedSlug && cancelProcess(selectedSlug)}
                   canProcess={canProcess}
                   auditSummary={auditSummary}
                   onPromoteAnyway={promoteV2Anyway}

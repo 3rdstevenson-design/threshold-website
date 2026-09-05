@@ -58,3 +58,4 @@ content-plans/daily/sources/
 
 # Ad-hoc queue dumps
 data/queue-backup-*.json
+.next-check/
