@@ -21,6 +21,8 @@ import fs from 'fs';
 import path from 'path';
 import type { PostPerformance, RetentionFrame, RetentionPoint } from './analyticsStore';
 import { readAnalytics } from './analyticsStore';
+import type { HistoryStore } from './analyticsHistory';
+import { assessEvergreen } from './evergreen';
 
 export type HookStyle =
   | 'Question hook'
@@ -113,6 +115,38 @@ export interface PerformanceCorpus {
   uploadNotes: string[];
   /** Hand-picked external viral examples. Empty array if none added yet. */
   externalExamples: ExternalExample[];
+  /** Hook hold at 3s across reels with retention curves. Curves are
+   *  hand-uploaded from the IG mobile app, so this covers only a subset —
+   *  see `skipRate` below for the API-wide equivalent. */
+  hookHold?: {
+    avgPct: number;
+    /** Reels holding below HOOK_HOLD_FLAG_PCT at 3s. */
+    flaggedCount: number;
+    best: { hook: string; pct: number }[];
+    worst: { hook: string; pct: number }[];
+  };
+  /** Graph API `reels_skip_rate` — percent who scrolled away, lower is
+   *  better. Unlike hookHold this needs no manual upload, so it covers
+   *  every synced reel and carries a far larger sample. Per-hook-style
+   *  averages are the actionable part: they say which openers survive. */
+  skipRate?: {
+    sampleSize: number;
+    avgPct: number;
+    /** Reels above SKIP_RATE_FLAG_PCT. */
+    flaggedCount: number;
+    byHookStyle: { pattern: HookStyle; sampleSize: number; avgPct: number; deltaPp: number }[];
+    best: { hook: string; pct: number }[];
+    worst: { hook: string; pct: number }[];
+  };
+  /** Posts still earning views 30+ days after publish (from history). */
+  evergreen?: { count: number; examples: string[] };
+  /** Per-pillar performance, joined from the publish queue. */
+  pillarStats?: {
+    pillar: string;
+    sampleSize: number;
+    avgViews: number;
+    avgEngagementRate: number;
+  }[];
 }
 
 const DROP_CLIFF_MIN_SAMPLE = 3;
@@ -153,21 +187,10 @@ function median(xs: number[]): number {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-function pctAtSecond(curve: RetentionPoint[], sec: number): number | null {
-  if (curve.length === 0) return null;
-  const sorted = [...curve].sort((a, b) => a.sec - b.sec);
-  if (sec <= sorted[0].sec) return sorted[0].pctViewers;
-  if (sec >= sorted[sorted.length - 1].sec) return sorted[sorted.length - 1].pctViewers;
-  for (let i = 0; i < sorted.length - 1; i++) {
-    const a = sorted[i];
-    const b = sorted[i + 1];
-    if (sec >= a.sec && sec <= b.sec) {
-      const t = (sec - a.sec) / (b.sec - a.sec || 1);
-      return a.pctViewers + t * (b.pctViewers - a.pctViewers);
-    }
-  }
-  return null;
-}
+// Pure retention math lives in retentionMath.ts (isomorphic, client-safe);
+// re-exported here so existing server-side callers keep their import path.
+export { pctAtSecond, hookHold3s, HOOK_HOLD_FLAG_PCT, SKIP_RATE_FLAG_PCT } from './retentionMath';
+import { pctAtSecond, hookHold3s, HOOK_HOLD_FLAG_PCT, SKIP_RATE_FLAG_PCT } from './retentionMath';
 
 /**
  * Scan retention curves for second-windows where the median viewer drops
@@ -177,8 +200,17 @@ function pctAtSecond(curve: RetentionPoint[], sec: number): number | null {
  * Exported for reuse by the retention-upload endpoint, which runs this on
  * a single post's curve to decide which seconds to extract frames at.
  */
-export function findDropCliffs(curves: RetentionPoint[][]): DropCliff[] {
-  if (curves.length < DROP_CLIFF_MIN_SAMPLE) return [];
+export function findDropCliffs(
+  curves: RetentionPoint[][],
+  options?: {
+    /** Minimum curves a window needs before it can flag a cliff. The
+     *  corpus default (3) demands statistical support across reels;
+     *  single-post frame extraction passes 1 — one curve IS the post. */
+    minSample?: number;
+  },
+): DropCliff[] {
+  const minSample = options?.minSample ?? DROP_CLIFF_MIN_SAMPLE;
+  if (curves.length < minSample) return [];
   const cliffs: DropCliff[] = [];
   for (let start = 0; start <= 28; start += 1) {
     const end = start + 2;
@@ -189,7 +221,7 @@ export function findDropCliffs(curves: RetentionPoint[][]): DropCliff[] {
       if (a == null || b == null) continue;
       drops.push(a - b);
     }
-    if (drops.length < DROP_CLIFF_MIN_SAMPLE) continue;
+    if (drops.length < minSample) continue;
     const medDrop = median(drops);
     if (medDrop >= CLIFF_PCT_THRESHOLD) {
       cliffs.push({
@@ -313,9 +345,17 @@ export function readExternalExamples(): ExternalExample[] {
   }
 }
 
+export interface CorpusExtras {
+  /** Metric-history snapshots for evergreen assessment. */
+  history?: HistoryStore;
+  /** queuePostId → content pillar, joined from the publish queue. */
+  pillarByQueueId?: Map<string, string>;
+}
+
 export function buildCorpus(
   posts: PostPerformance[],
   external: ExternalExample[] = [],
+  extras: CorpusExtras = {},
 ): PerformanceCorpus {
   const reels = posts.filter((p) => p.mediaType === 'REELS');
   const withWatchTime = reels.filter((p) => typeof p.completionRate === 'number');
@@ -389,6 +429,104 @@ export function buildCorpus(
     .slice(0, MAX_NOTES)
     .map((p) => p.retentionNotes!.trim().slice(0, 200));
 
+  // Hook hold at 3s across reels with retention curves (skip-rate proxy).
+  let hookHold: PerformanceCorpus['hookHold'];
+  const holds = withRetention
+    .map((p) => ({ post: p, pct: hookHold3s(p.retentionCurve!) }))
+    .filter((h): h is { post: PostPerformance; pct: number } => h.pct !== null)
+    .sort((a, b) => b.pct - a.pct);
+  if (holds.length > 0) {
+    hookHold = {
+      avgPct: Math.round(mean(holds.map((h) => h.pct)) * 10) / 10,
+      flaggedCount: holds.filter((h) => h.pct < HOOK_HOLD_FLAG_PCT).length,
+      best: holds.slice(0, 2).map((h) => ({
+        hook: hookOf(h.post.caption).slice(0, 80),
+        pct: Math.round(h.pct),
+      })),
+      worst: holds.slice(-2).reverse().map((h) => ({
+        hook: hookOf(h.post.caption).slice(0, 80),
+        pct: Math.round(h.pct),
+      })),
+    };
+  }
+
+  // Skip rate across every synced reel — no manual upload needed, so the
+  // sample dwarfs hookHold's. Per-hook-style deltas are what steer writing.
+  let skipRate: PerformanceCorpus['skipRate'];
+  const skips = reels
+    .filter((p): p is PostPerformance & { skipRate: number } => typeof p.skipRate === 'number')
+    .sort((a, b) => a.skipRate - b.skipRate); // ascending — lower is better
+  if (skips.length > 0) {
+    const baselineSkip = mean(skips.map((p) => p.skipRate));
+    const bySkipHook: Record<string, number[]> = {};
+    for (const p of skips) {
+      (bySkipHook[detectHookStyle(p.caption)] ??= []).push(p.skipRate);
+    }
+    skipRate = {
+      sampleSize: skips.length,
+      avgPct: Math.round(baselineSkip * 10) / 10,
+      flaggedCount: skips.filter((p) => p.skipRate > SKIP_RATE_FLAG_PCT).length,
+      byHookStyle: Object.entries(bySkipHook)
+        .map(([pattern, rates]) => ({
+          pattern: pattern as HookStyle,
+          sampleSize: rates.length,
+          avgPct: Math.round(mean(rates) * 10) / 10,
+          // Negative = skipped less than baseline = better.
+          deltaPp: Math.round((mean(rates) - baselineSkip) * 10) / 10,
+        }))
+        .filter((s) => s.sampleSize >= 3)
+        .sort((a, b) => a.avgPct - b.avgPct),
+      best: skips.slice(0, 3).map((p) => ({
+        hook: hookOf(p.caption).slice(0, 80),
+        pct: Math.round(p.skipRate * 10) / 10,
+      })),
+      worst: skips.slice(-3).reverse().map((p) => ({
+        hook: hookOf(p.caption).slice(0, 80),
+        pct: Math.round(p.skipRate * 10) / 10,
+      })),
+    };
+  }
+
+  // Evergreen: posts still earning views 30+ days out (needs history).
+  let evergreen: PerformanceCorpus['evergreen'];
+  if (extras.history) {
+    const stillEarning = posts.filter((p) => {
+      const snapshots = extras.history!.posts[p.mediaId];
+      if (!snapshots || snapshots.length < 2) return false;
+      return assessEvergreen(p.timestamp, snapshots).isEvergreen;
+    });
+    if (stillEarning.length > 0) {
+      evergreen = {
+        count: stillEarning.length,
+        examples: stillEarning
+          .sort((a, b) => b.views - a.views)
+          .slice(0, 3)
+          .map((p) => hookOf(p.caption).slice(0, 80)),
+      };
+    }
+  }
+
+  // Per-pillar performance, joined from the publish queue.
+  let pillarStats: PerformanceCorpus['pillarStats'];
+  if (extras.pillarByQueueId && extras.pillarByQueueId.size > 0) {
+    const byPillar: Record<string, PostPerformance[]> = {};
+    for (const p of posts) {
+      const pillar = p.queuePostId ? extras.pillarByQueueId.get(p.queuePostId) : undefined;
+      if (!pillar) continue;
+      (byPillar[pillar] ??= []).push(p);
+    }
+    const stats = Object.entries(byPillar)
+      .map(([pillar, ps]) => ({
+        pillar,
+        sampleSize: ps.length,
+        avgViews: Math.round(mean(ps.map((p) => p.views))),
+        avgEngagementRate: mean(ps.map((p) => p.engagementRate)),
+      }))
+      .filter((s) => s.sampleSize >= 2)
+      .sort((a, b) => b.avgViews - a.avgViews);
+    if (stats.length > 0) pillarStats = stats;
+  }
+
   return {
     generatedAt: new Date().toISOString(),
     sampleSize: reels.length,
@@ -406,6 +544,10 @@ export function buildCorpus(
     bottomPerformers,
     uploadNotes: notes,
     externalExamples: external,
+    ...(hookHold ? { hookHold } : {}),
+    ...(skipRate ? { skipRate } : {}),
+    ...(evergreen ? { evergreen } : {}),
+    ...(pillarStats ? { pillarStats } : {}),
   };
 }
 
@@ -422,7 +564,25 @@ export async function getPerformanceCorpus(): Promise<PerformanceCorpus> {
   if (cached && now - cached.at < CACHE_MS) return cached.corpus;
   const store = await readAnalytics();
   const external = readExternalExamples();
-  const corpus = buildCorpus(store.posts, external);
+
+  // History + pillar joins are enrichments — both fail-soft so a broken
+  // R2 read or queue parse never blocks the corpus.
+  const extras: CorpusExtras = {};
+  try {
+    const { readHistory } = await import('./analyticsHistory');
+    extras.history = await readHistory();
+  } catch {}
+  try {
+    const { readQueue } = await import('./queue');
+    const queue = await readQueue();
+    const map = new Map<string, string>();
+    for (const post of queue) {
+      if (post.pillar) map.set(post.id, post.pillar);
+    }
+    if (map.size > 0) extras.pillarByQueueId = map;
+  } catch {}
+
+  const corpus = buildCorpus(store.posts, external, extras);
   cached = { at: now, corpus };
   return corpus;
 }
@@ -438,16 +598,24 @@ export function invalidateCorpusCache(): void {
 export function renderCorpusForPrompt(corpus: PerformanceCorpus): string | null {
   const hasOwnData = corpus.sampleSizeWithWatchTime >= 3;
   const hasExternal = corpus.externalExamples.length > 0;
-  if (!hasOwnData && !hasExternal) return null;
+  // Skip rate needs no video duration, so it survives where completion
+  // rate does not (Graph v22 dropped video_duration). Gate on it too, or
+  // the widest-sample signal gets suppressed whenever watch-time is thin.
+  const hasSkip = !!corpus.skipRate;
+  if (!hasOwnData && !hasSkip && !hasExternal) return null;
 
   const lines: string[] = [];
   lines.push(
-    `PERFORMANCE CONTEXT — soft signals from prior Reels (${corpus.sampleSizeWithWatchTime} with watch-time, ${corpus.sampleSizeWithRetention} with retention curves${hasExternal ? `, plus ${corpus.externalExamples.length} hand-picked external viral examples` : ''}). These are nudges, NOT overrides — the hard constraints still apply.`,
+    `PERFORMANCE CONTEXT — soft signals from prior Reels (${corpus.sampleSizeWithWatchTime} with watch-time, ${corpus.sampleSizeWithRetention} with retention curves${hasSkip ? `, ${corpus.skipRate!.sampleSize} with skip rate` : ''}${hasExternal ? `, plus ${corpus.externalExamples.length} hand-picked external viral examples` : ''}). These are nudges, NOT overrides — the hard constraints still apply.`,
   );
 
   if (!hasOwnData) {
     lines.push('');
-    lines.push('(No own-history watch-time data yet. External examples only.)');
+    lines.push(
+      hasSkip
+        ? '(No own-history watch-time data yet. Skip rate below is the reliable signal.)'
+        : '(No own-history watch-time data yet. External examples only.)',
+    );
   } else {
     lines.push('');
     lines.push(
@@ -512,6 +680,49 @@ export function renderCorpusForPrompt(corpus: PerformanceCorpus): string | null 
         `  • ${(p.completionRate * 100).toFixed(0)}% — ${p.hookStyle}: "${p.hook.slice(0, 80)}"`,
       );
     }
+  }
+
+  if (corpus.hookHold) {
+    const hh = corpus.hookHold;
+    const best = hh.best[0] ? ` Best: "${hh.best[0].hook.slice(0, 60)}" (${hh.best[0].pct}%).` : '';
+    const worst = hh.worst[0] ? ` Worst: "${hh.worst[0].hook.slice(0, 60)}" (${hh.worst[0].pct}%).` : '';
+    lines.push('');
+    lines.push(
+      `Hook hold at 3s: avg ${hh.avgPct}%, ${hh.flaggedCount} reel(s) flagged below ${HOOK_HOLD_FLAG_PCT}%.${best}${worst}`,
+    );
+  }
+
+  if (corpus.skipRate) {
+    const sr = corpus.skipRate;
+    lines.push('');
+    lines.push(
+      `Skip rate (percent who scrolled away — lower is better, n=${sr.sampleSize}): avg ${sr.avgPct}%, ${sr.flaggedCount} reel(s) above ${SKIP_RATE_FLAG_PCT}%.`,
+    );
+    if (sr.byHookStyle.length > 0) {
+      const parts = sr.byHookStyle
+        .slice(0, 4)
+        .map((s) => `${s.pattern} ${s.avgPct}% (${s.deltaPp >= 0 ? '+' : ''}${s.deltaPp}pp, n=${s.sampleSize})`);
+      lines.push(`  By hook style, best first: ${parts.join(' · ')}.`);
+    }
+    if (sr.best[0]) {
+      lines.push(`  Least skipped: "${sr.best[0].hook.slice(0, 70)}" (${sr.best[0].pct}%).`);
+    }
+    if (sr.worst[0]) {
+      lines.push(`  Most skipped: "${sr.worst[0].hook.slice(0, 70)}" (${sr.worst[0].pct}%).`);
+    }
+  }
+
+  if (corpus.evergreen) {
+    lines.push(
+      `Evergreen (still earning views 30+ days out): ${corpus.evergreen.count} post(s), e.g. ${corpus.evergreen.examples.map((h) => `"${h.slice(0, 50)}"`).join(', ')}.`,
+    );
+  }
+
+  if (corpus.pillarStats && corpus.pillarStats.length > 0) {
+    const parts = corpus.pillarStats
+      .slice(0, 4)
+      .map((s) => `${s.pillar} (n=${s.sampleSize}) ${s.avgViews} avg views`);
+    lines.push(`Pillar performance: ${parts.join(' · ')}.`);
   }
 
   if (corpus.uploadNotes.length > 0) {

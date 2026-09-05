@@ -44,6 +44,11 @@ export interface PostPerformance {
   videoDurationMs?: number;
   /** avgWatchTimeMs / videoDurationMs, clamped to [0, 1]. */
   completionRate?: number;
+  /** reels_skip_rate — percent (0–100) of viewers who skipped away, REELS
+   *  only. Stands in for the per-second retention curve, which Instagram
+   *  exposes only in its mobile app (docs/ig-insights-api.md). Lower is
+   *  better; measures hook strength more directly than avgWatchTimeMs. */
+  skipRate?: number;
 
   // Per-second retention, sourced from a manually uploaded screenshot
   // of Instagram's Professional Dashboard retention chart.
@@ -102,6 +107,27 @@ function writeToFile(store: AnalyticsStore): void {
   fs.writeFileSync(LOCAL_PATH, JSON.stringify(store, null, 2));
 }
 
+/**
+ * Derive completionRate (avg watch time / duration, clamped to [0,1])
+ * whenever both inputs are known but the rate is missing — the API path
+ * can no longer compute it because v22 dropped video_duration; duration
+ * arrives later from a retention parse or the local ffprobe backfill.
+ */
+export function withDerivedCompletionRate(post: PostPerformance): PostPerformance {
+  if (
+    typeof post.completionRate !== 'number' &&
+    typeof post.avgWatchTimeMs === 'number' &&
+    typeof post.videoDurationMs === 'number' &&
+    post.videoDurationMs > 0
+  ) {
+    return {
+      ...post,
+      completionRate: Math.max(0, Math.min(1, post.avgWatchTimeMs / post.videoDurationMs)),
+    };
+  }
+  return post;
+}
+
 export async function readAnalytics(): Promise<AnalyticsStore> {
   return useR2() ? readFromR2() : readFromFile();
 }
@@ -127,17 +153,25 @@ export async function upsertPerformance(post: PostPerformance): Promise<void> {
     const existing = store.posts[idx];
     const wasManual = existing.manualEntry === true;
     const hasRealMetrics = post.views > 0 || post.likes > 0 || post.comments > 0;
-    store.posts[idx] = {
+    const merged: PostPerformance = {
       ...existing,
       ...post,
       manualEntry: wasManual && !hasRealMetrics ? true : undefined,
       slug: post.slug ?? existing.slug,
+      // Graph API v22 no longer returns video_duration, so a fresh sync
+      // carries undefined — never clobber a duration we already know
+      // (from an earlier sync, a retention parse, or the local backfill).
+      videoDurationMs: post.videoDurationMs ?? existing.videoDurationMs,
+      // A sync that degrades to a lower metric tier carries no skipRate —
+      // don't clobber one an earlier pass already captured.
+      skipRate: post.skipRate ?? existing.skipRate,
       retentionCurve: post.retentionCurve ?? existing.retentionCurve,
       retentionScreenshotUrl: post.retentionScreenshotUrl ?? existing.retentionScreenshotUrl,
       retentionUploadedAt: post.retentionUploadedAt ?? existing.retentionUploadedAt,
       retentionNotes: post.retentionNotes ?? existing.retentionNotes,
       retentionFrames: post.retentionFrames ?? existing.retentionFrames,
     };
+    store.posts[idx] = withDerivedCompletionRate(merged);
   }
   store.lastSyncedAt = new Date().toISOString();
   await writeAnalytics(store);
@@ -195,7 +229,7 @@ export async function mergePerformance(
   const store = await readAnalytics();
   const idx = store.posts.findIndex((p) => p.mediaId === mediaId);
   if (idx === -1) return null;
-  store.posts[idx] = { ...store.posts[idx], ...patch };
+  store.posts[idx] = withDerivedCompletionRate({ ...store.posts[idx], ...patch });
   store.lastSyncedAt = new Date().toISOString();
   await writeAnalytics(store);
   return store.posts[idx];

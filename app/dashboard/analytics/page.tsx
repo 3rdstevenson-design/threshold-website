@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, Button, Spinner } from '../_ui';
+import { LineChart } from '../_ui/LineChart';
 
 const C = {
   bg: 'var(--obsidian)',
@@ -75,6 +76,33 @@ interface PostPerformance {
   retentionUploadedAt?: string;
 }
 
+interface MetricSnapshot {
+  at: string;
+  views: number;
+  likes: number;
+  shares: number;
+  saves: number;
+  comments: number;
+}
+
+interface HistoryPost {
+  mediaId: string;
+  snapshots: MetricSnapshot[];
+  evergreen: {
+    isEvergreen: boolean;
+    ageDays: number;
+    firstWeekDailyRate: number;
+    recentDailyRate: number;
+    ratio: number;
+  };
+}
+
+interface HistoryResponse {
+  updatedAt: string;
+  lastSyncedAt: string;
+  posts: HistoryPost[];
+}
+
 interface ViralPatterns {
   baseline: {
     avgViews: number;
@@ -99,6 +127,8 @@ interface ViralPatterns {
 export default function AnalyticsPage() {
   const router = useRouter();
   const [data, setData] = useState<ViralPatterns | null>(null);
+  const [history, setHistory] = useState<HistoryResponse | null>(null);
+  const [longevityId, setLongevityId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
@@ -125,10 +155,16 @@ export default function AnalyticsPage() {
   async function loadPatterns() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/dashboard/analytics?days=${days}`, {
-        headers: { 'x-dashboard-key': dashKey() },
-      });
-      if (res.ok) setData(await res.json());
+      const [patternsRes, historyRes] = await Promise.all([
+        fetch(`/api/dashboard/analytics?days=${days}`, {
+          headers: { 'x-dashboard-key': dashKey() },
+        }),
+        fetch('/api/dashboard/analytics/history', {
+          headers: { 'x-dashboard-key': dashKey() },
+        }),
+      ]);
+      if (patternsRes.ok) setData(await patternsRes.json());
+      if (historyRes.ok) setHistory(await historyRes.json());
     } finally {
       setLoading(false);
     }
@@ -203,6 +239,24 @@ export default function AnalyticsPage() {
   const allPosts = data?.allPosts ?? [];
   const outlierIds = new Set(outliers.map(o => o.mediaId));
 
+  const postById = new Map(allPosts.map(post => [post.mediaId, post]));
+  const historyPosts = (history?.posts ?? []).filter(h => h.snapshots.length >= 2);
+  const evergreenPosts = historyPosts.filter(h => h.evergreen.isEvergreen);
+  const evergreenIds = new Set(evergreenPosts.map(h => h.mediaId));
+
+  // Longevity chart selection — default to the most-viewed post with history.
+  const longevityCandidates = [...historyPosts].sort((a, b2) =>
+    (postById.get(b2.mediaId)?.views ?? 0) - (postById.get(a.mediaId)?.views ?? 0),
+  );
+  const selectedLongevity =
+    longevityCandidates.find(h => h.mediaId === longevityId) ?? longevityCandidates[0] ?? null;
+
+  const syncIsStale = (() => {
+    const at = history?.lastSyncedAt;
+    if (!at) return false;
+    return Date.now() - Date.parse(at) > 24 * 3600_000;
+  })();
+
   return (
     <div style={{ minHeight: 'calc(100vh - 60px)', color: C.white, padding: '32px 24px' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -253,6 +307,9 @@ export default function AnalyticsPage() {
             <Button variant="ghost" onClick={() => router.push('/dashboard/analytics/retention')}>
               Retention →
             </Button>
+            <Button variant="ghost" onClick={() => router.push('/dashboard/brief')}>
+              Content brief →
+            </Button>
           </div>
         </div>
 
@@ -267,6 +324,16 @@ export default function AnalyticsPage() {
             <Alert kind="warn" title="Heads up">{w}</Alert>
           </div>
         ))}
+
+        {syncIsStale && (
+          <div style={{ marginBottom: 12 }}>
+            <Alert kind="warn" title="Sync is stale">
+              The last successful Instagram sync was more than 24 hours ago
+              ({fmtDate(history!.lastSyncedAt)}). If Sync now fails, the Meta
+              access token has likely expired and needs to be refreshed.
+            </Alert>
+          </div>
+        )}
 
         {/* Baseline stats */}
         <div style={{
@@ -433,6 +500,82 @@ export default function AnalyticsPage() {
           </div>
         )}
 
+        {/* Longevity / views over time */}
+        <SectionTitle eyebrow="Longevity" title="Views over time" />
+        {historyPosts.length === 0 ? (
+          <div style={{
+            color: C.silver, fontSize: 14, marginBottom: 40,
+            fontFamily: 'var(--font-body)',
+          }}>
+            History accrues from each sync — after a few days of snapshots
+            this section charts how every post keeps earning views.
+          </div>
+        ) : (
+          <div style={{ marginBottom: 40 }}>
+            {card(
+              <>
+                <select
+                  value={selectedLongevity?.mediaId ?? ''}
+                  onChange={(e) => setLongevityId(e.target.value)}
+                  style={{
+                    background: C.bg, color: C.white, border: `1px solid ${C.border}`,
+                    borderRadius: 8, padding: '7px 10px', fontSize: 12,
+                    fontFamily: 'var(--font-body)', marginBottom: 14, maxWidth: '100%',
+                  }}
+                >
+                  {longevityCandidates.map(h => {
+                    const post = postById.get(h.mediaId);
+                    const hook = post ? post.caption.split('\n')[0].trim().slice(0, 70) : h.mediaId;
+                    return (
+                      <option key={h.mediaId} value={h.mediaId}>
+                        {hook || h.mediaId}{h.evergreen.isEvergreen ? ' · evergreen' : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+                {selectedLongevity && (
+                  <LineChart
+                    points={selectedLongevity.snapshots.map(s => ({
+                      x: Date.parse(s.at),
+                      y: s.views,
+                    }))}
+                    xFormat={(x) => new Date(x).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    yFormat={(y) => num(y)}
+                    fill
+                  />
+                )}
+              </>
+            )}
+            {evergreenPosts.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                {label('Still earning views 30+ days after publish')}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {evergreenPosts
+                    .sort((a, b2) => b2.evergreen.recentDailyRate - a.evergreen.recentDailyRate)
+                    .slice(0, 6)
+                    .map(h => {
+                      const post = postById.get(h.mediaId);
+                      return (
+                        <div key={h.mediaId} style={{
+                          display: 'flex', gap: 12, alignItems: 'baseline',
+                          fontSize: 13, fontFamily: 'var(--font-body)',
+                        }}>
+                          <span style={evergreenPillStyle}>Evergreen</span>
+                          <span style={{ color: C.white, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {post ? post.caption.split('\n')[0].trim().slice(0, 90) : h.mediaId}
+                          </span>
+                          <span style={{ color: C.silver, whiteSpace: 'nowrap', fontFeatureSettings: '"tnum"' }}>
+                            {h.evergreen.ageDays}d old · {h.evergreen.recentDailyRate.toFixed(1)} views/day
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* All posts table */}
         <SectionTitle eyebrow="Index" title="All synced posts" />
         <div style={{
@@ -490,6 +633,9 @@ export default function AnalyticsPage() {
                     </td>
                     <td style={{ padding: '10px 12px', color: C.silver, maxWidth: 220, fontFamily: 'var(--font-body)' }}>
                       <span title={post.caption}>{hook}{hook.length < post.caption.split('\n')[0].trim().length ? '…' : ''}</span>
+                      {evergreenIds.has(post.mediaId) && (
+                        <span style={{ ...evergreenPillStyle, marginLeft: 8 }}>Evergreen</span>
+                      )}
                     </td>
                     <td style={{ padding: '10px 12px', color: C.white, fontWeight: 600, fontFeatureSettings: '"tnum"' }}>{num(post.views)}</td>
                     <td style={{ padding: '10px 12px', color: C.white, fontFeatureSettings: '"tnum"' }}>{num(post.likes)}</td>
@@ -515,6 +661,20 @@ export default function AnalyticsPage() {
     </div>
   );
 }
+
+const evergreenPillStyle: React.CSSProperties = {
+  fontSize: 9,
+  fontWeight: 600,
+  padding: '2px 8px',
+  borderRadius: 8,
+  background: 'rgba(201, 168, 76, 0.10)',
+  color: 'var(--champion-gold)',
+  border: '1px solid rgba(201, 168, 76, 0.40)',
+  letterSpacing: '0.22em',
+  textTransform: 'uppercase',
+  fontFamily: 'var(--font-ui)',
+  whiteSpace: 'nowrap',
+};
 
 function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (

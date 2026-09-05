@@ -16,11 +16,24 @@ export interface RecentMedia {
   id: string;
   caption: string;
   media_type: 'IMAGE' | 'CAROUSEL_ALBUM' | 'REELS' | 'VIDEO';
+  /** Meta types reels as media_type VIDEO — the reel-ness lives here. */
+  media_product_type?: 'FEED' | 'REELS' | 'STORY' | 'AD';
   timestamp: string;
   like_count: number;
   comments_count: number;
   /** Duration in seconds. Present for REELS/VIDEO; absent for IMAGE/CAROUSEL. */
   video_duration?: number;
+}
+
+/**
+ * The store's media type, normalized: a VIDEO whose media_product_type is
+ * REELS is a Reel — that is what unlocks the reels watch-time metrics and
+ * every reels-only analytics feature downstream.
+ */
+export function normalizedMediaType(
+  item: Pick<RecentMedia, 'media_type' | 'media_product_type'>,
+): RecentMedia['media_type'] {
+  return item.media_product_type === 'REELS' ? 'REELS' : item.media_type;
 }
 
 export interface PostInsights {
@@ -38,13 +51,19 @@ export interface PostInsights {
   replays?: number;
   /** avgWatchTimeMs / videoDurationMs, clamped to [0, 1]. */
   completionRate?: number;
+  /** reels_skip_rate — percent (0–100) of viewers who skipped away.
+   *  REELS only. The closest thing the Graph API offers to a retention
+   *  curve: Instagram's per-second curve is mobile-app-only (see
+   *  docs/ig-insights-api.md), so this scalar stands in for hook strength.
+   *  Lower is better. */
+  skipRate?: number;
 }
 
 export async function fetchRecentMedia(limit = 25): Promise<RecentMedia[]> {
   const url = new URL(`${BASE}/${igId()}/media`);
   url.searchParams.set(
     'fields',
-    'id,caption,media_type,timestamp,like_count,comments_count,video_duration',
+    'id,caption,media_type,media_product_type,timestamp,like_count,comments_count,video_duration',
   );
   url.searchParams.set('limit', String(limit));
   url.searchParams.set('access_token', token());
@@ -81,27 +100,35 @@ export async function fetchPostInsights(
   videoDurationSec?: number,
 ): Promise<PostInsights | null> {
   // Try progressively simpler metric sets until one succeeds.
-  // Meta v22.0 removed impressions; not all metrics are available for every post age/type.
-  // For REELS we try watch-time + replay metrics first, then fall back to engagement-only.
+  // Verified against v22.0 on 2026-07-22: `plays`, `video_views`, and
+  // `clips_replays_count` are gone; `views` is the unified view metric and
+  // the ig_reels_* watch-time metrics still work for reels.
   const attempts: { metrics: string; viewKey: string }[] =
     mediaType === 'REELS'
       ? [
           {
             metrics:
-              'plays,reach,saved,shares,ig_reels_avg_watch_time,ig_reels_video_view_total_time,clips_replays_count',
-            viewKey: 'plays',
+              'views,reach,saved,shares,ig_reels_avg_watch_time,ig_reels_video_view_total_time,reels_skip_rate',
+            viewKey: 'views',
           },
-          { metrics: 'plays,reach,saved,shares', viewKey: 'plays' },
-          { metrics: 'plays,reach,saved',        viewKey: 'plays' },
+          // Same minus reels_skip_rate — keeps watch-time if a given reel
+          // predates the skip-rate metric or Meta rejects it.
+          {
+            metrics:
+              'views,reach,saved,shares,ig_reels_avg_watch_time,ig_reels_video_view_total_time',
+            viewKey: 'views',
+          },
+          { metrics: 'views,reach,saved,shares', viewKey: 'views' },
           { metrics: 'reach,saved',              viewKey: 'reach' },
         ]
       : mediaType === 'VIDEO'
       ? [
-          { metrics: 'video_views,reach,saved',  viewKey: 'video_views' },
+          { metrics: 'views,reach,saved',        viewKey: 'views' },
           { metrics: 'reach,saved',              viewKey: 'reach' },
         ]
       : [
           // IMAGE and CAROUSEL_ALBUM
+          { metrics: 'views,reach,saved',        viewKey: 'views' },
           { metrics: 'reach,saved',              viewKey: 'reach' },
         ];
 
@@ -119,6 +146,7 @@ export async function fetchPostInsights(
     const avgWatchTimeMs = data.ig_reels_avg_watch_time;
     const totalWatchTimeMs = data.ig_reels_video_view_total_time;
     const replays = data.clips_replays_count;
+    const skipRate = data.reels_skip_rate;
 
     let completionRate: number | undefined;
     if (
@@ -141,6 +169,7 @@ export async function fetchPostInsights(
       totalWatchTimeMs: typeof totalWatchTimeMs === 'number' ? totalWatchTimeMs : undefined,
       replays: typeof replays === 'number' ? replays : undefined,
       completionRate,
+      skipRate: typeof skipRate === 'number' ? skipRate : undefined,
     };
   }
 

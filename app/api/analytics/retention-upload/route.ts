@@ -11,29 +11,23 @@
  *   - notes             : optional free-text notes from the user
  *
  * Flow:
- *   1. Resolve mediaId (either direct or via reelUrl shortcode decode).
+ *   1. Resolve mediaId (lib/instagramIds.ts).
  *   2. Stash the screenshot in R2 under analytics/retention/<mediaId>.<ext>.
  *   3. Call Claude vision to extract {curve, videoDurationSec, notes}.
- *   4. Merge the curve + screenshot URL into analytics. If the post isn't
- *      there yet, create a stub record with manualEntry: true so the next
- *      sync cron upgrades it with real metrics.
- *   5. Detect drop cliffs. If a local source video can be located, extract
- *      a frame per cliff + get a one-shot Claude vision description.
- *   6. Invalidate the performance-corpus cache.
+ *   4. Hand off to ingestRetentionCurve (lib/retentionIngest.ts): merge the
+ *      curve into analytics (stub record if new), detect drop cliffs, and
+ *      fail-soft extract a described frame per cliff from the source video.
+ *
+ * Structured curve data (no screenshot) goes to /api/analytics/retention-data
+ * instead — same ingest tail, no vision call.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { r2, R2_BUCKET, r2PublicUrl, useR2 } from '@/lib/r2';
 import { parseRetentionScreenshot } from '@/lib/retentionParser';
-import {
-  mergePerformance,
-  readAnalytics,
-  upsertStubPerformance,
-  type PostPerformance,
-} from '@/lib/analyticsStore';
-import { findDropCliffs, invalidateCorpusCache } from '@/lib/performanceCorpus';
-import { locateSourceVideo } from '@/lib/sourceVideoLocator';
-import { extractFramesForCliffs } from '@/lib/retentionFrames';
+import { resolveMediaId } from '@/lib/instagramIds';
+import { ingestRetentionCurve } from '@/lib/retentionIngest';
+import { readAnalytics } from '@/lib/analyticsStore';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -41,54 +35,75 @@ export const maxDuration = 300;
 
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 
-const SHORTCODE_ALPHABET =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-
 function extFor(mediaType: string): string {
   if (mediaType === 'image/png') return 'png';
   if (mediaType === 'image/webp') return 'webp';
   return 'jpg';
 }
 
+/** Vision reads the duration off a chart axis, so it lands close but rarely
+ *  exact. Wide enough to survive that, tight enough that two Reels cut to the
+ *  same target length still separate in practice. */
+const DURATION_TOLERANCE_MS = 1500;
+
+interface DurationMatch {
+  mediaId?: string;
+  reason?: string;
+  candidates: { mediaId: string; hook: string; durationSec: number; deltaSec: number }[];
+}
+
 /**
- * Decode an Instagram shortcode to the numeric media pk. Uses the standard
- * base64 alphabet (A-Z, a-z, 0-9, -, _). The pk is the first 11 chars for
- * Reels; we decode the full shortcode for safety and stringify as decimal.
+ * Find the one Reel a curve belongs to, by duration, among Reels that don't
+ * already have a curve. Returns `mediaId` only on an unambiguous single hit —
+ * zero matches and multiple matches both come back as candidates so the caller
+ * can ask rather than guess. Silently attaching a curve to the wrong Reel would
+ * poison the content brief, which is the whole point of collecting it.
  */
-function shortcodeToMediaId(shortcode: string): string | null {
-  if (!/^[A-Za-z0-9_-]+$/.test(shortcode)) return null;
-  let n = BigInt(0);
-  const radix = BigInt(64);
-  for (let i = 0; i < shortcode.length; i++) {
-    const idx = SHORTCODE_ALPHABET.indexOf(shortcode.charAt(i));
-    if (idx < 0) return null;
-    n = n * radix + BigInt(idx);
-  }
-  return n.toString();
-}
+async function matchReelByDuration(durationMs?: number): Promise<DurationMatch> {
+  const store = await readAnalytics();
+  const eligible = store.posts.filter(
+    (p) =>
+      (p.mediaType === 'REELS' || p.mediaType === 'VIDEO') &&
+      !(p.retentionCurve && p.retentionCurve.length > 1) &&
+      typeof p.videoDurationMs === 'number' &&
+      p.videoDurationMs > 0,
+  );
 
-function extractShortcode(url: string): string | null {
-  const m = url.match(/instagram\.com\/(?:reel|p|reels)\/([A-Za-z0-9_-]+)/i);
-  return m ? m[1] : null;
-}
+  const describe = (p: (typeof eligible)[number]) => ({
+    mediaId: p.mediaId,
+    hook: (p.caption ?? '').split('\n')[0].trim().slice(0, 80),
+    durationSec: Math.round((p.videoDurationMs ?? 0) / 100) / 10,
+    deltaSec: durationMs
+      ? Math.round(Math.abs((p.videoDurationMs ?? 0) - durationMs) / 100) / 10
+      : -1,
+  });
 
-function resolveMediaId(input: { mediaId?: string; reelUrl?: string }): string | null {
-  const direct = input.mediaId?.trim();
-  if (direct) {
-    if (/^\d{10,}$/.test(direct)) return direct;
-    // Accept a raw shortcode too.
-    if (/^[A-Za-z0-9_-]{5,}$/.test(direct)) {
-      const decoded = shortcodeToMediaId(direct);
-      if (decoded) return decoded;
-    }
+  if (!durationMs) {
+    return {
+      reason: 'the chart had no readable duration, so there is nothing to match on',
+      candidates: eligible.slice(0, 8).map(describe),
+    };
   }
-  const url = input.reelUrl?.trim();
-  if (url) {
-    const sc = extractShortcode(url);
-    if (sc) return shortcodeToMediaId(sc);
-    if (/^\d{10,}$/.test(url)) return url;
-  }
-  return null;
+
+  const near = eligible
+    .filter((p) => Math.abs((p.videoDurationMs ?? 0) - durationMs) <= DURATION_TOLERANCE_MS)
+    .sort(
+      (a, b) =>
+        Math.abs((a.videoDurationMs ?? 0) - durationMs) -
+        Math.abs((b.videoDurationMs ?? 0) - durationMs),
+    );
+
+  if (near.length === 1) return { mediaId: near[0].mediaId, candidates: [] };
+
+  return {
+    reason: near.length
+      ? `${near.length} Reels without a curve are within ${DURATION_TOLERANCE_MS / 1000}s of this chart`
+      : 'no Reel without a curve matches this duration',
+    candidates: (near.length ? near : eligible)
+      .slice(0, 8)
+      .map(describe)
+      .sort((a, b) => a.deltaSec - b.deltaSec),
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -119,13 +134,6 @@ export async function POST(req: NextRequest) {
   if (!(file instanceof File)) {
     return NextResponse.json({ error: 'missing file' }, { status: 400 });
   }
-  const mediaId = resolveMediaId({ mediaId: rawMediaId, reelUrl });
-  if (!mediaId) {
-    return NextResponse.json(
-      { error: 'missing mediaId — provide a numeric id or a Reel URL' },
-      { status: 400 },
-    );
-  }
   if (!ALLOWED_TYPES.has(file.type)) {
     return NextResponse.json(
       { error: `unsupported file type ${file.type}; use PNG, JPEG, or WebP` },
@@ -133,41 +141,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const store = await readAnalytics();
-  let existing = store.posts.find((p) => p.mediaId === mediaId);
-  if (!existing) {
-    existing = await upsertStubPerformance({
-      mediaId,
-      caption: captionInput || undefined,
-      videoDurationMs: Number.isFinite(videoDurationMsInput) && videoDurationMsInput > 0
-        ? videoDurationMsInput
-        : undefined,
-    });
-  }
+  // mediaId is OPTIONAL. Instagram's retention chart doesn't name the Reel, so
+  // an unattended sender (the Telegram concierge) has no id to pass. When it's
+  // absent we match on the duration the vision pass reads off the x-axis.
+  //
+  // That forces parse-before-stash: the R2 object key is <mediaId>.<ext>, so
+  // the id has to be known first. Side benefit — screenshots we can't read no
+  // longer orphan themselves in the bucket.
+  const explicitMediaId = resolveMediaId({ mediaId: rawMediaId, reelUrl });
 
   const buf = Buffer.from(await file.arrayBuffer());
-  const ext = extFor(file.type);
-  const key = `analytics/retention/${mediaId}.${ext}`;
-
-  let screenshotUrl: string | undefined;
-  if (useR2()) {
-    try {
-      await r2.send(
-        new PutObjectCommand({
-          Bucket: R2_BUCKET(),
-          Key: key,
-          Body: buf,
-          ContentType: file.type,
-        }),
-      );
-      screenshotUrl = r2PublicUrl(key);
-    } catch (e: any) {
-      return NextResponse.json(
-        { error: `R2 upload failed: ${e?.message ?? e}` },
-        { status: 500 },
-      );
-    }
-  }
 
   let parsed;
   try {
@@ -197,71 +180,70 @@ export async function POST(req: NextRequest) {
     ? parsed.videoDurationSec * 1000
     : Number.isFinite(videoDurationMsInput) && videoDurationMsInput > 0
       ? videoDurationMsInput
-      : existing.videoDurationMs;
+      : undefined;
 
-  const updated = await mergePerformance(mediaId, {
-    retentionCurve: parsed.curve,
-    retentionScreenshotUrl: screenshotUrl,
-    retentionUploadedAt: new Date().toISOString(),
-    retentionNotes: notes || parsed.notes,
-    videoDurationMs,
-    caption: existing.caption || captionInput || '',
-  });
-
-  invalidateCorpusCache();
-
-  // ── Retention frames (fail-soft) ─────────────────────────────────────
-  let framesExtracted = 0;
-  let framesSkippedReason: string | undefined;
-  try {
-    const cliffs = findDropCliffs([parsed.curve]);
-    if (cliffs.length === 0) {
-      framesSkippedReason = 'no drop cliffs detected';
-    } else {
-      const located = await locateSourceVideo({
-        mediaId,
-        slug: updated?.slug,
-        queuePostId: updated?.queuePostId,
-      });
-      if (!located) {
-        framesSkippedReason = 'source video not found';
-      } else {
-        try {
-          const frames = await extractFramesForCliffs({
-            mediaId,
-            slug: updated?.slug,
-            videoAbsPath: located.absPath,
-            cliffs: cliffs.map((c) => ({ secondRange: c.secondRange })),
-            apiKey,
-          });
-          if (frames.length > 0) {
-            await mergePerformance(mediaId, { retentionFrames: frames });
-            framesExtracted = frames.length;
-            invalidateCorpusCache();
-          } else {
-            framesSkippedReason = 'frame extraction returned no frames';
-          }
-        } finally {
-          located.cleanup?.();
-        }
-      }
+  let mediaId = explicitMediaId;
+  let matchedBy: 'explicit' | 'duration' = 'explicit';
+  if (!mediaId) {
+    const match = await matchReelByDuration(videoDurationMs);
+    if (!match.mediaId) {
+      // 409, not 500: nothing failed, we just can't tell which Reel this is.
+      // Callers should surface the candidates rather than retry blindly.
+      return NextResponse.json(
+        {
+          error: 'ambiguous match',
+          reason: match.reason,
+          chartDurationSec: parsed.videoDurationSec,
+          candidates: match.candidates,
+        },
+        { status: 409 },
+      );
     }
-  } catch (e: any) {
-    framesSkippedReason = `frame extraction threw: ${e?.message ?? e}`;
-    console.warn(framesSkippedReason);
+    mediaId = match.mediaId;
+    matchedBy = 'duration';
   }
 
-  const finalPost = framesExtracted > 0
-    ? (await readAnalytics()).posts.find((p) => p.mediaId === mediaId)
-    : updated;
+  const ext = extFor(file.type);
+  const key = `analytics/retention/${mediaId}.${ext}`;
+
+  let screenshotUrl: string | undefined;
+  if (useR2()) {
+    try {
+      await r2.send(
+        new PutObjectCommand({
+          Bucket: R2_BUCKET(),
+          Key: key,
+          Body: buf,
+          ContentType: file.type,
+        }),
+      );
+      screenshotUrl = r2PublicUrl(key);
+    } catch (e: any) {
+      return NextResponse.json(
+        { error: `R2 upload failed: ${e?.message ?? e}` },
+        { status: 500 },
+      );
+    }
+  }
+
+  const result = await ingestRetentionCurve({
+    mediaId,
+    curve: parsed.curve,
+    videoDurationMs,
+    caption: captionInput || undefined,
+    notes: notes || parsed.notes,
+    screenshotUrl,
+    apiKey,
+  });
 
   return NextResponse.json({
     ok: true,
     mediaId,
+    matchedBy,
     curvePoints: parsed.curve.length,
     visionNotes: parsed.notes,
-    framesExtracted,
-    framesSkippedReason,
-    post: finalPost,
+    framesExtracted: result.framesExtracted,
+    framesSkippedReason: result.framesSkippedReason,
+    post: result.post,
   });
 }

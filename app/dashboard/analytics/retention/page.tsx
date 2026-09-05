@@ -1,9 +1,12 @@
 'use client';
 
+import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UploadModal from './UploadModal';
 import { Button } from '../../_ui';
+import { LineChart, Sparkline } from '../../_ui/LineChart';
+import { hookHold3s, HOOK_HOLD_FLAG_PCT, SKIP_RATE_FLAG_PCT } from '@/lib/retentionMath';
 
 const C = {
   bg: 'var(--obsidian)',
@@ -64,6 +67,7 @@ interface PostRow {
   timestamp: string;
   views: number;
   completionRate?: number;
+  skipRate?: number;
   videoDurationMs?: number;
   retentionCurve?: RetentionPoint[];
   retentionUploadedAt?: string;
@@ -73,20 +77,6 @@ interface PostRow {
   manualEntry?: boolean;
 }
 
-function miniSparkline(curve: RetentionPoint[]): string {
-  if (curve.length === 0) return '';
-  const blocks = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
-  const sampled: number[] = [];
-  const target = Math.min(16, curve.length);
-  for (let i = 0; i < target; i++) {
-    const idx = Math.floor((i / target) * curve.length);
-    sampled.push(curve[idx].pctViewers);
-  }
-  return sampled
-    .map((pct) => blocks[Math.min(7, Math.floor((pct / 100) * 8))])
-    .join('');
-}
-
 export default function RetentionUploadsPage() {
   const router = useRouter();
   const [posts, setPosts] = useState<PostRow[]>([]);
@@ -94,6 +84,7 @@ export default function RetentionUploadsPage() {
   const [selected, setSelected] = useState<PostRow | null>(null);
   const [newUploadOpen, setNewUploadOpen] = useState(false);
   const [reextracting, setReextracting] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthed()) {
@@ -120,6 +111,7 @@ export default function RetentionUploadsPage() {
           timestamp: p.timestamp,
           views: p.views,
           completionRate: p.completionRate,
+          skipRate: p.skipRate,
           videoDurationMs: p.videoDurationMs,
           retentionCurve: p.retentionCurve,
           retentionUploadedAt: p.retentionUploadedAt,
@@ -211,7 +203,7 @@ export default function RetentionUploadsPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
                 <tr style={{ borderBottom: `1px solid ${C.border}` }}>
-                  {['Date', 'Hook', 'Views', 'Completion', 'Duration', 'Retention curve', 'Action'].map((h) => (
+                  {['Date', 'Hook', 'Views', 'Completion', 'Skip rate', 'Hook hold', 'Duration', 'Retention curve', 'Action'].map((h) => (
                     <th key={h} style={{ padding: '8px 12px', textAlign: 'left', color: C.silver, fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>
                       {h}
                     </th>
@@ -223,8 +215,11 @@ export default function RetentionUploadsPage() {
                   const hook = p.caption.split('\n')[0].trim().slice(0, 60);
                   const hasCurve = Array.isArray(p.retentionCurve) && p.retentionCurve.length >= 2;
                   const hasFrames = Array.isArray(p.retentionFrames) && p.retentionFrames.length > 0;
+                  const hold = hasCurve ? hookHold3s(p.retentionCurve!) : null;
+                  const expanded = expandedId === p.mediaId;
                   return (
-                    <tr key={p.mediaId} style={{ borderBottom: `1px solid ${C.border}` }}>
+                    <React.Fragment key={p.mediaId}>
+                    <tr style={{ borderBottom: expanded ? 'none' : `1px solid ${C.border}` }}>
                       <td style={{ padding: '10px 12px', color: C.silver, whiteSpace: 'nowrap', verticalAlign: 'top' }}>{fmtDate(p.timestamp)}</td>
                       <td style={{ padding: '10px 12px', color: C.white, maxWidth: 260, verticalAlign: 'top' }}>
                         {hook || <span style={{ color: C.silver, fontStyle: 'italic' }}>(no caption)</span>}
@@ -236,15 +231,44 @@ export default function RetentionUploadsPage() {
                       <td style={{ padding: '10px 12px', color: C.white, verticalAlign: 'top' }}>
                         {typeof p.completionRate === 'number' ? `${(p.completionRate * 100).toFixed(0)}%` : '—'}
                       </td>
+                      <td
+                        style={{
+                          padding: '10px 12px', verticalAlign: 'top', fontWeight: 700,
+                          fontFeatureSettings: '"tnum"',
+                          color: typeof p.skipRate !== 'number'
+                            ? C.silver
+                            : p.skipRate > SKIP_RATE_FLAG_PCT ? C.red : C.green,
+                        }}
+                        title="Percent of viewers who scrolled away (Graph API reels_skip_rate). Lower is better. Instagram's per-second retention curve is mobile-app only, so this is the API-available stand-in for hook strength."
+                      >
+                        {typeof p.skipRate === 'number' ? `${p.skipRate.toFixed(1)}%` : '—'}
+                      </td>
+                      <td
+                        style={{
+                          padding: '10px 12px', verticalAlign: 'top', fontWeight: 700,
+                          fontFeatureSettings: '"tnum"',
+                          color: hold === null ? C.silver : hold < HOOK_HOLD_FLAG_PCT ? C.red : C.green,
+                        }}
+                        title="Percent of viewers still watching at 3 seconds. A low hold means the hook is losing people before the payoff."
+                      >
+                        {hold === null ? '—' : `${Math.round(hold)}%`}
+                      </td>
                       <td style={{ padding: '10px 12px', color: C.silver, verticalAlign: 'top' }}>
                         {typeof p.videoDurationMs === 'number' ? `${Math.round(p.videoDurationMs / 1000)}s` : '—'}
                       </td>
                       <td style={{ padding: '10px 12px', verticalAlign: 'top' }}>
                         {hasCurve ? (
                           <div>
-                            <span title={p.retentionNotes ?? `${p.retentionCurve!.length} points`} style={{ color: C.green, fontFamily: 'ui-monospace, monospace', letterSpacing: 1 }}>
-                              {miniSparkline(p.retentionCurve!)}
-                            </span>
+                            <button
+                              onClick={() => setExpandedId(expanded ? null : p.mediaId)}
+                              title={p.retentionNotes ?? `${p.retentionCurve!.length} points — click to expand`}
+                              style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'block' }}
+                            >
+                              <Sparkline
+                                points={p.retentionCurve!.map((pt) => ({ x: pt.sec, y: pt.pctViewers }))}
+                                color={hold !== null && hold < HOOK_HOLD_FLAG_PCT ? C.red : C.green}
+                              />
+                            </button>
                             {hasFrames ? (
                               <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
                                 {p.retentionFrames!.slice(0, 3).map((f) => (
@@ -311,6 +335,39 @@ export default function RetentionUploadsPage() {
                         </div>
                       </td>
                     </tr>
+                    {expanded && hasCurve && (
+                      <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                        <td colSpan={9} style={{ padding: '4px 12px 18px' }}>
+                          <div style={{
+                            background: C.surface, border: `1px solid ${C.border}`,
+                            borderRadius: 8, padding: '16px 18px',
+                          }}>
+                            <div style={{
+                              fontSize: 10, fontWeight: 600, letterSpacing: '0.22em',
+                              color: C.silver, textTransform: 'uppercase', marginBottom: 10,
+                              fontFamily: 'var(--font-ui)',
+                            }}>
+                              Retention · % of viewers still watching · gold rules mark drop cliffs · dashed gold line = {HOOK_HOLD_FLAG_PCT}% hook-hold flag
+                            </div>
+                            <LineChart
+                              points={p.retentionCurve!.map((pt) => ({ x: pt.sec, y: pt.pctViewers }))}
+                              yDomain={[0, 100]}
+                              xFormat={(x) => `${Math.round(x)}s`}
+                              yFormat={(y) => `${Math.round(y)}%`}
+                              thresholdY={HOOK_HOLD_FLAG_PCT}
+                              markers={(p.retentionFrames ?? []).map((f) => ({
+                                x: f.sec,
+                                label: `Drop at ${f.sec}s`,
+                                imageUrl: f.frameUrl,
+                                description: f.description,
+                              }))}
+                              fill
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </React.Fragment>
                   );
                 })}
               </tbody>

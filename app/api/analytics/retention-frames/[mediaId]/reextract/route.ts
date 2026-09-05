@@ -47,7 +47,9 @@ export async function POST(
     );
   }
 
-  const cliffs = findDropCliffs([post.retentionCurve]);
+  // minSample 1 — this is a single post's own curve; the corpus-wide
+  // default of 3 would return no cliffs for every single-curve call.
+  const cliffs = findDropCliffs([post.retentionCurve], { minSample: 1 });
   if (cliffs.length === 0) {
     return NextResponse.json({
       ok: true,

@@ -338,6 +338,37 @@ describe('renderCorpusForPrompt', () => {
     expect(text).toContain('Bottom performers');
   });
 
+  it('surfaces skip rate and its per-hook-style split in the prompt', () => {
+    // Question hooks skip much less than statement hooks here.
+    const posts: PostPerformance[] = Array.from({ length: 12 }, (_, i) =>
+      reel({
+        mediaId: `s${i}`,
+        caption: i % 2 === 0 ? `Why does ${i} matter?` : `Most people get ${i} wrong.`,
+        skipRate: i % 2 === 0 ? 45 + (i % 3) : 75 + (i % 3),
+        views: 1_000,
+      }),
+    );
+    const c = buildCorpus(posts);
+    expect(c.skipRate?.sampleSize).toBe(12);
+    // Ascending: the low-skip style must rank first.
+    expect(c.skipRate!.byHookStyle[0].avgPct).toBeLessThan(
+      c.skipRate!.byHookStyle[c.skipRate!.byHookStyle.length - 1].avgPct,
+    );
+    expect(c.skipRate!.best[0].pct).toBeLessThan(c.skipRate!.worst[0].pct);
+
+    const text = renderCorpusForPrompt(c)!;
+    expect(text).toContain('Skip rate');
+    expect(text).toContain('By hook style');
+    expect(text).toContain('Least skipped');
+  });
+
+  it('omits the skip-rate block entirely when no reel has the metric', () => {
+    const posts: PostPerformance[] = [reel({ mediaId: 'n1', caption: 'No skip data here.' })];
+    const c = buildCorpus(posts);
+    expect(c.skipRate).toBeUndefined();
+    expect(renderCorpusForPrompt(c) ?? '').not.toContain('Skip rate');
+  });
+
   it('stays under ~1500 tokens (~6000 chars) on a realistic corpus', () => {
     const posts: PostPerformance[] = Array.from({ length: 50 }, (_, i) =>
       reel({
