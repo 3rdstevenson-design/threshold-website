@@ -49,8 +49,7 @@ export default function ContactForm() {
       <div className="border border-threshold-purple/30 bg-white rounded-sm p-8 text-center">
         <h2 className="font-cormorant text-2xl text-obsidian mb-2">Thanks, I got it.</h2>
         <p className="font-nunito text-deep-navy/80">
-          I&apos;ll be in touch shortly. If you opted in to texts, you&apos;ll get a confirmation
-          message. Reply STOP anytime to opt out.
+          I&apos;ll be in touch shortly.
         </p>
       </div>
     )
