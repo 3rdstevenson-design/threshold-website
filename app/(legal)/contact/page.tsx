@@ -30,8 +30,8 @@ export default function ContactPage() {
         <ul className="font-nunito text-sm text-deep-navy/80 space-y-1">
           <li>
             Phone:{' '}
-            <a href="tel:+12408015342" className="text-threshold-purple">
-              (240) 801-5342
+            <a href="tel:+14025360203" className="text-threshold-purple">
+              (402) 536-0203
             </a>
           </li>
           <li>
