@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/metadata'
 
 export const metadata: Metadata = {
   title: { absolute: 'Terms & Conditions | Threshold Health & Performance' },
-  description:
-    'The terms and conditions governing use of thresholdhp.com and Threshold Health & Performance services.',
-  alternates: { canonical: '/terms-and-conditions' },
+  ...pageMeta({
+    fullTitle: 'Terms & Conditions | Threshold Health & Performance',
+    description: 'The terms and conditions governing use of thresholdhp.com and Threshold Health & Performance services.',
+    path: '/terms-and-conditions',
+  }),
 }
 
 const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;font-family:Nunito Sans,Helvetica,Arial,sans-serif;color:#1a1a2e;line-height:1.6">

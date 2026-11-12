@@ -1,11 +1,18 @@
 import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/metadata'
+import SiteFooter from '@/components/SiteFooter'
+import InstagramLink from '@/components/InstagramLink'
+import Image from 'next/image'
 import Link from 'next/link'
 import { BOOKING_URL } from '@/lib/booking'
 
 export const metadata: Metadata = {
-  title: 'About Dr. Lars Stevenson | Threshold Health & Performance',
-  description:
-    'Doctor of Physical Therapy and Strength & Conditioning specialist. Olympic-level methods applied to everyone trying to get back to what they love.',
+  title: 'About Dr. Lars Stevenson, PT, DPT',
+  ...pageMeta({
+    fullTitle: 'About Dr. Lars Stevenson, PT, DPT | Threshold Health & Performance',
+    description: 'Meet Dr. Lars Stevenson, PT, DPT, CSCS: physical therapist and strength coach in Reston, VA, using Olympic-level methods to get people back to what they love.',
+    path: '/about',
+  }),
 }
 
 const MARK_PATH =
@@ -47,6 +54,7 @@ function Nav() {
           >
             About
           </Link>
+          <InstagramLink iconClassName="h-[18px] w-[18px]" className="text-sterling-silver hover:text-clinical-white transition-colors duration-200" />
           <a
             href={BOOKING_URL}
             target="_blank"
@@ -56,14 +64,17 @@ function Nav() {
             Book Now
           </a>
         </div>
-        <a
-          href={BOOKING_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="md:hidden font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-4 py-2 hover:bg-purple-800 transition-colors duration-200"
-        >
-          Book Now
-        </a>
+        <div className="md:hidden flex items-center gap-4">
+          <InstagramLink iconClassName="h-5 w-5" className="text-sterling-silver" />
+          <a
+            href={BOOKING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-4 py-2 hover:bg-purple-800 transition-colors duration-200"
+          >
+            Book Now
+          </a>
+        </div>
       </div>
     </nav>
   )
@@ -115,9 +126,13 @@ export default function AboutPage() {
                   }}
                   aria-hidden="true"
                 />
-                <img
+                <Image
                   src="/lars-about-new.png"
-                  alt="Dr. Lars Stevenson"
+                  alt="Dr. Lars Stevenson, PT, DPT, testing an athlete's hamstring flexibility during a physical therapy session"
+                  width={600}
+                  height={900}
+                  sizes="(min-width: 1024px) 40vw, 90vw"
+                  priority
                   className="relative z-10 w-full h-auto object-contain"
                   style={{ maxHeight: '680px' }}
                 />
@@ -245,31 +260,7 @@ export default function AboutPage() {
 
       </main>
 
-      {/* ─── Footer ─── */}
-      <footer className="bg-obsidian border-t border-white/10 py-10">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <LogoMark className="h-5 w-auto text-threshold-purple" />
-            <span className="font-montserrat text-xs tracking-[0.18em] text-sterling-silver uppercase">
-              Threshold Health &amp; Performance
-            </span>
-          </div>
-          <p className="font-montserrat text-xs text-sterling-silver text-center">
-            Reston, Virginia &nbsp;·&nbsp;{' '}
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-clinical-white transition-colors duration-200"
-            >
-              Book an Appointment
-            </a>
-          </p>
-          <p className="font-montserrat text-xs text-white/30">
-            &copy; {new Date().getFullYear()} Threshold Health &amp; Performance
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   )
 }

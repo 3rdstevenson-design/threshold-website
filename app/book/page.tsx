@@ -1,11 +1,16 @@
 import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/metadata'
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { BOOKING_URL } from '@/lib/booking'
 
 export const metadata: Metadata = {
-  title: 'Book a Session | Threshold Health & Performance',
-  description:
-    'Book your intro call with Dr. Lars Stevenson. 20 honest minutes about your situation, what you have already tried, and the next step forward.',
+  title: 'Book an Intro Call in Reston, VA',
+  ...pageMeta({
+    fullTitle: 'Book an Intro Call in Reston, VA | Threshold Health & Performance',
+    description: 'Book a 20-minute intro call with Dr. Lars Stevenson, PT, DPT in Reston, VA. An honest talk about your situation, what you have tried, and the next step forward.',
+    path: '/book',
+  }),
 }
 
 const MARK_PATH =
@@ -114,29 +119,7 @@ export default function BookPage() {
 
       </main>
 
-      {/* ─── Footer ─── */}
-      <footer className="bg-obsidian border-t border-white/10 py-10">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <Link href="/" className="flex items-center gap-3">
-            <LogoMark className="h-5 w-auto text-threshold-purple" />
-            <span className="font-montserrat text-xs tracking-[0.18em] text-sterling-silver uppercase">
-              Threshold Health &amp; Performance
-            </span>
-          </Link>
-          <p className="font-montserrat text-xs text-sterling-silver text-center">
-            Reston, Virginia &nbsp;·&nbsp;{' '}
-            <a
-              href={BOOKING_URL}
-              className="hover:text-clinical-white transition-colors duration-200"
-            >
-              Book an Appointment
-            </a>
-          </p>
-          <p className="font-montserrat text-xs text-white/30">
-            &copy; {new Date().getFullYear()} Threshold Health &amp; Performance
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   )
 }
