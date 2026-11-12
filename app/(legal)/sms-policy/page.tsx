@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/metadata'
 
 export const metadata: Metadata = {
   title: { absolute: 'SMS Communications & Consent Policy | Threshold Health & Performance' },
-  description:
-    'Threshold Health & Performance SMS messaging program: message types, frequency, STOP/HELP keywords, and how we handle mobile information.',
-  alternates: { canonical: '/sms-policy' },
+  ...pageMeta({
+    fullTitle: 'SMS Communications & Consent Policy | Threshold Health & Performance',
+    description: 'Threshold Health & Performance SMS messaging program: message types, frequency, STOP/HELP keywords, and how we handle mobile information.',
+    path: '/sms-policy',
+  }),
 }
 
 const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;font-family:Nunito Sans,Helvetica,Arial,sans-serif;color:#1a1a2e;line-height:1.6">

@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/metadata'
 
 export const metadata: Metadata = {
   title: { absolute: 'Privacy Policy | Threshold Health & Performance' },
-  description:
-    'How Threshold Health & Performance collects, uses, and protects your information, including SMS consent and mobile data handling.',
-  alternates: { canonical: '/privacy-policy' },
+  ...pageMeta({
+    fullTitle: 'Privacy Policy | Threshold Health & Performance',
+    description: 'How Threshold Health & Performance collects, uses, and protects your information, including SMS consent and mobile data handling.',
+    path: '/privacy-policy',
+  }),
 }
 
 const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;font-family:Nunito Sans,Helvetica,Arial,sans-serif;color:#1a1a2e;line-height:1.6">

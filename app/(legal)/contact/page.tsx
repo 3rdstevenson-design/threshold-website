@@ -1,11 +1,15 @@
 import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/metadata'
 import ContactForm from './ContactForm'
+import InstagramLink from '@/components/InstagramLink'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Contact & Text Updates | Threshold Health & Performance' },
-  description:
-    'Get in touch with Dr. Lars Stevenson at Threshold Health & Performance, and opt in to text updates (appointment reminders, follow-ups, and occasional offers).',
-  alternates: { canonical: '/contact' },
+  title: { absolute: 'Contact & Text Updates | Threshold Health & Performance, Reston VA' },
+  ...pageMeta({
+    fullTitle: 'Contact & Text Updates | Threshold Health & Performance, Reston VA',
+    description: 'Get in touch with Dr. Lars Stevenson at Threshold Health & Performance, and opt in to text updates (appointment reminders, follow-ups, and occasional offers).',
+    path: '/contact',
+  }),
 }
 
 export default function ContactPage() {
@@ -22,6 +26,11 @@ export default function ContactPage() {
         appointment reminders, follow-ups, and the occasional offer. I read these myself.
       </p>
       <ContactForm />
+
+      <p className="font-nunito text-base text-deep-navy/80 leading-[1.8] mt-10">
+        Not ready to reach out yet? Follow along on Instagram, where I post the work as it happens:{' '}
+        <InstagramLink showHandle iconClassName="h-4 w-4" className="text-threshold-purple font-semibold align-middle" />
+      </p>
 
       <div className="mt-12 pt-8 border-t border-deep-navy/10">
         <p className="font-montserrat text-xs font-semibold tracking-wide text-deep-navy uppercase mb-3">
@@ -40,7 +49,11 @@ export default function ContactPage() {
               dr.lars@thresholdhp.com
             </a>
           </li>
-          <li>Threshold Health &amp; Performance, 1908 Reston Metro Plaza, Reston, VA 20190</li>
+          <li>
+            Instagram:{' '}
+            <InstagramLink showHandle iconClassName="h-3.5 w-3.5" className="text-threshold-purple align-middle" />
+          </li>
+          <li>Mailing address: Threshold Health &amp; Performance, 1908 Reston Metro Plaza, Reston, VA 20190</li>
         </ul>
       </div>
     </div>
