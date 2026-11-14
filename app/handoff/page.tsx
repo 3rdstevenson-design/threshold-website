@@ -94,21 +94,37 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function BookingFallback() {
+// Email, text or call: shown under the calendar, or on its own while there
+// is no calendar URL yet.
+function ReachOut({ alone }: { alone: boolean }) {
   const tel = BUSINESS.phone.replace(/-/g, '')
+  const options = [
+    { label: 'Email', value: BUSINESS.email, href: `mailto:${BUSINESS.email}?subject=The%20Handoff` },
+    { label: 'Text', value: BUSINESS.phoneDisplay, href: `sms:${tel}` },
+    { label: 'Call', value: BUSINESS.phoneDisplay, href: `tel:${tel}` },
+  ]
   return (
-    <div className="bg-obsidian border border-white/10 rounded-sm px-6 py-12 md:px-12 text-center">
-      <p className="font-nunito text-lg md:text-xl text-clinical-white leading-relaxed">
-        Email{' '}
-        <a href={`mailto:${BUSINESS.email}?subject=The%20Handoff`} className="text-clinical-white underline decoration-threshold-purple underline-offset-4 hover:text-sterling-silver">
-          {BUSINESS.email}
-        </a>{' '}
-        or text{' '}
-        <a href={`sms:${tel}`} className="text-clinical-white underline decoration-threshold-purple underline-offset-4 hover:text-sterling-silver">
-          {BUSINESS.phoneDisplay}
-        </a>{' '}
-        to book.
+    <div className={alone ? '' : 'mt-10'}>
+      <p className="font-nunito text-base md:text-lg text-clinical-white mb-4">
+        {alone ? 'Email, text or call me to book.' : 'Rather reach out yourself? Email, text or call me.'}
       </p>
+      <ul className="grid sm:grid-cols-3 gap-3">
+        {options.map((o) => (
+          <li key={o.label}>
+            <a
+              href={o.href}
+              className="block bg-obsidian border border-white/10 hover:border-threshold-purple px-5 py-4 transition-colors duration-200"
+            >
+              <span className="block font-montserrat text-xs font-semibold tracking-[0.2em] text-champion-gold uppercase mb-1">
+                {o.label}
+              </span>
+              <span className="block font-nunito text-sm md:text-base text-clinical-white break-words">
+                {o.value}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -146,31 +162,18 @@ export default function HandoffPage() {
         <section id="book" className="bg-deep-navy py-14 md:py-20 scroll-mt-16">
           <div className="max-w-3xl mx-auto px-6">
             <SectionLabel>Pick a Time</SectionLabel>
-            {HANDOFF_WIDGET_URL ? (
-              <>
-                <div className="bg-clinical-white rounded-sm shadow-2xl p-4 md:p-6">
-                  {/* GoHighLevel calendar widget. GHL's form_embed.js can auto-size
-                      this iframe; until it's added, a fixed height that fits the
-                      calendar plus its form. */}
-                  <iframe
-                    src={HANDOFF_WIDGET_URL}
-                    title="Book The Handoff with Dr. Lars Stevenson"
-                    className="w-full block"
-                    style={{ height: 900, border: 'none' }}
-                    scrolling="yes"
-                  />
-                </div>
-                <p className="font-nunito text-sm text-sterling-silver text-center mt-6">
-                  Rather not use the calendar? Email{' '}
-                  <a href={`mailto:${BUSINESS.email}?subject=The%20Handoff`} className="underline underline-offset-4 hover:text-clinical-white">
-                    {BUSINESS.email}
-                  </a>
-                  .
-                </p>
-              </>
-            ) : (
-              <BookingFallback />
+            {HANDOFF_WIDGET_URL && (
+              <div className="bg-clinical-white rounded-sm shadow-2xl overflow-hidden">
+                {/* Zoom Scheduler booking page, embedded. */}
+                <iframe
+                  src={HANDOFF_WIDGET_URL}
+                  title="Book The Handoff with Dr. Lars Stevenson"
+                  className="w-full block"
+                  style={{ height: 820, border: 'none' }}
+                />
+              </div>
             )}
+            <ReachOut alone={!HANDOFF_WIDGET_URL} />
           </div>
         </section>
 

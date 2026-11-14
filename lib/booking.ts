@@ -7,9 +7,9 @@ export const BOOKING_URL = '/book'
 
 // The Handoff (doctor interview series) booking calendar, embedded on /handoff.
 // Doctors book there; patients never do (patient booking stays on Practice
-// Better at /book, and no patient info goes into GoHighLevel).
-// TODO(Lars): paste the GoHighLevel calendar widget URL here once the GHL
-// Starter account is back (Calendars → your Handoff calendar → Share → Embed,
-// the iframe's src, e.g. https://api.leadconnectorhq.com/widget/booking/<id>).
-// While this is empty, /handoff shows an "email or text to book" fallback.
+// Better at /book).
+// TODO(Lars): paste the Zoom Scheduler booking page URL here
+// (scheduler.zoom.us → Booking pages → The Handoff → Share → Embed, the
+// iframe's src). While this is empty, /handoff shows only the
+// email / text / call options.
 export const HANDOFF_WIDGET_URL = ''
