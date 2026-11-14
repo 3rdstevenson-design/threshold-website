@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { pageMeta } from '@/lib/metadata'
-import { HANDOFF_BOOKING_PAGE, HANDOFF_WIDGET_URL } from '@/lib/booking'
-import { BUSINESS } from '@/lib/site'
-import LogoMark from '@/components/LogoMark'
+import { HANDOFF_BOOKING_PAGE } from '@/lib/booking'
+import SchedulerBooking from '@/components/SchedulerBooking'
+import { BookingNav, SectionLabel } from '@/components/BookingChrome'
 import SiteFooter from '@/components/SiteFooter'
 
 // /handoff is where doctors book a Handoff interview. Its QR code is on the
@@ -49,81 +48,10 @@ const SAMPLE_QUESTIONS = [
   },
 ]
 
-function Nav() {
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-sm border-b border-white/5">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <LogoMark className="h-7 w-auto text-clinical-white group-hover:text-threshold-purple transition-colors duration-300" />
-          <span className="font-montserrat text-xs font-semibold tracking-[0.2em] text-clinical-white uppercase">
-            Threshold
-          </span>
-        </Link>
-        <a
-          href="#book"
-          className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-5 py-2.5 hover:bg-threshold-purple/80 transition-colors duration-200"
-        >
-          Pick a Time
-        </a>
-      </div>
-    </nav>
-  )
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-5">
-      {children}
-    </p>
-  )
-}
-
-// Email, text or call: shown under the calendar, or on its own while there
-// is no calendar URL yet.
-function ReachOut({ alone }: { alone: boolean }) {
-  const tel = BUSINESS.phone.replace(/-/g, '')
-  return (
-    <div className={alone ? '' : 'mt-10'}>
-      <p className="font-nunito text-base md:text-lg text-clinical-white mb-4">
-        {alone ? 'Email, call or text me to book.' : 'Prefer to talk first? Email, call or text.'}
-      </p>
-      <div className="grid sm:grid-cols-2 gap-3">
-        <a
-          href={`mailto:${BUSINESS.email}?subject=The%20Handoff`}
-          className="block bg-obsidian border border-white/10 hover:border-threshold-purple px-5 py-4 transition-colors duration-200"
-        >
-          <span className="block font-montserrat text-xs font-semibold tracking-[0.2em] text-champion-gold uppercase mb-1">
-            Email
-          </span>
-          <span className="block font-nunito text-sm md:text-base text-clinical-white break-words">
-            {BUSINESS.email}
-          </span>
-        </a>
-        <div className="bg-obsidian border border-white/10 px-5 py-4">
-          <span className="block font-montserrat text-xs font-semibold tracking-[0.2em] text-champion-gold uppercase mb-1">
-            Call or Text
-          </span>
-          <span className="block font-nunito text-sm md:text-base text-clinical-white">
-            {BUSINESS.phoneDisplay}
-          </span>
-          <span className="mt-2 flex gap-4 font-montserrat text-xs font-semibold tracking-wider uppercase">
-            <a href={`tel:${tel}`} className="text-clinical-white underline decoration-threshold-purple underline-offset-4 hover:text-sterling-silver">
-              Call
-            </a>
-            <a href={`sms:${tel}`} className="text-clinical-white underline decoration-threshold-purple underline-offset-4 hover:text-sterling-silver">
-              Text
-            </a>
-          </span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function HandoffPage() {
   return (
     <>
-      <Nav />
+      <BookingNav />
       <main>
 
         {/* ─── Hero ─── */}
@@ -153,27 +81,11 @@ export default function HandoffPage() {
         <section id="book" className="bg-deep-navy py-14 md:py-20 scroll-mt-16">
           <div className="max-w-3xl mx-auto px-6">
             <SectionLabel>Pick a Time</SectionLabel>
-            {HANDOFF_WIDGET_URL && (
-              <>
-                <div className="bg-clinical-white rounded-sm shadow-2xl overflow-hidden">
-                  {/* Zoom Scheduler booking page, embedded (see lib/booking.ts). */}
-                  <iframe
-                    src={HANDOFF_WIDGET_URL}
-                    title="Book The Handoff with Dr. Lars Stevenson"
-                    className="w-full block h-[900px] md:h-[640px]"
-                    style={{ border: 'none' }}
-                  />
-                </div>
-                <p className="font-nunito text-sm text-sterling-silver mt-4">
-                  Calendar not loading?{' '}
-                  <a href={HANDOFF_BOOKING_PAGE} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-clinical-white">
-                    Open it on Zoom
-                  </a>
-                  .
-                </p>
-              </>
-            )}
-            <ReachOut alone={!HANDOFF_WIDGET_URL} />
+            <SchedulerBooking
+              bookingPage={HANDOFF_BOOKING_PAGE}
+              title="Book The Handoff with Dr. Lars Stevenson"
+              emailSubject="The Handoff"
+            />
           </div>
         </section>
 
