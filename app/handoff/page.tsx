@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   ...pageMeta({
     fullTitle: 'The Handoff | Threshold Health & Performance',
     description:
-      'Northern Virginia doctors on getting hurt, getting back, and staying in the game. A 20 to 30 minute interview with Dr. Lars Stevenson, PT, DPT.',
+      'Doctors on getting hurt, getting back, and staying in the game. A 20 to 30 minute interview with Dr. Lars Stevenson, PT, DPT.',
     path: '/handoff',
   }),
   robots: { index: false, follow: true },
@@ -37,11 +37,11 @@ const WHAT_YOU_GET = [
   },
   {
     when: 'First look',
-    what: 'The guide I’m putting together for PTs, built from what doctors around Northern Virginia tell me.',
+    what: 'The guide I’m putting together for PTs, built from what doctors tell me.',
   },
   {
     when: 'Your name on it',
-    what: 'Your take, in your words, in front of the patients and PTs around here.',
+    what: 'Your take, in your words, in front of patients and PTs.',
   },
 ]
 
@@ -128,14 +128,14 @@ export default function HandoffPage() {
               The Handoff
             </h1>
             <p className="font-cormorant italic text-2xl md:text-3xl text-clinical-white/90 leading-snug max-w-3xl mb-8">
-              Northern Virginia doctors on getting hurt, getting back, and staying in the game.
+              Doctors on getting hurt, getting back, and staying in the game.
             </p>
             <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl">
               <p>
-                I&apos;m Dr. Lars Stevenson, a physical therapist in Reston.
-                I&apos;m sitting down with doctors around here to ask what they
-                see in their patients, and what they wish those patients (and
-                their PTs) knew.
+                I&apos;m Dr. Lars Stevenson, a physical therapist. I&apos;m
+                sitting down with doctors to ask what they see in their
+                patients, and what they wish those patients (and their PTs)
+                knew.
               </p>
               <p>Pick a time below. It takes 20 to 30 minutes.</p>
             </div>
