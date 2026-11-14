@@ -23,26 +23,25 @@ export const metadata: Metadata = {
 }
 
 const HOW_IT_WORKS = [
-  'It takes 20 to 30 minutes.',
-  'We meet at your office, or on Zoom.',
+  '20 to 30 minutes, at your office or on Zoom.',
   'I send you the questions ahead of time.',
-  'You pick how: video, audio, or just a talk I quote from.',
-  'You see everything first. You can pull anything before it goes out.',
+  'You pick the format: video, audio, or I just take notes and quote you.',
+  'You see everything before it goes out, and you can pull anything.',
   'Nothing about your patients goes on the record.',
 ]
 
 const WHAT_YOU_GET = [
   {
     when: 'Within 3 days',
-    what: 'Your clip, once you OK it, and a one-page handout of your answers in your own words. It’s yours to give your patients.',
+    what: 'Your clip once you OK it, plus a one-page handout of your answers, in your words, to hand your patients.',
   },
   {
-    when: 'Before anyone else',
-    what: 'The PT guide: what doctors across Northern Virginia said.',
+    when: 'First look',
+    what: 'The guide I’m putting together for PTs, built from what doctors around Northern Virginia tell me.',
   },
   {
-    when: 'On the record',
-    what: 'Your take, in front of the people who see your patients next.',
+    when: 'Your name on it',
+    what: 'Your take, in your words, in front of the patients and PTs around here.',
   },
 ]
 
@@ -133,26 +132,50 @@ export default function HandoffPage() {
             </p>
             <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl">
               <p>
-                I&apos;m Dr. Lars Stevenson, a physical therapist in Reston. Care
-                breaks down in the handoff. You, the PT and the patient each hold
-                part of the picture.
+                I&apos;m Dr. Lars Stevenson, a physical therapist in Reston.
+                I&apos;m sitting down with doctors around here to ask what they
+                see in their patients, and what they wish those patients (and
+                their PTs) knew.
               </p>
-              <p>
-                I want your take: what you wish the other two knew. Patients get
-                short clips. PTs get a guide.
-              </p>
+              <p>Pick a time below. It takes 20 to 30 minutes.</p>
             </div>
-            <a
-              href="#book"
-              className="inline-block mt-10 font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-7 py-3.5 hover:bg-threshold-purple/80 transition-colors duration-200"
-            >
-              Pick a Time
-            </a>
+          </div>
+        </section>
+
+        {/* ─── Booking (first, so the QR code lands on the calendar) ─── */}
+        <section id="book" className="bg-deep-navy py-14 md:py-20 scroll-mt-16">
+          <div className="max-w-3xl mx-auto px-6">
+            <SectionLabel>Pick a Time</SectionLabel>
+            {HANDOFF_WIDGET_URL ? (
+              <>
+                <div className="bg-clinical-white rounded-sm shadow-2xl p-4 md:p-6">
+                  {/* GoHighLevel calendar widget. GHL's form_embed.js can auto-size
+                      this iframe; until it's added, a fixed height that fits the
+                      calendar plus its form. */}
+                  <iframe
+                    src={HANDOFF_WIDGET_URL}
+                    title="Book The Handoff with Dr. Lars Stevenson"
+                    className="w-full block"
+                    style={{ height: 900, border: 'none' }}
+                    scrolling="yes"
+                  />
+                </div>
+                <p className="font-nunito text-sm text-sterling-silver text-center mt-6">
+                  Rather not use the calendar? Email{' '}
+                  <a href={`mailto:${BUSINESS.email}?subject=The%20Handoff`} className="underline underline-offset-4 hover:text-clinical-white">
+                    {BUSINESS.email}
+                  </a>
+                  .
+                </p>
+              </>
+            ) : (
+              <BookingFallback />
+            )}
           </div>
         </section>
 
         {/* ─── How it works ─── */}
-        <section className="bg-deep-navy py-16 md:py-20">
+        <section className="bg-obsidian py-16 md:py-20">
           <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-14 md:gap-16">
             <div>
               <SectionLabel>How It Works</SectionLabel>
@@ -184,7 +207,7 @@ export default function HandoffPage() {
         </section>
 
         {/* ─── Sample questions ─── */}
-        <section className="bg-obsidian py-16 md:py-20">
+        <section className="bg-deep-navy py-16 md:py-20">
           <div className="max-w-5xl mx-auto px-6">
             <SectionLabel>Questions Like These</SectionLabel>
             <h2 className="font-cormorant font-light text-clinical-white text-3xl md:text-5xl leading-tight mb-10 max-w-2xl">
@@ -192,7 +215,7 @@ export default function HandoffPage() {
             </h2>
             <ol className="grid sm:grid-cols-2 gap-4 md:gap-6">
               {SAMPLE_QUESTIONS.map((q, i) => (
-                <li key={q.moment} className="bg-deep-navy border border-white/5 p-6 md:p-7">
+                <li key={q.moment} className="bg-obsidian border border-white/5 p-6 md:p-7">
                   <p className="font-montserrat text-xs tracking-[0.2em] text-sterling-silver uppercase mb-3">
                     <span className="text-threshold-purple font-semibold mr-2">{String(i + 1).padStart(2, '0')}</span>
                     {q.moment}
@@ -204,43 +227,8 @@ export default function HandoffPage() {
               ))}
             </ol>
             <p className="font-nunito text-sm md:text-base text-sterling-silver mt-8 max-w-2xl">
-              I&apos;ll send yours ahead of time. In the room, we follow your answers.
+              I&apos;ll send yours ahead of time. In the room, I just follow where your answers go.
             </p>
-          </div>
-        </section>
-
-        {/* ─── Booking ─── */}
-        <section id="book" className="bg-deep-navy py-16 md:py-20 scroll-mt-16">
-          <div className="max-w-3xl mx-auto px-6">
-            <SectionLabel>Pick a Time</SectionLabel>
-            <h2 className="font-cormorant font-light text-clinical-white text-3xl md:text-5xl leading-tight mb-10">
-              Book your Handoff.
-            </h2>
-            {HANDOFF_WIDGET_URL ? (
-              <>
-                <div className="bg-clinical-white rounded-sm shadow-2xl p-4 md:p-6">
-                  {/* GoHighLevel calendar widget. GHL's form_embed.js can auto-size
-                      this iframe; until it's added, a fixed height that fits the
-                      calendar plus its form. */}
-                  <iframe
-                    src={HANDOFF_WIDGET_URL}
-                    title="Book The Handoff with Dr. Lars Stevenson"
-                    className="w-full block"
-                    style={{ height: 900, border: 'none' }}
-                    scrolling="yes"
-                  />
-                </div>
-                <p className="font-nunito text-sm text-sterling-silver text-center mt-6">
-                  Rather not use the calendar? Email{' '}
-                  <a href={`mailto:${BUSINESS.email}?subject=The%20Handoff`} className="underline underline-offset-4 hover:text-clinical-white">
-                    {BUSINESS.email}
-                  </a>
-                  .
-                </p>
-              </>
-            ) : (
-              <BookingFallback />
-            )}
           </div>
         </section>
 
