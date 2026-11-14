@@ -1,0 +1,252 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { pageMeta } from '@/lib/metadata'
+import { HANDOFF_WIDGET_URL } from '@/lib/booking'
+import { BUSINESS } from '@/lib/site'
+import LogoMark from '@/components/LogoMark'
+import SiteFooter from '@/components/SiteFooter'
+
+// /handoff is where doctors book a Handoff interview. Its QR code is on the
+// printed one-sheet. It's for doctors only, so it stays out of search results
+// and the sitemap. The copy follows marketing-agent's
+// agent/physician-referrals/2026-11-13-the-handoff.md ("The one line",
+// "The ask", "What they get", the question bank); change them together.
+export const metadata: Metadata = {
+  title: 'The Handoff',
+  ...pageMeta({
+    fullTitle: 'The Handoff | Threshold Health & Performance',
+    description:
+      'Northern Virginia doctors on getting hurt, getting back, and staying in the game. A 20 to 30 minute interview with Dr. Lars Stevenson, PT, DPT.',
+    path: '/handoff',
+  }),
+  robots: { index: false, follow: true },
+}
+
+const HOW_IT_WORKS = [
+  'It takes 20 to 30 minutes.',
+  'We meet at your office, or on Zoom.',
+  'I send you the questions ahead of time.',
+  'You pick how: video, audio, or just a talk I quote from.',
+  'You see everything first. You can pull anything before it goes out.',
+  'Nothing about your patients goes on the record.',
+]
+
+const WHAT_YOU_GET = [
+  {
+    when: 'Within 3 days',
+    what: 'Your clip, once you OK it, and a one-page handout of your answers in your own words. It’s yours to give your patients.',
+  },
+  {
+    when: 'Before anyone else',
+    what: 'The PT guide: what doctors across Northern Virginia said.',
+  },
+  {
+    when: 'On the record',
+    what: 'Your take, in front of the people who see your patients next.',
+  },
+]
+
+// One question per moment of an injury, plus one for PTs.
+const SAMPLE_QUESTIONS = [
+  {
+    moment: 'Just got hurt',
+    question: 'When someone just got hurt, what do you wish they knew in the first 2 weeks?',
+  },
+  {
+    moment: 'Never got fully healthy',
+    question: 'Who are the patients who never quite get back, and what do you think gets missed?',
+  },
+  {
+    moment: 'Staying healthy',
+    question: 'What do you tell someone who wants another 20 years in their sport?',
+  },
+  {
+    moment: 'For PTs',
+    question: 'What do you wish PTs did more of, or less of, with your patients?',
+  },
+]
+
+function Nav() {
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-sm border-b border-white/5">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3 group">
+          <LogoMark className="h-7 w-auto text-clinical-white group-hover:text-threshold-purple transition-colors duration-300" />
+          <span className="font-montserrat text-xs font-semibold tracking-[0.2em] text-clinical-white uppercase">
+            Threshold
+          </span>
+        </Link>
+        <a
+          href="#book"
+          className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-5 py-2.5 hover:bg-threshold-purple/80 transition-colors duration-200"
+        >
+          Pick a Time
+        </a>
+      </div>
+    </nav>
+  )
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-5">
+      {children}
+    </p>
+  )
+}
+
+function BookingFallback() {
+  const tel = BUSINESS.phone.replace(/-/g, '')
+  return (
+    <div className="bg-obsidian border border-white/10 rounded-sm px-6 py-12 md:px-12 text-center">
+      <p className="font-nunito text-lg md:text-xl text-clinical-white leading-relaxed">
+        Email{' '}
+        <a href={`mailto:${BUSINESS.email}?subject=The%20Handoff`} className="text-clinical-white underline decoration-threshold-purple underline-offset-4 hover:text-sterling-silver">
+          {BUSINESS.email}
+        </a>{' '}
+        or text{' '}
+        <a href={`sms:${tel}`} className="text-clinical-white underline decoration-threshold-purple underline-offset-4 hover:text-sterling-silver">
+          {BUSINESS.phoneDisplay}
+        </a>{' '}
+        to book.
+      </p>
+    </div>
+  )
+}
+
+export default function HandoffPage() {
+  return (
+    <>
+      <Nav />
+      <main>
+
+        {/* ─── Hero ─── */}
+        <section className="relative bg-obsidian overflow-hidden pt-16 pb-0">
+          <div className="hero-beam" aria-hidden="true" />
+          <div className="relative z-10 max-w-5xl mx-auto px-6 pb-14 pt-20 md:pt-24">
+            <SectionLabel>For Doctors · An Interview Series</SectionLabel>
+            <h1 className="font-cormorant font-light text-clinical-white leading-[1.05] text-5xl md:text-7xl mb-6 max-w-3xl">
+              The Handoff
+            </h1>
+            <p className="font-cormorant italic text-2xl md:text-3xl text-clinical-white/90 leading-snug max-w-3xl mb-8">
+              Northern Virginia doctors on getting hurt, getting back, and staying in the game.
+            </p>
+            <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl">
+              <p>
+                I&apos;m Dr. Lars Stevenson, a physical therapist in Reston. Care
+                breaks down in the handoff. You, the PT and the patient each hold
+                part of the picture.
+              </p>
+              <p>
+                I want your take: what you wish the other two knew. Patients get
+                short clips. PTs get a guide.
+              </p>
+            </div>
+            <a
+              href="#book"
+              className="inline-block mt-10 font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-7 py-3.5 hover:bg-threshold-purple/80 transition-colors duration-200"
+            >
+              Pick a Time
+            </a>
+          </div>
+        </section>
+
+        {/* ─── How it works ─── */}
+        <section className="bg-deep-navy py-16 md:py-20">
+          <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-14 md:gap-16">
+            <div>
+              <SectionLabel>How It Works</SectionLabel>
+              <ul className="space-y-4">
+                {HOW_IT_WORKS.map((item) => (
+                  <li key={item} className="flex gap-4 font-nunito text-base md:text-lg text-clinical-white leading-relaxed">
+                    <span className="mt-[0.7em] h-1.5 w-1.5 shrink-0 bg-threshold-purple" aria-hidden="true" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <SectionLabel>What You Get</SectionLabel>
+              <ul className="space-y-6">
+                {WHAT_YOU_GET.map((item) => (
+                  <li key={item.when} className="border-l-2 border-threshold-purple pl-5">
+                    <p className="font-montserrat text-xs font-semibold tracking-[0.2em] text-champion-gold uppercase mb-1.5">
+                      {item.when}
+                    </p>
+                    <p className="font-nunito text-base md:text-lg text-clinical-white leading-relaxed">
+                      {item.what}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Sample questions ─── */}
+        <section className="bg-obsidian py-16 md:py-20">
+          <div className="max-w-5xl mx-auto px-6">
+            <SectionLabel>Questions Like These</SectionLabel>
+            <h2 className="font-cormorant font-light text-clinical-white text-3xl md:text-5xl leading-tight mb-10 max-w-2xl">
+              Mostly I want your take on things like these.
+            </h2>
+            <ol className="grid sm:grid-cols-2 gap-4 md:gap-6">
+              {SAMPLE_QUESTIONS.map((q, i) => (
+                <li key={q.moment} className="bg-deep-navy border border-white/5 p-6 md:p-7">
+                  <p className="font-montserrat text-xs tracking-[0.2em] text-sterling-silver uppercase mb-3">
+                    <span className="text-threshold-purple font-semibold mr-2">{String(i + 1).padStart(2, '0')}</span>
+                    {q.moment}
+                  </p>
+                  <p className="font-nunito text-base md:text-lg text-clinical-white leading-relaxed">
+                    {q.question}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <p className="font-nunito text-sm md:text-base text-sterling-silver mt-8 max-w-2xl">
+              I&apos;ll send yours ahead of time. In the room, we follow your answers.
+            </p>
+          </div>
+        </section>
+
+        {/* ─── Booking ─── */}
+        <section id="book" className="bg-deep-navy py-16 md:py-20 scroll-mt-16">
+          <div className="max-w-3xl mx-auto px-6">
+            <SectionLabel>Pick a Time</SectionLabel>
+            <h2 className="font-cormorant font-light text-clinical-white text-3xl md:text-5xl leading-tight mb-10">
+              Book your Handoff.
+            </h2>
+            {HANDOFF_WIDGET_URL ? (
+              <>
+                <div className="bg-clinical-white rounded-sm shadow-2xl p-4 md:p-6">
+                  {/* GoHighLevel calendar widget. GHL's form_embed.js can auto-size
+                      this iframe; until it's added, a fixed height that fits the
+                      calendar plus its form. */}
+                  <iframe
+                    src={HANDOFF_WIDGET_URL}
+                    title="Book The Handoff with Dr. Lars Stevenson"
+                    className="w-full block"
+                    style={{ height: 900, border: 'none' }}
+                    scrolling="yes"
+                  />
+                </div>
+                <p className="font-nunito text-sm text-sterling-silver text-center mt-6">
+                  Rather not use the calendar? Email{' '}
+                  <a href={`mailto:${BUSINESS.email}?subject=The%20Handoff`} className="underline underline-offset-4 hover:text-clinical-white">
+                    {BUSINESS.email}
+                  </a>
+                  .
+                </p>
+              </>
+            ) : (
+              <BookingFallback />
+            )}
+          </div>
+        </section>
+
+      </main>
+
+      <SiteFooter />
+    </>
+  )
+}
