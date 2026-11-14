@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { pageMeta } from '@/lib/metadata'
-import { HANDOFF_WIDGET_URL } from '@/lib/booking'
+import { HANDOFF_BOOKING_PAGE, HANDOFF_WIDGET_URL } from '@/lib/booking'
 import { BUSINESS } from '@/lib/site'
 import LogoMark from '@/components/LogoMark'
 import SiteFooter from '@/components/SiteFooter'
@@ -163,15 +163,24 @@ export default function HandoffPage() {
           <div className="max-w-3xl mx-auto px-6">
             <SectionLabel>Pick a Time</SectionLabel>
             {HANDOFF_WIDGET_URL && (
-              <div className="bg-clinical-white rounded-sm shadow-2xl overflow-hidden">
-                {/* Zoom Scheduler booking page, embedded. */}
-                <iframe
-                  src={HANDOFF_WIDGET_URL}
-                  title="Book The Handoff with Dr. Lars Stevenson"
-                  className="w-full block"
-                  style={{ height: 820, border: 'none' }}
-                />
-              </div>
+              <>
+                <div className="bg-clinical-white rounded-sm shadow-2xl overflow-hidden">
+                  {/* Zoom Scheduler booking page, embedded (see lib/booking.ts). */}
+                  <iframe
+                    src={HANDOFF_WIDGET_URL}
+                    title="Book The Handoff with Dr. Lars Stevenson"
+                    className="w-full block h-[900px] md:h-[640px]"
+                    style={{ border: 'none' }}
+                  />
+                </div>
+                <p className="font-nunito text-sm text-sterling-silver mt-4">
+                  Calendar not loading?{' '}
+                  <a href={HANDOFF_BOOKING_PAGE} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-clinical-white">
+                    Open it on Zoom
+                  </a>
+                  .
+                </p>
+              </>
             )}
             <ReachOut alone={!HANDOFF_WIDGET_URL} />
           </div>
