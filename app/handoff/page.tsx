@@ -23,26 +23,10 @@ export const metadata: Metadata = {
 }
 
 const HOW_IT_WORKS = [
-  '20 to 30 minutes, at your office or on Zoom.',
+  '20 to 30 minutes on Zoom. Rather meet at your office? Reach out first and I’ll set it up.',
   'I send you the questions ahead of time.',
-  'You pick the format: video, audio, or I just take notes and quote you.',
-  'You see everything before it goes out, and you can pull anything.',
+  'You pick the format: video, audio, or I take notes and quote you.',
   'Nothing about your patients goes on the record.',
-]
-
-const WHAT_YOU_GET = [
-  {
-    when: 'Within 3 days',
-    what: 'Your clip once you OK it, plus a one-page handout of your answers, in your words, to hand your patients.',
-  },
-  {
-    when: 'First look',
-    what: 'The guide I’m putting together for PTs, built from what doctors tell me.',
-  },
-  {
-    when: 'Your name on it',
-    what: 'Your take, in your words, in front of patients and PTs.',
-  },
 ]
 
 // One question per moment of an injury, plus one for PTs.
@@ -98,33 +82,40 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // is no calendar URL yet.
 function ReachOut({ alone }: { alone: boolean }) {
   const tel = BUSINESS.phone.replace(/-/g, '')
-  const options = [
-    { label: 'Email', value: BUSINESS.email, href: `mailto:${BUSINESS.email}?subject=The%20Handoff` },
-    { label: 'Text', value: BUSINESS.phoneDisplay, href: `sms:${tel}` },
-    { label: 'Call', value: BUSINESS.phoneDisplay, href: `tel:${tel}` },
-  ]
   return (
     <div className={alone ? '' : 'mt-10'}>
       <p className="font-nunito text-base md:text-lg text-clinical-white mb-4">
-        {alone ? 'Email, text or call me to book.' : 'Rather reach out yourself? Email, text or call me.'}
+        {alone ? 'Email, call or text me to book.' : 'Prefer to talk first? Email, call or text.'}
       </p>
-      <ul className="grid sm:grid-cols-3 gap-3">
-        {options.map((o) => (
-          <li key={o.label}>
-            <a
-              href={o.href}
-              className="block bg-obsidian border border-white/10 hover:border-threshold-purple px-5 py-4 transition-colors duration-200"
-            >
-              <span className="block font-montserrat text-xs font-semibold tracking-[0.2em] text-champion-gold uppercase mb-1">
-                {o.label}
-              </span>
-              <span className="block font-nunito text-sm md:text-base text-clinical-white break-words">
-                {o.value}
-              </span>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <a
+          href={`mailto:${BUSINESS.email}?subject=The%20Handoff`}
+          className="block bg-obsidian border border-white/10 hover:border-threshold-purple px-5 py-4 transition-colors duration-200"
+        >
+          <span className="block font-montserrat text-xs font-semibold tracking-[0.2em] text-champion-gold uppercase mb-1">
+            Email
+          </span>
+          <span className="block font-nunito text-sm md:text-base text-clinical-white break-words">
+            {BUSINESS.email}
+          </span>
+        </a>
+        <div className="bg-obsidian border border-white/10 px-5 py-4">
+          <span className="block font-montserrat text-xs font-semibold tracking-[0.2em] text-champion-gold uppercase mb-1">
+            Call or Text
+          </span>
+          <span className="block font-nunito text-sm md:text-base text-clinical-white">
+            {BUSINESS.phoneDisplay}
+          </span>
+          <span className="mt-2 flex gap-4 font-montserrat text-xs font-semibold tracking-wider uppercase">
+            <a href={`tel:${tel}`} className="text-clinical-white underline decoration-threshold-purple underline-offset-4 hover:text-sterling-silver">
+              Call
             </a>
-          </li>
-        ))}
-      </ul>
+            <a href={`sms:${tel}`} className="text-clinical-white underline decoration-threshold-purple underline-offset-4 hover:text-sterling-silver">
+              Text
+            </a>
+          </span>
+        </div>
+      </div>
     </div>
   )
 }
@@ -188,42 +179,25 @@ export default function HandoffPage() {
 
         {/* ─── How it works ─── */}
         <section className="bg-obsidian py-16 md:py-20">
-          <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-14 md:gap-16">
-            <div>
-              <SectionLabel>How It Works</SectionLabel>
-              <ul className="space-y-4">
-                {HOW_IT_WORKS.map((item) => (
-                  <li key={item} className="flex gap-4 font-nunito text-base md:text-lg text-clinical-white leading-relaxed">
-                    <span className="mt-[0.7em] h-1.5 w-1.5 shrink-0 bg-threshold-purple" aria-hidden="true" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <SectionLabel>What You Get</SectionLabel>
-              <ul className="space-y-6">
-                {WHAT_YOU_GET.map((item) => (
-                  <li key={item.when} className="border-l-2 border-threshold-purple pl-5">
-                    <p className="font-montserrat text-xs font-semibold tracking-[0.2em] text-champion-gold uppercase mb-1.5">
-                      {item.when}
-                    </p>
-                    <p className="font-nunito text-base md:text-lg text-clinical-white leading-relaxed">
-                      {item.what}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="max-w-5xl mx-auto px-6">
+            <SectionLabel>How It Works</SectionLabel>
+            <ul className="space-y-4 max-w-2xl">
+              {HOW_IT_WORKS.map((item) => (
+                <li key={item} className="flex gap-4 font-nunito text-base md:text-lg text-clinical-white leading-relaxed">
+                  <span className="mt-[0.7em] h-1.5 w-1.5 shrink-0 bg-threshold-purple" aria-hidden="true" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
         {/* ─── Sample questions ─── */}
         <section className="bg-deep-navy py-16 md:py-20">
           <div className="max-w-5xl mx-auto px-6">
-            <SectionLabel>Questions Like These</SectionLabel>
+            <SectionLabel>The Questions</SectionLabel>
             <h2 className="font-cormorant font-light text-clinical-white text-3xl md:text-5xl leading-tight mb-10 max-w-2xl">
-              Mostly I want your take on things like these.
+              What I’ll ask.
             </h2>
             <ol className="grid sm:grid-cols-2 gap-4 md:gap-6">
               {SAMPLE_QUESTIONS.map((q, i) => (
@@ -239,7 +213,7 @@ export default function HandoffPage() {
               ))}
             </ol>
             <p className="font-nunito text-sm md:text-base text-sterling-silver mt-8 max-w-2xl">
-              I&apos;ll send yours ahead of time. In the room, I just follow where your answers go.
+              These are samples. Yours come ahead of time, matched to the patients you see.
             </p>
           </div>
         </section>
