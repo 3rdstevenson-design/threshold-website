@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { GUIDE, type GuideLead } from '@/lib/guide-lead'
 import { createContact, getContact, sendEmail } from './resend'
 import { renderEmail } from './render'
@@ -16,6 +18,13 @@ function from(): string {
   return f
 }
 const REPLY_TO = () => process.env.EMAIL_REPLY_TO || 'dr.lars@thresholdhp.com'
+
+let guidePdf: string | undefined
+/** The guide PDF as base64, read once. next.config.js traces public/guides into /api/guide so it ships with the function. */
+function guideAttachment(): { filename: string; content: string } {
+  if (!guidePdf) guidePdf = readFileSync(path.join(process.cwd(), 'public', GUIDE.pdfPath)).toString('base64')
+  return { filename: GUIDE.attachmentName, content: guidePdf }
+}
 
 /** Test addresses (containing "+baadtest") get the follow-ups 3 and 6 minutes out instead of days. */
 export function isTestAddress(email: string): boolean {
@@ -90,12 +99,14 @@ export async function startSequence(lead: GuideLead, baseUrl: string, now = new 
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         },
         scheduledAt: at,
+        ...(copy.attachGuide ? { attachments: [guideAttachment()] } : {}),
         tags: [
           { name: 'sequence', value: 'baad-guide' },
           { name: 'step', value: copy.step },
         ],
-        // A double-click or a same-day repeat doesn't send twice.
-        idempotencyKey: `site-baad-${copy.step}-${contact}-${keyBase}`,
+        // A double-click or a same-day repeat doesn't send twice. v2: the guide email changed on 2026-11-15
+        // (attachment, shorter copy), and Resend refuses a reused key with a different body.
+        idempotencyKey: `site-baad-v2-${copy.step}-${contact}-${keyBase}`,
       })
       later.unshift(id)
       result.sent.unshift({ step: copy.step, id, at: (at ?? now).toISOString() })

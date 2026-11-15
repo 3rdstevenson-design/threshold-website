@@ -58,6 +58,8 @@ export type OutgoingEmail = {
   scheduledAt?: Date;
   tags?: { name: string; value: string }[];
   idempotencyKey?: string;
+  /** Base64 file content (Resend's `attachments`). */
+  attachments?: { filename: string; content: string }[];
 };
 
 export async function sendEmail(e: OutgoingEmail): Promise<string> {
@@ -73,6 +75,7 @@ export async function sendEmail(e: OutgoingEmail): Promise<string> {
       html: e.html,
       headers: e.headers,
       tags: e.tags,
+      ...(e.attachments?.length ? { attachments: e.attachments } : {}),
       ...(e.scheduledAt ? { scheduled_at: e.scheduledAt.toISOString() } : {}),
     },
     e.idempotencyKey ? { "Idempotency-Key": e.idempotencyKey } : undefined,
