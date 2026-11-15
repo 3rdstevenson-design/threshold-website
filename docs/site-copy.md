@@ -292,6 +292,9 @@ Every email ends with: "You're getting this because you asked for my Stretch Sma
 **Right away. Subject: Your stretching guide is here** (preview: "Your Stretch Smarter guide is attached.")
 Hey {first name}, Your Stretch Smarter guide is attached. *(The PDF rides along as an attachment, Stretch-Smarter-The-BAAD-Model.pdf, so nothing routes through the website, and the "skip to page 6" tip is gone: your calls, 2026-11-15.)*
 If anything in the guide doesn't make sense, hit reply. It comes straight to me.
+If you want more direct, one-on-one care, book a free 30-minute call. Tell me what's going on and what you've tried, and I'll tell you what I'd do next. [Book a free call]
+Not near Reston? I coach online too. [See online coaching]
+*(The booking and online coaching links: your call, 2026-11-15. The guide comes first and the subject is about the guide, so this stays a delivery email with no promotional line.)*
 
 **Day 2, 9 AM ET. Subject: Stretch at a 2 out of 10** (preview: "It'll feel too easy. That's the point.")
 Hey {first name}, If you change one thing from the guide, make it this: stretch at a 2 or 3 out of 10.

@@ -13,6 +13,9 @@
 
 export type SequenceStep = 'thanks' | 'd2' | 'd5'
 
+/** A paragraph, or a link on its own line. `{firstName}` and `{guideUrl}` are filled in. */
+export type Block = string | { link: { label: string; href: string } }
+
 export type EmailCopy = {
   step: SequenceStep
   /** Days after signup; sent at 9:00 AM ET. 0 = immediately. */
@@ -20,12 +23,12 @@ export type EmailCopy = {
   subject: string
   preview: string
   /** Paragraphs before the link. `{firstName}` is filled in. */
-  before: string[]
+  before: Block[]
   link?: { label: string; href: string }
   /** Attach the guide PDF (the guide email only, Lars 2026-11-15: no routing through the website). */
   attachGuide?: boolean
   /** Paragraphs after the link, before the sign-off. */
-  after: string[]
+  after: Block[]
   postscript?: string
   /** Commercial (not the guide delivery itself): the footer adds PROMO_LINE. */
   promotional?: boolean
@@ -45,10 +48,31 @@ export const SEQUENCE: EmailCopy[] = [
     dayOffset: 0,
     subject: 'Your stretching guide is here',
     preview: 'Your Stretch Smarter guide is attached.',
-    // The PDF rides along as an attachment, and the "start on page 6" tip is gone (Lars, 2026-11-15).
+    // The PDF rides along as an attachment, and the "start on page 6" tip is gone (Lars, 2026-11-15). Then the email
+    // steers toward one-on-one care, and toward online coaching for anyone outside Reston (Lars, same day). The guide
+    // comes first and the subject is about the guide, so under CAN-SPAM's primary-purpose test this stays a delivery
+    // email (no promotional line).
     attachGuide: true,
-    before: ['Hey {firstName},', 'Your Stretch Smarter guide is attached.'],
-    after: ["If anything in the guide doesn't make sense, hit reply. It comes straight to me."],
+    before: [
+      'Hey {firstName},',
+      'Your Stretch Smarter guide is attached.',
+      "If anything in the guide doesn't make sense, hit reply. It comes straight to me.",
+      "If you want more direct, one-on-one care, book a free 30-minute call. Tell me what's going on and what you've tried, and I'll tell you what I'd do next.",
+      {
+        link: {
+          label: 'Book a free call',
+          href: 'https://www.thresholdhp.com/book?utm_source=baad-guide&utm_medium=email&utm_campaign=thanks',
+        },
+      },
+      'Not near Reston? I coach online too.',
+      {
+        link: {
+          label: 'See online coaching',
+          href: 'https://www.thresholdhp.com/online-coaching?utm_source=baad-guide&utm_medium=email&utm_campaign=thanks',
+        },
+      },
+    ],
+    after: [],
   },
   {
     step: 'd2',

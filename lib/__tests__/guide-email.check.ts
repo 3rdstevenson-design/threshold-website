@@ -66,6 +66,11 @@ async function main() {
   assert.ok(!thanks.body.text.includes('/guides/') && !thanks.body.html.includes('/guides/'))
   assert.ok(!thanks.body.text.toLowerCase().includes('page 6'))
   assert.ok(thanks.body.text.includes('Your Stretch Smarter guide is attached.'))
+  // It steers toward a call, and toward online coaching for people outside Reston, and stays a delivery email.
+  assert.ok(thanks.body.text.includes('Book a free call: https://www.thresholdhp.com/book?utm_source=baad-guide&utm_medium=email&utm_campaign=thanks'))
+  assert.ok(thanks.body.text.includes('See online coaching: https://www.thresholdhp.com/online-coaching?utm_source=baad-guide&utm_medium=email&utm_campaign=thanks'))
+  assert.ok(thanks.body.html.includes('>Book a free call</a>') && thanks.body.html.includes('>See online coaching</a>'))
+  assert.ok(thanks.body.text.indexOf('is attached') < thanks.body.text.indexOf('Book a free call'))
   assert.ok(thanks.body.text.includes('1908 Reston Metro Plaza'))
   assert.ok(thanks.body.text.includes("You're getting this because you asked for my Stretch Smarter guide"))
   assert.equal(thanks.body.headers['List-Unsubscribe-Post'], 'List-Unsubscribe=One-Click')
