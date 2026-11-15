@@ -2,186 +2,194 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
-}
+/* Light editorial base (2026-11-14). No glows, gradients or particles: see DESIGN.md. */
 
-body {
-  background-color: #0D0D18;
-  color: #F5F5F5;
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem; /* anchors clear the sticky header */
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scrollbar-color: #c9c9d3 #ffffff;
+  }
 
-@layer utilities {
-  .small-caps {
-    font-variant-caps: small-caps;
+  body {
+    background-color: #ffffff;
+    color: #0d0d18;
+    font-feature-settings: 'kern', 'liga';
+  }
+
+  ::selection {
+    background-color: rgba(112, 2, 171, 0.16);
+    color: #0d0d18;
+  }
+
+  input,
+  textarea {
+    caret-color: #7002ab;
+  }
+
+  :focus-visible {
+    outline: 2px solid #7002ab;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Numerals line up in phone numbers and lists. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 }
 
-/* ── Hero spotlight background ── */
-.hero-spotlight {
-  background:
-    radial-gradient(ellipse 80% 70% at 50% -5%, rgba(112, 2, 171, 0.55) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 50% at 50% 5%,  rgba(201, 168, 76, 0.08) 0%, transparent 55%),
-    #0D0D18;
-}
-
-/* ── Drifting light beam ── */
-.hero-beam {
-  position: absolute;
-  top: -10%;
-  left: 25%;
-  width: 50%;
-  height: 120%;
-  background: linear-gradient(
-    180deg,
-    rgba(130, 20, 200, 0.55) 0%,
-    rgba(112,  2, 171, 0.25) 25%,
-    rgba(201, 168, 76, 0.08) 45%,
-    transparent              75%
-  );
-  transform-origin: top center;
-  animation: beam-drift 18s ease-in-out infinite;
-  pointer-events: none;
-  filter: blur(22px);
-  z-index: 1;
-}
-
-@keyframes beam-drift {
-  0%   { transform: translateX(-12%) rotate(-5deg); opacity: 0.6;  }
-  30%  { transform: translateX(  8%) rotate( 3deg); opacity: 1.0;  }
-  65%  { transform: translateX( -5%) rotate(-2deg); opacity: 0.75; }
-  100% { transform: translateX(-12%) rotate(-5deg); opacity: 0.6;  }
-}
-
-/* ── Floating light particles — 5 drift variants (no CSS custom props needed) ── */
-@keyframes float-far-left {
-  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
-  8%   {                                                            opacity: 0.9;  }
-  88%  {                                                            opacity: 0.25; }
-  100% { transform: translateY(-60vh) translateX(-35px) scale(0);  opacity: 0;    }
-}
-@keyframes float-left {
-  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
-  8%   {                                                            opacity: 0.9;  }
-  88%  {                                                            opacity: 0.25; }
-  100% { transform: translateY(-60vh) translateX(-18px) scale(0);  opacity: 0;    }
-}
-@keyframes float-center {
-  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
-  8%   {                                                            opacity: 0.9;  }
-  88%  {                                                            opacity: 0.25; }
-  100% { transform: translateY(-60vh) translateX(  4px) scale(0);  opacity: 0;    }
-}
-@keyframes float-right {
-  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
-  8%   {                                                            opacity: 0.9;  }
-  88%  {                                                            opacity: 0.25; }
-  100% { transform: translateY(-60vh) translateX( 20px) scale(0);  opacity: 0;    }
-}
-@keyframes float-far-right {
-  0%   { transform: translateY(0)     translateX(0)    scale(0.4); opacity: 0;    }
-  8%   {                                                            opacity: 0.9;  }
-  88%  {                                                            opacity: 0.25; }
-  100% { transform: translateY(-60vh) translateX( 38px) scale(0);  opacity: 0;    }
-}
-
-.particle {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(240, 220, 255, 1.0) 0%,
-    rgba(150,  60, 255, 0.6) 45%,
-    transparent               100%
-  );
-  pointer-events: none;
-  z-index: 2;
-}
-.p-fl  { animation: float-far-left  var(--dur, 12s) ease-in-out infinite; }
-.p-l   { animation: float-left      var(--dur, 12s) ease-in-out infinite; }
-.p-c   { animation: float-center    var(--dur, 12s) ease-in-out infinite; }
-.p-r   { animation: float-right     var(--dur, 12s) ease-in-out infinite; }
-.p-fr  { animation: float-far-right var(--dur, 12s) ease-in-out infinite; }
-
-/* ── Logo glow pulse ── */
-@keyframes glow-pulse {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 10px rgba(112, 2, 171, 0.70))
-      drop-shadow(0 0 28px rgba(112, 2, 171, 0.40));
+@layer components {
+  /* Text links: purple, thin underline that thickens on hover. */
+  .link {
+    color: #7002ab;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-thickness 150ms ease-out, color 150ms ease-out;
   }
-  50% {
-    filter:
-      drop-shadow(0 0 22px rgba(130,  20, 200, 1.00))
-      drop-shadow(0 0 55px rgba(112,   2, 171, 0.65))
-      drop-shadow(0 0 90px rgba(201, 168,  76, 0.22));
+  .link:hover {
+    color: #5a0189;
+    text-decoration-thickness: 2px;
+  }
+
+  /* The one button. Solid purple, square corners, sentence case. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #7002ab;
+    color: #ffffff;
+    font-family: var(--font-montserrat), system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    border-radius: 2px;
+    transition: background-color 150ms ease-out, transform 150ms ease-out;
+  }
+  .btn:hover {
+    background-color: #5a0189;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  .field {
+    display: block;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid #c9c9d3;
+    border-radius: 2px;
+    background: #ffffff;
+    color: #0d0d18;
+    font-size: 1.0625rem;
+    transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+  }
+  .field:hover {
+    border-color: #8a8a9a;
+  }
+  .field:focus-visible {
+    outline: none;
+    border-color: #7002ab;
+    box-shadow: 0 0 0 3px rgba(112, 2, 171, 0.18);
+  }
+  .field[aria-invalid='true'] {
+    border-color: #b42318;
   }
 }
 
-.logo-glow {
-  animation: glow-pulse 4s ease-in-out infinite;
-  display: inline-block;
+/* The page's one authored moment: the hero photograph settles into place on load.
+   It starts almost fully visible, so nothing waits on the animation. */
+@keyframes settle {
+  from {
+    clip-path: inset(0 0 0 7%);
+    transform: scale(1.03);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: scale(1);
+  }
 }
 
-/* ── CTA button glow ── */
-.btn-glow {
-  box-shadow: 0 0 20px rgba(112, 2, 171, 0.55), 0 0 42px rgba(112, 2, 171, 0.25);
-  transition: box-shadow 0.3s ease, background-color 0.2s ease, transform 0.2s ease;
-}
-.btn-glow:hover {
-  box-shadow: 0 0 32px rgba(112, 2, 171, 0.90), 0 0 65px rgba(112, 2, 171, 0.45);
-  transform: translateY(-1px);
+.settle {
+  animation: settle 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ── CROSS card hover glow ── */
-.cross-card-glow {
-  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
-}
-.cross-card-glow:hover {
-  box-shadow: 0 0 28px rgba(112, 2, 171, 0.25), 0 0 55px rgba(112, 2, 171, 0.10);
-  border-color: rgba(112, 2, 171, 0.80);
-  transform: translateY(-3px);
+@media (prefers-reduced-motion: reduce) {
+  .settle {
+    animation: none;
+  }
 }
 
-/* ── Section ambient glow ── */
-.section-glow-purple {
-  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(112, 2, 171, 0.12) 0%, transparent 70%);
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+/* Legal pages: approved HTML with inline styles. Only the fonts change, to the brand's self-hosted ones. */
+.legal-doc [style*="max-width:820px"] {
+  font-family: var(--font-nunito), Helvetica, Arial, sans-serif !important;
+  color: #3a3a48 !important;
+}
+.legal-doc [style*="max-width:820px"] h1,
+.legal-doc [style*="max-width:820px"] h2 {
+  font-family: var(--font-cormorant), Georgia, serif !important;
+  font-weight: 600;
+  color: #0d0d18 !important;
+}
+.legal-doc [style*="max-width:820px"] a {
+  color: #7002ab;
+  text-underline-offset: 0.2em;
 }
 
-/* ── Lars / About spotlight section ── */
-.lars-spotlight {
-  background:
-    radial-gradient(ellipse 65% 90% at 50% -10%, rgba(112, 2, 171, 0.45) 0%, transparent 62%),
-    radial-gradient(ellipse 100% 55% at 50% 110%, rgba(201, 168, 76, 0.04) 0%, transparent 65%),
-    #0D0D18;
-}
+/* ---------- Moments (Lars kept these three on 2026-11-15; photo chapters were dropped) ----------
+   Words fill in: components/moments/WordHighlight.tsx ("The other half" on the homepage).
+   Headline behind you: the hero's cut-out stands over the headline (app/page.tsx); layout only, no motion.
+   Portrait develops: the About portrait, below. Every moment is off for people who turn motion off.
+   The `js` class comes from the inline script in app/layout.tsx; without JavaScript the photo simply stands. */
 
-/* ── Stat text glow ── */
-.stat-glow {
-  text-shadow:
-    0 0 22px rgba(112, 2, 171, 0.80),
-    0 0 50px rgba(112, 2, 171, 0.40);
+/* Portrait develops: a faint gray print that comes up, darks first, then colour, once. */
+@keyframes develop {
+  0% {
+    filter: grayscale(1) contrast(0.55) brightness(1.45);
+  }
+  45% {
+    filter: grayscale(1) contrast(1) brightness(1);
+  }
+  100% {
+    filter: grayscale(0) contrast(1) brightness(1);
+  }
 }
-
-/* ── Book section ambient glow ── */
-.book-glow {
-  background: radial-gradient(ellipse 75% 55% at 50% 50%, rgba(112, 2, 171, 0.10) 0%, transparent 70%);
+html.js .m-develop img {
+  filter: grayscale(1) contrast(0.55) brightness(1.45);
 }
-
-/* ── About page hero ── */
-.about-hero {
-  background:
-    radial-gradient(ellipse 70% 80% at 50% -8%, rgba(112, 2, 171, 0.50) 0%, transparent 60%),
-    #0D0D18;
+html.js .m-develop.is-developing img {
+  animation: develop 1600ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
-
-/* ── Photo spotlight frame ── */
-.photo-spotlight {
-  box-shadow:
-    0 0 0 1px rgba(112, 2, 171, 0.30),
-    0 0 40px rgba(112, 2, 171, 0.30),
-    0 0 80px rgba(112, 2, 171, 0.15);
+@media (prefers-reduced-motion: reduce) {
+  html.js .m-develop img,
+  html.js .m-develop.is-developing img {
+    filter: none;
+    animation: none;
+  }
 }

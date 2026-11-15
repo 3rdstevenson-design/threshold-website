@@ -46,18 +46,18 @@ export default function ContactForm() {
 
   if (status === 'ok') {
     return (
-      <div className="border border-threshold-purple/30 bg-white rounded-sm p-8 text-center">
-        <h2 className="font-cormorant text-2xl text-obsidian mb-2">Thanks, I got it.</h2>
-        <p className="font-nunito text-deep-navy/80">
+      <div className="border border-hairline bg-band p-8">
+        <h2 className="font-cormorant text-h3 font-medium text-ink mb-2">Thanks, I got it.</h2>
+        <p className="font-nunito text-ink-soft">
           I&apos;ll be in touch shortly.
         </p>
       </div>
     )
   }
 
-  const labelCls = 'font-montserrat text-xs font-semibold tracking-wide text-deep-navy uppercase'
+  const labelCls = 'mb-1.5 block font-montserrat text-[0.9375rem] font-semibold text-ink'
   const inputCls =
-    'mt-1 w-full rounded-sm border border-deep-navy/20 bg-white px-3 py-2.5 font-nunito text-obsidian focus:border-threshold-purple focus:outline-none focus:ring-1 focus:ring-threshold-purple'
+    'field'
 
   return (
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
@@ -90,7 +90,7 @@ export default function ContactForm() {
       <div>
         <label htmlFor="phone" className={labelCls}>Mobile phone</label>
         <input id="phone" name="phone" type="tel" required autoComplete="tel" className={inputCls} />
-        <p className="mt-1 font-nunito text-xs text-deep-navy/60">
+        <p className="mt-1 text-small text-muted">
           Entering your number does not by itself sign you up for texts. To get texts, check the box
           below.
         </p>
@@ -104,7 +104,7 @@ export default function ContactForm() {
       {/* SMS consent — transactional. Not required to submit (per carrier guidelines). */}
       <label className="flex gap-3 items-start cursor-pointer">
         <input type="checkbox" name="smsConsent" className="mt-1 h-4 w-4 accent-[#7002AB]" />
-        <span className="font-nunito text-sm text-deep-navy/80 leading-relaxed">
+        <span className="text-small text-ink-soft">
           I agree to receive transactional text messages from Threshold Health &amp; Performance
           (appointment reminders, follow-ups, and account updates) at the number provided. Message
           frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help.
@@ -114,28 +114,28 @@ export default function ContactForm() {
       {/* Marketing consent — optional, unchecked by default, cannot be required. */}
       <label className="flex gap-3 items-start cursor-pointer">
         <input type="checkbox" name="marketingConsent" className="mt-1 h-4 w-4 accent-[#7002AB]" />
-        <span className="font-nunito text-sm text-deep-navy/80 leading-relaxed">
+        <span className="text-small text-ink-soft">
           I also agree to receive marketing and promotional text messages (offers and program
           announcements). Optional, and not required to submit this form or to purchase. Message and
           data rates may apply. Reply STOP to opt out.
         </span>
       </label>
 
-      <p className="font-nunito text-xs text-deep-navy/60 leading-relaxed">
+      <p className="text-small text-muted leading-relaxed">
         Consent is not a condition of purchase. Mobile information is never sold or shared with third
         parties or affiliates for their marketing. See our{' '}
-        <a href="/privacy-policy" className="text-threshold-purple underline">Privacy Policy</a> and{' '}
-        <a href="/sms-policy" className="text-threshold-purple underline">SMS Policy</a>.
+        <a href="/privacy-policy" className="link">Privacy Policy</a> and{' '}
+        <a href="/sms-policy" className="link">SMS Policy</a>.
       </p>
 
       {status === 'error' && (
-        <p className="font-nunito text-sm text-red-600">{error}</p>
+        <p className="text-small text-[#b42318]">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={status === 'submitting'}
-        className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-7 py-3 disabled:opacity-50"
+        className="btn"
       >
         {status === 'submitting' ? 'Sending…' : 'Send'}
       </button>

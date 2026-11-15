@@ -1,124 +1,65 @@
 import type { Metadata } from 'next'
 import { pageMeta } from '@/lib/metadata'
+import { BUSINESS, DISCOVERY_CALL } from '@/lib/site'
+import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
-import Link from 'next/link'
-import { BOOKING_URL } from '@/lib/booking'
+import BookingWidget from '@/components/BookingWidget'
 
 export const metadata: Metadata = {
-  title: 'Book an Intro Call in Reston, VA',
+  title: 'Book a Free Call in Reston, VA',
   ...pageMeta({
-    fullTitle: 'Book an Intro Call in Reston, VA | Threshold Health & Performance',
-    description: 'Book a 20-minute intro call with Dr. Lars Stevenson, PT, DPT in Reston, VA. An honest talk about your situation, what you have tried, and the next step forward.',
+    fullTitle: 'Book a Free Call in Reston, VA | Threshold Health & Performance',
+    description:
+      "Book a free 30-minute call with Dr. Lars Stevenson, PT, DPT. Talk through what's going on, what you've tried, and the next step.",
     path: '/book',
   }),
-}
-
-const MARK_PATH =
-  'M1674.35,464.18s-86.86-2.87-176.53,29.02c-44.21,15.72-129.8,51.59-240.99,129.98,0,0,77.76,68.47,187.49,96.12,0,0-93.91-19.04-194.32-90.68-100.41,71.64-194.32,90.68-194.32,90.68,109.73-27.66,187.49-96.12,187.49-96.12-111.19-78.39-196.79-114.26-240.99-129.98-89.68-31.89-176.53-29.02-176.53-29.02,0,0,62.16-1.99,150,31.13,135.87,51.24,231.21,131.61,231.21,131.61-152.65,109.2-358.85,123.04-368.63,123.64,132.46-7.72,210.87-23.73,283.35-46.38,72.55-22.67,128.42-51.54,128.42-51.54,0,0,55.87,28.87,128.42,51.54,72.48,22.65,150.89,38.66,283.35,46.38-9.78-.6-215.98-14.44-368.63-123.64,0,0,95.34-80.37,231.21-131.61,87.84-33.12,150-31.13,150-31.13Z'
-
-// `?s=<serviceId>` scopes PB's widget to a single service — the free Discovery
-// Call — instead of listing every public service. ID from PB's widget builder
-// (Settings → Website Links & Widgets → "Service: Discovery Call").
-const WIDGET_URL =
-  'https://my.practicebetter.io?fl_wtc=7002ab&fl_wtac=0d0d18#/6a0502bf701f5e74531dd463/widgets/bookings?s=6a0514de701f5e74531f1e92'
-
-function LogoMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="826 460 848 295"
-      className={className}
-      aria-hidden="true"
-      fill="currentColor"
-    >
-      <path d={MARK_PATH} />
-    </svg>
-  )
-}
-
-function Nav() {
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-sm border-b border-white/5">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <LogoMark className="h-7 w-auto text-clinical-white group-hover:text-threshold-purple transition-colors duration-300" />
-          <span className="font-montserrat text-xs font-semibold tracking-[0.2em] text-clinical-white uppercase">
-            Threshold
-          </span>
-        </Link>
-        <div className="hidden md:flex items-center gap-8">
-          <Link
-            href="/#method"
-            className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
-          >
-            The CROSS Method
-          </Link>
-          <Link
-            href="/about"
-            className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
-          >
-            About
-          </Link>
-          <span className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-5 py-2.5">
-            Book Now
-          </span>
-        </div>
-      </div>
-    </nav>
-  )
 }
 
 export default function BookPage() {
   return (
     <>
-      <Nav />
-      <main>
-
-        {/* ─── Hero ─── */}
-        <section className="relative bg-obsidian overflow-hidden pt-16 pb-0">
-          <div className="hero-beam" aria-hidden="true" />
-
-          <div className="relative z-10 max-w-5xl mx-auto px-6 pb-12 pt-20 md:pt-24">
-            <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-5">
-              Start Here
-            </p>
-            <h1 className="font-cormorant font-light text-clinical-white leading-[1.05] text-5xl md:text-7xl mb-8 max-w-3xl">
-              Book your intro call.
+      <SiteHeader current="book" />
+      <main id="main">
+        <section className="mx-auto grid max-w-page gap-12 px-5 pb-24 pt-12 sm:px-8 md:grid-cols-12 md:gap-8 md:pb-32 md:pt-20">
+          <div className="md:col-span-5 lg:col-span-4">
+            <h1 className="font-cormorant text-h2 font-medium text-ink md:text-[clamp(2.4rem,1.6rem+2vw,3.6rem)]">
+              Book a free {DISCOVERY_CALL.minutes}&#8209;minute call
             </h1>
-            <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl">
-              <p>
-                Twenty honest minutes. We&apos;ll go through your situation, what
-                you&apos;ve already tried, and build a clear picture of the steps
-                you need to take.
-              </p>
-              <p>
-                No pitch. No pressure. If I&apos;m not the right person for what
-                you need, I&apos;ll tell you and point you to who is.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Widget ─── */}
-        <section className="bg-deep-navy py-16 md:py-20">
-          <div className="max-w-3xl mx-auto px-6">
-            <div className="bg-clinical-white rounded-sm shadow-2xl p-4 md:p-6">
-              <iframe
-                src={WIDGET_URL}
-                title="Book a session with Dr. Lars Stevenson"
-                className="w-full block"
-                style={{ height: 850, border: 'none' }}
-                scrolling="yes"
-                allowFullScreen
-              />
-            </div>
-            <p className="font-montserrat text-xs tracking-wide text-sterling-silver/70 text-center mt-6">
-              Powered by Practice Better &nbsp;·&nbsp; Sessions, payments, and confirmations handled securely.
+            <p className="mt-6 text-lede text-ink-soft">
+              It&apos;s a video call with me. Tell me what&apos;s going on and what you&apos;ve tried, and I&apos;ll
+              tell you what I&apos;d do next. If I&apos;m not the right person for it, I&apos;ll point you to who is.
             </p>
+
+            <h2 className="mt-12 font-nunito text-h3 font-bold text-ink">After the call</h2>
+            <ol className="mt-4 space-y-4 text-body text-ink-soft">
+              <li className="grid grid-cols-[1.75rem_1fr]">
+                <span className="tabular font-semibold text-ink">1.</span>
+                <span>If it&apos;s a fit, you book your evaluation: a full assessment and your first treatment.</span>
+              </li>
+              <li className="grid grid-cols-[1.75rem_1fr]">
+                <span className="tabular font-semibold text-ink">2.</span>
+                <span>Your plan is built from that evaluation, and it changes as you retest.</span>
+              </li>
+            </ol>
+
+            <p className="mt-12 text-body text-ink-soft">
+              Rather call?{' '}
+              <a href={`tel:${BUSINESS.phone.replace(/-/g, '')}`} className="link tabular">
+                {BUSINESS.phoneDisplay}
+              </a>
+              , or email{' '}
+              <a href={`mailto:${BUSINESS.email}`} className="link">
+                {BUSINESS.email}
+              </a>
+              .
+            </p>
+            <p className="mt-3 text-small text-muted">Booking runs on Practice Better, my patient portal.</p>
+          </div>
+          <div className="md:col-span-7 md:col-start-6 lg:col-span-7 lg:col-start-6">
+            <BookingWidget eager />
           </div>
         </section>
-
       </main>
-
       <SiteFooter />
     </>
   )

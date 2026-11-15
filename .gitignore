@@ -32,3 +32,6 @@ next-env.d.ts
 # Claude Code local settings
 .claude/
 
+
+# local production builds (next.config.js NEXT_DIST_DIR)
+/.next-build/

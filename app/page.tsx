@@ -1,565 +1,303 @@
-import React from 'react'
-import { pageMeta } from '@/lib/metadata'
-import { SITE_DESCRIPTION } from '@/lib/site'
-import SiteFooter from '@/components/SiteFooter'
-import InstagramLink from '@/components/InstagramLink'
-import Image from 'next/image'
 import type { Metadata } from 'next'
-import TestimonialCarousel from './TestimonialCarousel'
-import { BOOKING_URL } from '@/lib/booking'
+import Image from 'next/image'
+import Link from 'next/link'
+import { pageMeta } from '@/lib/metadata'
+import { SITE_NAME, BUSINESS, USP_LINE, DISCOVERY_CALL } from '@/lib/site'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
+import BookingWidget from '@/components/BookingWidget'
+import GuideSignup from '@/components/GuideSignup'
+import WordHighlight from '@/components/moments/WordHighlight'
 
 export const metadata: Metadata = {
   ...pageMeta({
-    fullTitle: 'Threshold Health & Performance | Physical Therapy in Reston, VA',
-    description: SITE_DESCRIPTION,
+    fullTitle: `${SITE_NAME} | Physical Therapy in Reston, VA`,
+    description:
+      "Physical therapy for athletes and active adults in Reston, VA. When the pain backs off, you're halfway there. I take you the rest of the way.",
     path: '/',
   }),
 }
 
-// Logo mark path — the crossing curves only, for use in nav / watermark
-const MARK_PATH =
-  'M1674.35,464.18s-86.86-2.87-176.53,29.02c-44.21,15.72-129.8,51.59-240.99,129.98,0,0,77.76,68.47,187.49,96.12,0,0-93.91-19.04-194.32-90.68-100.41,71.64-194.32,90.68-194.32,90.68,109.73-27.66,187.49-96.12,187.49-96.12-111.19-78.39-196.79-114.26-240.99-129.98-89.68-31.89-176.53-29.02-176.53-29.02,0,0,62.16-1.99,150,31.13,135.87,51.24,231.21,131.61,231.21,131.61-152.65,109.2-358.85,123.04-368.63,123.64,132.46-7.72,210.87-23.73,283.35-46.38,72.55-22.67,128.42-51.54,128.42-51.54,0,0,55.87,28.87,128.42,51.54,72.48,22.65,150.89,38.66,283.35,46.38-9.78-.6-215.98-14.44-368.63-123.64,0,0,95.34-80.37,231.21-131.61,87.84-33.12,150-31.13,150-31.13Z'
-
-// Floating light particles — drift class: fl=far-left, l=left, c=center, r=right, fr=far-right
-const heroParticles = [
-  { x: '6%',  y: '75%', dur: '14s', del: '0s',   size: 4, cls: 'p-fl' },
-  { x: '15%', y: '60%', dur: '11s', del: '1.8s', size: 3, cls: 'p-l'  },
-  { x: '24%', y: '80%', dur: '16s', del: '0.5s', size: 5, cls: 'p-fl' },
-  { x: '34%', y: '65%', dur: '9s',  del: '3.2s', size: 3, cls: 'p-r'  },
-  { x: '44%', y: '78%', dur: '13s', del: '1.5s', size: 4, cls: 'p-c'  },
-  { x: '54%', y: '62%', dur: '12s', del: '4.0s', size: 3, cls: 'p-r'  },
-  { x: '64%', y: '72%', dur: '15s', del: '0.8s', size: 4, cls: 'p-fr' },
-  { x: '74%', y: '58%', dur: '10s', del: '2.8s', size: 3, cls: 'p-r'  },
-  { x: '84%', y: '76%', dur: '14s', del: '5.5s', size: 4, cls: 'p-fr' },
-  { x: '92%', y: '63%', dur: '11s', del: '6.2s', size: 3, cls: 'p-fr' },
-  { x: '10%', y: '50%', dur: '13s', del: '0.3s', size: 3, cls: 'p-l'  },
-  { x: '42%', y: '55%', dur: '12s', del: '3.5s', size: 4, cls: 'p-c'  },
-  { x: '70%', y: '48%', dur: '10s', del: '7.1s', size: 3, cls: 'p-r'  },
-  { x: '30%', y: '45%', dur: '16s', del: '2.2s', size: 5, cls: 'p-l'  },
-  { x: '58%', y: '52%', dur: '9s',  del: '4.8s', size: 3, cls: 'p-fr' },
-  { x: '80%', y: '40%', dur: '15s', del: '1.2s', size: 4, cls: 'p-fr' },
-  { x: '20%', y: '42%', dur: '12s', del: '8.1s', size: 3, cls: 'p-fl' },
-  { x: '50%', y: '38%', dur: '11s', del: '3.9s', size: 4, cls: 'p-c'  },
-]
-
-const crossCards = [
+// The CROSS method, in the order a patient goes through it (copy for Lars's approval: docs/site-copy.md).
+// The letters spell the method's name, so they stand in for list numbers.
+const STEPS: { letter: string; title: string; body: string }[] = [
   {
     letter: 'C',
-    title: 'Clinical Assessment',
-    description:
-      'A systematic, joint-by-joint evaluation that finds what everyone else missed. Where it broke down, and why.',
+    title: 'Assess every joint.',
+    body: "A full evaluation, joint by joint, to find where things broke down and why. You leave the first visit knowing what's going on.",
   },
   {
     letter: 'R',
-    title: 'Reconditioning',
-    description:
-      "Hands-on treatment that addresses the actual system that failed. It starts session one. You don't wait 3 visits to feel a difference.",
+    title: 'Treat from the first session.',
+    body: 'Hands-on treatment starts that day, along with the exercises that hold the change in place.',
   },
   {
     letter: 'O',
-    title: 'Ownership',
-    description:
-      'The layer most practitioners skip. Addressing the beliefs and self-concept that keep people stuck just as much as the physical problem does.',
+    title: 'Rebuild your confidence.',
+    body: 'Pain changes what you believe your body can handle. Part of the work is proving to yourself that it can.',
   },
   {
     letter: 'S',
-    title: 'Systematic',
-    description:
-      "A proven sequence behind everything. Nothing is random. You always know why we're doing what we're doing and where we're going next.",
+    title: 'Follow a plan with a reason.',
+    body: "Every exercise has a place in the sequence, and you'll always know why you're doing it.",
   },
   {
     letter: 'S',
-    title: 'Support',
-    description:
-      "Ongoing presence through the entire crossing. A real roadmap with someone who knows you as an individual and is invested in where you're going.",
+    title: 'Test it, then trust it.',
+    body: "I retest as you go and stay with you until you're back, in person and between sessions in the app.",
   },
 ]
 
-const larsCredentials = [
-  { stat: 'Olympic',  label: 'Athlete Prep',            detail: 'Tokyo & Paris Games' },
-  { stat: '1:1',      label: 'Direct Care Only',         detail: 'No techs. No aides.' },
-  { stat: 'DPT',      label: 'Doctor of Physical Therapy', detail: 'Strength & Conditioning background' },
+// Patient reviews, word for word.
+const REVIEWS = [
+  {
+    quote:
+      "Lars Stevenson is by far the best physical therapist I've ever worked with. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.",
+    date: 'January 2025',
+  },
+  {
+    quote:
+      'After one session I immediately felt relief from my back and hip pain. He was very detailed and clear, and gave me exercises to do at home before our next visit.',
+    date: 'January 2025',
+  },
+  {
+    quote:
+      'He has the exact right mix of treatment planning, diagnosis, communication skills, technical knowledge, and the ability to challenge patients to do their best.',
+    date: 'February 2025',
+  },
 ]
 
-function LogoMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="826 460 848 295"
-      className={className}
-      aria-hidden="true"
-      fill="currentColor"
-    >
-      <path d={MARK_PATH} />
-    </svg>
-  )
-}
+const OTHER_HALF = [
+  "Less pain is a milestone. The other half is getting your strength, speed and confidence back, so the shoulder that's fine doing dishes holds up on a serve.",
+  'That half is what I work on. Your plan starts from your own evaluation and changes every time you retest.',
+]
 
-function Nav() {
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-sm border-b border-white/5">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="#hero" className="flex items-center gap-3 group">
-          <LogoMark className="h-7 w-auto text-clinical-white group-hover:text-threshold-purple transition-colors duration-300" />
-          <span className="font-montserrat text-xs font-semibold tracking-[0.2em] text-clinical-white uppercase">
-            Threshold
-          </span>
-        </a>
-        <div className="hidden md:flex items-center gap-8">
-          <a
-            href="#method"
-            className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
-          >
-            The CROSS Method
-          </a>
-          <a
-            href="#work"
-            className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
-          >
-            The Work
-          </a>
-          <a
-            href="/about"
-            className="font-montserrat text-xs tracking-wide text-sterling-silver hover:text-clinical-white transition-colors duration-200"
-          >
-            About
-          </a>
-          <InstagramLink iconClassName="h-[18px] w-[18px]" className="text-sterling-silver hover:text-clinical-white transition-colors duration-200" />
-          <a
-            href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-5 py-2.5 hover:bg-purple-800 transition-all duration-200 btn-glow"
-          >
-            Book Now
-          </a>
-        </div>
-        <div className="md:hidden flex items-center gap-4">
-          <InstagramLink iconClassName="h-5 w-5" className="text-sterling-silver" />
-          <a
-            href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-montserrat text-xs font-semibold tracking-wider text-clinical-white bg-threshold-purple px-4 py-2 hover:bg-purple-800 transition-colors duration-200"
-          >
-            Book Now
-          </a>
-        </div>
-      </div>
-    </nav>
-  )
-}
+const tel = `tel:${BUSINESS.phone.replace(/-/g, '')}`
+const h2 = 'font-cormorant text-h2 font-medium text-ink'
 
-function CrossCard({
-  card,
-}: {
-  card: { letter: string; title: string; description: string }
-}) {
-  return (
-    <div className="cross-card-glow bg-deep-navy border-t-2 border-threshold-purple p-7 md:p-8 flex flex-col gap-4">
-      <p className="font-montserrat text-xs font-bold tracking-[0.3em] text-threshold-purple uppercase">
-        {card.letter}
-      </p>
-      <h3 className="font-cormorant text-2xl md:text-3xl font-medium text-clinical-white leading-tight">
-        {card.title}
-      </h3>
-      <p className="font-nunito text-sm md:text-base text-sterling-silver leading-relaxed">
-        {card.description}
-      </p>
-    </div>
-  )
-}
-
-export default function Page() {
+export default function HomePage() {
   return (
     <>
-      <Nav />
-      <main>
-
-        {/* ─── Section 1: Hero ─── */}
-        <section
-          id="hero"
-          className="relative min-h-screen hero-spotlight overflow-hidden flex flex-col justify-center pt-16"
-        >
-          {/* Drifting light beam */}
-          <div className="hero-beam" aria-hidden="true" />
-
-          {/* Floating light particles */}
-          <div
-            className="absolute inset-0 overflow-hidden pointer-events-none"
-            aria-hidden="true"
-          >
-            {heroParticles.map((p, i) => (
-              <span
-                key={i}
-                className={`particle ${p.cls}`}
-                style={{
-                  left: p.x,
-                  top: p.y,
-                  width: `${p.size}px`,
-                  height: `${p.size}px`,
-                  animationDuration: p.dur,
-                  animationDelay: p.del,
-                }}
-              />
-            ))}
-          </div>
-
-          <div className="relative z-10 max-w-5xl mx-auto px-6 py-24 md:py-32">
-
-            {/* Logo with glow */}
-            <div className="logo-glow mb-14">
-              <img
-                src="/logo-dark.svg"
-                alt="Threshold Health and Performance"
-                className="w-72 md:w-96 h-auto"
-              />
-            </div>
-
-            <p
-              className="font-montserrat text-xs tracking-[0.28em] text-sterling-silver uppercase mb-8"
-              style={{ fontVariantCaps: 'small-caps' }}
-            >
-              Reston, Virginia
-            </p>
-
-            <h1 className="font-cormorant font-light text-clinical-white leading-[1.05] text-5xl md:text-7xl lg:text-[5.5rem] mb-8 max-w-4xl">
-              Your threshold is higher than they told you.
-            </h1>
-
-            <p className="font-montserrat text-base md:text-lg text-sterling-silver leading-relaxed max-w-2xl mb-10">
-              Physical therapy and performance coaching for athletes who&apos;ve
-              done the work, followed the program, and still aren&apos;t back to
-              their sport.
-            </p>
-
-            <div className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl mb-14 space-y-4">
-              <p>
-                If you found Threshold, you&apos;ve already been through the
-                standard PT route. The appointments, the home exercise program,
-                6 to 8 weeks of protocol that wasn&apos;t designed for someone
-                trying to compete.
+      <SiteHeader current="home" />
+      <main id="main" className="overflow-x-clip">
+        {/* First screen: the headline, what this is, the action, one photograph of the work. */}
+        <section className="mx-auto max-w-page px-5 pb-20 pt-12 sm:px-8 md:pb-28 md:pt-20">
+          <h1 className="relative z-[1] max-w-[24ch] font-cormorant text-display font-medium text-ink">{USP_LINE}</h1>
+          <div className="mt-10 grid gap-12 md:mt-14 md:grid-cols-12 md:gap-8">
+            <div className="md:col-span-5 md:row-start-1 lg:col-span-4">
+              <p className="text-lede text-ink-soft">
+                I&apos;m a physical therapist with a background in strength and conditioning and exercise, with a
+                concentration in nutrition. I take athletes and active adults the rest of the way, on one plan built
+                for them and tested as they go.
               </p>
-              <p>
-                You&apos;re still not back. Still training around it, or
-                watching from the sideline, or just not the athlete you were.
-              </p>
-              <p>
-                That&apos;s the Threshold. I&apos;m here to help you cross it.
-              </p>
-            </div>
-
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block font-montserrat text-sm font-semibold tracking-wider text-clinical-white bg-threshold-purple px-9 py-4 hover:bg-purple-800 transition-all duration-200 btn-glow"
-            >
-              Book Your Intro Call →
-            </a>
-          </div>
-
-          {/* Gradient fade into next section */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-deep-navy pointer-events-none"
-            aria-hidden="true"
-          />
-        </section>
-
-        {/* ─── Section 2: The Problem ─── */}
-        <section id="problem" className="relative bg-deep-navy py-24 md:py-36">
-          <div className="section-glow-purple" aria-hidden="true" />
-          <div className="relative max-w-5xl mx-auto px-6">
-            <div className="border-l-[3px] border-threshold-purple pl-8 md:pl-14">
-              <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
-                Why You&apos;re Still Stuck
-              </p>
-
-              <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-10 max-w-3xl">
-                The approach had a design problem. You were just the one who
-                felt it.
-              </h2>
-
-              <div className="space-y-5 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
-                <p>
-                  Standard rehab wasn&apos;t built for athletes. It runs on 6
-                  to 8 week protocols and diagnosis codes that have nothing to
-                  do with the demands of the sport you&apos;re trying to get
-                  back to.
-                </p>
-                <p>
-                  It treats the diagnosis. Not the system that broke down
-                  behind it.
-                </p>
-                <p>
-                  Manage the symptom long enough without resolving what&apos;s
-                  actually causing it, and the limitation stops feeling like a
-                  temporary setback. It starts feeling like your new ceiling.
-                </p>
-                <p className="text-clinical-white font-semibold">
-                  It isn&apos;t.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Section 3: The Method ─── */}
-        <section id="method" className="bg-obsidian py-24 md:py-36">
-          <div className="max-w-5xl mx-auto px-6">
-            <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
-              The CROSS Method
-            </p>
-
-            <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-6 max-w-3xl">
-              One crossing. No shortcuts.
-            </h2>
-
-            <p className="font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-16">
-              Every person I work with goes through the same proven sequence.
-              Built to restore function, rebuild confidence, and return you to
-              the life that limitation interrupted.
-            </p>
-
-            {/* Row 1: C, R, O */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {crossCards.slice(0, 3).map((card) => (
-                <CrossCard key={card.title} card={card} />
-              ))}
-            </div>
-
-            {/* Row 2: S, S — centered on desktop */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5 lg:w-2/3 lg:mx-auto">
-              {crossCards.slice(3).map((card, i) => (
-                <CrossCard key={`${card.title}-${i}`} card={card} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Section 4: The Work ─── */}
-        <section id="work" className="bg-deep-navy py-24 md:py-36">
-          <div className="max-w-5xl mx-auto px-6">
-            <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
-              The Work
-            </p>
-
-            <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-14 max-w-3xl">
-              This is what it actually produces.
-            </h2>
-
-            {/* Case study */}
-            <div className="border-l-[3px] border-threshold-purple pl-8 md:pl-14 mb-16">
-              <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl">
-                <p>
-                  A high school football player came in with hip tightness that
-                  had been limiting his training for years. He&apos;d been
-                  managing it on his own, picked up advice from coaches and
-                  trainers along the way, but nothing had actually fixed it.
-                </p>
-                <p>
-                  We ran a full evaluation, found exactly where the system had
-                  broken down, and started working in session one. The treatment
-                  was built around what his body needed and the specific demands
-                  of his sport. In under six weeks he was training without
-                  restriction and went on to play Division I college football.
-                </p>
-                <p>
-                  That kind of outcome requires a practitioner who can identify
-                  the underlying problem rather than manage what&apos;s visible
-                  on the surface. When that happens, the results look completely
-                  different. That&apos;s what it means to cross the Threshold.
-                </p>
-              </div>
-            </div>
-
-            {/* Pull quote */}
-            <div className="border-t border-white/10 pt-14">
-              <blockquote>
-                <p className="font-cormorant italic text-champion-gold text-2xl md:text-4xl lg:text-5xl leading-snug max-w-4xl">
-                  &ldquo;You&apos;re at the threshold of thinking this is just
-                  how it&apos;s going to be. That&apos;s exactly where the work
-                  begins.&rdquo;
-                </p>
-              </blockquote>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Section 5: Testimonials ─── */}
-        <section id="testimonials" className="bg-obsidian py-24 md:py-36">
-          <div className="max-w-5xl mx-auto px-6">
-            <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
-              From Patients
-            </p>
-            <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-16 max-w-3xl">
-              What the work produces.
-            </h2>
-            <TestimonialCarousel />
-          </div>
-        </section>
-
-        {/* ─── Section 6: Meet Lars ─── */}
-        <section id="lars" className="relative lars-spotlight py-24 md:py-36 overflow-hidden">
-
-          {/* Watermark logo mark */}
-          <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            aria-hidden="true"
-          >
-            <LogoMark className="w-[700px] h-auto text-threshold-purple opacity-[0.055]" />
-          </div>
-
-          <div className="relative z-10 max-w-5xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
-              {/* Image column */}
-              <div className="relative flex items-center justify-center order-2 lg:order-1">
-                {/* Glow behind the figures */}
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(ellipse at 50% 70%, rgba(112,2,171,0.4) 0%, transparent 65%)',
-                    filter: 'blur(40px)',
-                  }}
-                  aria-hidden="true"
-                />
-                <Image
-                  src="/lars-smile.png"
-                  alt="Dr. Lars Stevenson, PT, DPT, physical therapist and performance coach at Threshold Health & Performance in Reston, Virginia"
-                  width={600}
-                  height={900}
-                  sizes="(min-width: 1024px) 40vw, 90vw"
-                  className="relative z-10 w-full h-auto object-contain"
-                  style={{ maxHeight: '680px' }}
-                />
-              </div>
-
-              {/* Text column */}
-              <div className="order-1 lg:order-2">
-                <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
-                  The Practitioner
-                </p>
-
-                <h2 className="font-cormorant font-light text-clinical-white leading-[1.0] text-4xl md:text-6xl lg:text-7xl mb-4">
-                  Dr. Lars Stevenson
-                </h2>
-
-                <p className="font-montserrat text-xs tracking-[0.22em] text-threshold-purple uppercase mb-10 whitespace-nowrap">
-                  PT, DPT &nbsp;·&nbsp; Strength &amp; Conditioning &nbsp;·&nbsp; Reston, Virginia
-                </p>
-
-                {/* Credential callout cards */}
-                <div className="grid grid-cols-3 gap-3 mb-10">
-                  {larsCredentials.map((item) => (
-                    <div
-                      key={item.label}
-                      className="border border-white/10 bg-white/[0.03] p-4 text-center"
-                    >
-                      <p className="font-cormorant text-3xl md:text-4xl text-threshold-purple mb-1 stat-glow">
-                        {item.stat}
-                      </p>
-                      <p className="font-montserrat text-[10px] font-semibold tracking-widest text-clinical-white uppercase mb-1">
-                        {item.label}
-                      </p>
-                      <p className="font-nunito text-[10px] text-sterling-silver">
-                        {item.detail}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-lg mb-10">
-                  <p>
-                    I started my apprenticeship under an Olympic performance
-                    coach at 20. I learned sprint mechanics, weight room
-                    technique, and injury rehab from the inside out.
-                  </p>
-                  <p>
-                    By the time I finished my doctorate, I&apos;d worked with
-                    sprinters prepping for the Tokyo and Paris Games. That same
-                    process is what runs every session at Threshold.
-                  </p>
-                  <p>
-                    I trained in strength and conditioning before PT school, and
-                    that combination is rare. The work reflects it: a
-                    joint-by-joint evaluation that finds what everyone else
-                    missed, and a method that works through every layer of why
-                    something won&apos;t resolve.
-                  </p>
-                  <p className="text-clinical-white font-semibold">
-                    1:1 care only. No techs. No handoffs. You work with me,
-                    start to finish.
-                  </p>
-                </div>
-
-                <a
-                  href={BOOKING_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block font-montserrat text-sm font-semibold tracking-wider text-clinical-white bg-threshold-purple px-9 py-4 hover:bg-purple-800 transition-all duration-200 btn-glow"
-                >
-                  Book With Dr. Stevenson →
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
+                <a href="#book" className="btn">
+                  {DISCOVERY_CALL.label}
+                </a>
+                <a href={tel} className="link tabular font-montserrat text-[0.9375rem] font-semibold">
+                  Call {BUSINESS.phoneDisplay}
                 </a>
               </div>
+              <p className="mt-6 text-small text-muted">
+                Free {DISCOVERY_CALL.minutes}-minute call. Based in {BUSINESS.city}, {BUSINESS.regionName}.
+              </p>
+            </div>
 
+            {/* Headline behind you (Lars kept it, 2026-11-15): the cut-out stands over the headline's second line. */}
+            <div className="relative z-[2] -mt-6 md:col-span-7 md:row-start-1 md:-mt-[clamp(3.25rem,5.6vw,5.75rem)] lg:col-span-8">
+              <div className="relative aspect-[3/2]">
+                <Image
+                  src="/photos/hands-on-forearm-cutout.png"
+                  alt="Dr. Lars Stevenson working hands-on on a client's wrist and forearm"
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 62vw, (min-width: 768px) 58vw, 100vw"
+                  className="object-contain object-bottom"
+                />
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ─── Section 6: Book Now ─── */}
-        <section id="book" className="relative bg-obsidian py-24 md:py-36 overflow-hidden">
+        <section className="border-t border-hairline">
+          <div className="mx-auto grid max-w-page gap-8 px-5 py-24 sm:px-8 md:grid-cols-12 md:py-32">
+            <h2 className={`${h2} md:col-span-5`}>The other half of recovery</h2>
+            <WordHighlight
+              paragraphs={OTHER_HALF}
+              className="max-w-measure space-y-5 text-lede text-ink-soft md:col-span-6 md:col-start-7"
+            />
+          </div>
+        </section>
 
-          {/* Ambient glow */}
-          <div className="book-glow absolute inset-0 pointer-events-none" aria-hidden="true" />
-
-          <div className="relative z-10 max-w-5xl mx-auto px-6">
-            <p className="font-montserrat text-xs tracking-[0.35em] text-sterling-silver uppercase mb-7">
-              Start Here
-            </p>
-
-            <h2 className="font-cormorant font-light text-clinical-white leading-tight text-3xl md:text-5xl mb-8 max-w-3xl">
-              Ready to find out what&apos;s actually going on?
-            </h2>
-
-            <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-3xl mb-12">
-              <p>
-                Start with a call. We&apos;ll go through your situation, what
-                you&apos;ve already tried, and build a clear picture of the
-                steps you need to take to get back to the sport, the training,
-                and the life that limitation put on hold.
-              </p>
-              <p>
-                From there, we&apos;ll get your Initial Evaluation on the
-                calendar and get to work.
-              </p>
-              <p>No pitch. No pressure. Just 20 honest minutes.</p>
+        <section id="how-i-work" className="bg-band">
+          <div className="mx-auto grid max-w-page gap-14 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">
+            <div className="md:col-span-5">
+              <div className="md:sticky md:top-28">
+                <h2 className={h2}>How I work with you</h2>
+                <p className="mt-5 max-w-[34ch] text-lede text-ink-soft">
+                  Every patient goes through the same five parts, in this order. I call it the CROSS method.
+                </p>
+                <div className="relative mt-10 aspect-[4/3] overflow-hidden bg-hairline">
+                  <Image
+                    src="/photos/shoulder-assessment.jpg"
+                    alt="Dr. Lars Stevenson assessing a client's shoulder"
+                    fill
+                    sizes="(min-width: 768px) 38vw, 100vw"
+                    className="object-cover object-[55%_35%]"
+                  />
+                </div>
+              </div>
             </div>
+            <ol className="md:col-span-6 md:col-start-7">
+              {STEPS.map((step, i) => (
+                <li
+                  key={i}
+                  className="grid grid-cols-[3rem_1fr] gap-x-5 border-t border-[#d9d9e1] py-8 first:border-t-0 first:pt-0 sm:grid-cols-[3.75rem_1fr]"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="font-cormorant text-[2.9rem] font-medium leading-[0.85] text-ink sm:text-[3.4rem]"
+                  >
+                    {step.letter}
+                  </span>
+                  <div>
+                    <h3 className="font-nunito text-h3 font-bold text-ink">{step.title}</h3>
+                    <p className="mt-2 max-w-measure text-body text-ink-soft">{step.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
 
-            {/* CTA */}
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block font-montserrat text-base font-semibold tracking-wider text-clinical-white bg-threshold-purple px-11 py-5 hover:bg-purple-800 transition-all duration-200 btn-glow mb-28"
-            >
-              Book Your Intro Call →
-            </a>
+        <section className="mx-auto max-w-page px-5 py-24 sm:px-8 md:py-32">
+          <h2 className={h2}>Results and reviews</h2>
+          <div className="mt-12 grid gap-14 md:grid-cols-12 md:gap-8">
+            <div className="md:col-span-6">
+              <p className="max-w-measure text-lede text-ink-soft md:sticky md:top-28">
+                A high school football player came in with hip tightness that had limited his training for years.
+                He&apos;d picked up advice from coaches and trainers, and nothing had fixed it. I evaluated him, found
+                where the system had broken down, and started treatment that day, built around his body and his sport.
+                He got back to training without restriction and went on to play Division I college football.
+              </p>
+            </div>
+            <div className="space-y-10 md:col-span-5 md:col-start-8">
+              {REVIEWS.map((r, i) => (
+                <figure key={i} className="border-t border-hairline pt-6 first:border-t-0 first:pt-0">
+                  <blockquote className="font-cormorant text-[1.4rem] font-medium leading-[1.4] text-ink">
+                    &ldquo;{r.quote}&rdquo;
+                  </blockquote>
+                  <figcaption className="mt-3 text-small text-muted">Patient review, {r.date}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
 
-            {/* Signature */}
-            <div className="border-t border-white/10 pt-14 text-center">
-              <p className="font-cormorant italic text-sterling-silver text-2xl md:text-3xl mb-4">
+        <section className="bg-band">
+          <div className="mx-auto grid max-w-page items-center gap-12 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">
+            <div className="md:col-span-5">
+              <div className="relative aspect-[4/5] overflow-hidden bg-hairline">
+                <Image
+                  src="/photos/lars-treating-hip.jpg"
+                  alt="Dr. Lars Stevenson treating a patient's hip"
+                  fill
+                  sizes="(min-width: 768px) 40vw, 100vw"
+                  className="object-cover object-[50%_30%]"
+                />
+              </div>
+            </div>
+            <div className="md:col-span-6 md:col-start-7">
+              <h2 className={h2}>Dr. Lars Stevenson, PT, DPT</h2>
+              <div className="mt-6 max-w-measure space-y-5 text-lede text-ink-soft">
+                <p>
+                  I grew up an Air Force kid and played football from age 7 through Division III at St. Olaf College. I
+                  was top 5 on my team in every lift and barely played, which is a big part of why I train athletes the
+                  way I do.
+                </p>
+                <p>
+                  At 20 I started an apprenticeship with a strength coach, and I&apos;ve coached everyone from middle
+                  school athletes all the way up to the Olympic stage. Every session is with me, start to finish, with
+                  no techs or aides.
+                </p>
+              </div>
+              <Link href="/about" className="link mt-8 inline-block font-montserrat text-[0.9375rem] font-semibold">
+                Read my story
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section id="guide" className="mx-auto max-w-page px-5 py-24 sm:px-8 md:py-32">
+          <div className="grid gap-12 md:grid-cols-12 md:gap-8">
+            <div className="md:col-span-5">
+              <h2 className={h2}>A free guide to stretching smarter</h2>
+              <p className="mt-5 max-w-measure text-lede text-ink-soft">
+                Stretch Smarter is my 15-page guide to the BAAD model: the 4 things that decide whether a stretch
+                changes anything (breathing, angle, amplitude and duration), with a body-region guide and a 4&#8209;week
+                plan.
+              </p>
+            </div>
+            <div className="md:col-span-6 md:col-start-7 md:pt-2">
+              <GuideSignup />
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-band">
+          <div className="mx-auto grid max-w-page items-center gap-10 px-5 py-20 sm:px-8 md:grid-cols-12 md:gap-8 md:py-24">
+            <div className="md:col-span-4">
+              <div className="relative aspect-[4/5] overflow-hidden bg-hairline">
+                <Image
+                  src="/photos/coaching-bench-spot.jpg"
+                  alt="Dr. Lars Stevenson spotting a client on the bench press"
+                  fill
+                  sizes="(min-width: 768px) 32vw, 100vw"
+                  className="object-cover object-[50%_45%]"
+                />
+              </div>
+            </div>
+            <div className="md:col-span-6 md:col-start-7">
+              <h2 className={h2}>Online coaching, wherever you train</h2>
+              <p className="mt-5 max-w-measure text-lede text-ink-soft">
+                Not near Reston? I coach your return to training online, after rehab: a plan built around you, coaching
+                in the app, and a call when you need one.
+              </p>
+              <Link
+                href="/online-coaching"
+                className="link mt-6 inline-block font-montserrat text-[0.9375rem] font-semibold"
+              >
+                See online coaching
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section id="book" className="mx-auto max-w-page px-5 py-24 sm:px-8 md:py-32">
+          <div className="grid gap-12 md:grid-cols-12 md:gap-8">
+            <div className="md:col-span-4">
+              <h2 className={h2}>Book a free {DISCOVERY_CALL.minutes}&#8209;minute call</h2>
+              <p className="mt-5 text-lede text-ink-soft">
+                Tell me what&apos;s going on and what you&apos;ve tried. If I&apos;m the right person for it, the next
+                step is your evaluation. If I&apos;m not, I&apos;ll tell you who is.
+              </p>
+              <p className="mt-6 text-small text-muted">
+                Rather call?{' '}
+                <a href={tel} className="link tabular">
+                  {BUSINESS.phoneDisplay}
+                </a>
+              </p>
+              <p className="mt-12 font-cormorant text-[1.6rem] font-medium italic leading-snug text-ink">
                 Be Good. Help Someone. Learn Lots.
               </p>
-              <p className="font-montserrat text-xs tracking-widest text-sterling-silver uppercase">
-                Dr. Lars Stevenson, PT, DPT &nbsp;·&nbsp; Threshold Health
-                &amp; Performance &nbsp;·&nbsp; Reston, Virginia
-              </p>
+              <p className="mt-1 text-small text-muted">Dr. Lars Stevenson</p>
+            </div>
+            <div className="md:col-span-8 md:col-start-5 lg:col-span-7 lg:col-start-6">
+              <BookingWidget />
             </div>
           </div>
         </section>
-
       </main>
-
       <SiteFooter />
     </>
   )

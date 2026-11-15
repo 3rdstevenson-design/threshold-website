@@ -8,12 +8,22 @@ export const SITE_URL = 'https://www.thresholdhp.com'
 export const SITE_NAME = 'Threshold Health & Performance'
 export const SITE_TAGLINE = "It's time to cross your threshold."
 export const SITE_DESCRIPTION =
-  'Physical therapy and performance coaching in Reston, Virginia for athletes who have done the work, followed the program, and still are not back to their sport.'
+  "Physical therapy for athletes and active adults in Reston, Virginia. When the pain backs off, you're halfway there. Dr. Lars Stevenson takes you the rest of the way."
+
+// The 2026-11-12 USP (wiki concept-threshold-positioning), used as the homepage headline.
+export const USP_LINE = "When the pain backs off, you're halfway there."
 
 export const FOUNDER = {
   name: 'Dr. Lars Stevenson',
   jobTitle: 'Doctor of Physical Therapy',
-  credentials: 'PT, DPT, CSCS',
+  // His CSCS lapsed: never cite it (Lars, 2026-11-14).
+  credentials: 'PT, DPT',
+}
+
+// The free discovery call (Practice Better service "Discovery Call", 30 minutes, video).
+export const DISCOVERY_CALL = {
+  minutes: 30,
+  label: 'Book a free call',
 }
 
 // Google Business Profile is a service-area business (Reston, Tysons,

@@ -1,28 +1,37 @@
-import type { Metadata } from 'next'
-import { Cormorant_Garamond, Montserrat, Nunito_Sans } from 'next/font/google'
+import type { Metadata, Viewport } from 'next'
+import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import StructuredData from '@/components/StructuredData'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/site'
 
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  style: ['normal', 'italic'],
+// Brand fonts, self-hosted as latin woff2 subsets (SIL OFL, licenses beside the files in app/fonts).
+// Local files keep builds independent of Google Fonts and keep the type identical in every preview.
+const cormorant = localFont({
+  src: [
+    { path: './fonts/cormorant-garamond-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/cormorant-garamond-latin-600-normal.woff2', weight: '600', style: 'normal' },
+    { path: './fonts/cormorant-garamond-latin-500-italic.woff2', weight: '500', style: 'italic' },
+  ],
   variable: '--font-cormorant',
   display: 'swap',
+  fallback: ['Georgia', 'serif'],
 })
 
-const montserrat = Montserrat({
-  subsets: ['latin'],
+const montserrat = localFont({
+  src: './fonts/montserrat-latin-wght-normal.woff2',
+  weight: '100 900',
   variable: '--font-montserrat',
   display: 'swap',
+  fallback: ['system-ui', 'sans-serif'],
 })
 
-const nunitoSans = Nunito_Sans({
-  subsets: ['latin'],
+const nunitoSans = localFont({
+  src: './fonts/nunito-sans-latin-wght-normal.woff2',
+  weight: '200 1000',
   variable: '--font-nunito',
   display: 'swap',
+  fallback: ['system-ui', 'sans-serif'],
 })
 
 const HOME_TITLE = `${SITE_NAME} | Physical Therapy in Reston, VA`
@@ -50,17 +59,31 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: '#FFFFFF',
+  colorScheme: 'light',
+}
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html
-      lang="en"
-      className={`${cormorant.variable} ${montserrat.variable} ${nunitoSans.variable} scroll-smooth`}
-    >
-      <body>
+    // suppressHydrationWarning: the inline script below adds `js` to <html> before React hydrates.
+    <html lang="en" className={`${cormorant.variable} ${montserrat.variable} ${nunitoSans.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Marks JavaScript as on before first paint, so the About portrait starts as a faint print without a
+            flash of the finished photo. Without JavaScript it never gets the class and the photo simply stands. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
+      <body className="bg-paper font-nunito text-ink antialiased">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink"
+        >
+          Skip to content
+        </a>
         <StructuredData />
         {children}
         {/* Vercel Web Analytics (free on Hobby). Replaced Plausible, whose trial lapsed in June 2026. */}
