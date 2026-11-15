@@ -59,6 +59,7 @@ export default function IntroCallPage() {
               bookingPage={INTRO_CALL_BOOKING_PAGE}
               title="Book an intro call with Dr. Lars Stevenson"
               emailSubject="Intro call"
+              contact={false}
             />
           </div>
         </section>
