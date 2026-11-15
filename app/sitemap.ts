@@ -2,7 +2,9 @@ import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/site'
 
 // Served at /sitemap.xml. Public, indexable routes only. /referral is a
-// noindex duplicate of /book and the legal pages carry no search value.
+// noindex duplicate of /book, /handoff and /intro-call are noindex booking
+// pages people reach from a link, and the
+// legal pages carry no search value.
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: `${SITE_URL}/`, changeFrequency: 'monthly', priority: 1 },
