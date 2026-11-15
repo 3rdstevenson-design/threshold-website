@@ -32,9 +32,20 @@ const invalid = () =>
     400,
   )
 
+/** null for a bad token, and also when tokens can't be checked (UNSUBSCRIBE_SECRET missing), so a visitor
+ *  sees "That link didn't work" and the reply-to-unsubscribe route instead of a server error. */
+function read(t: string) {
+  try {
+    return readToken(t)
+  } catch (e) {
+    console.error('unsubscribe: cannot verify tokens:', e instanceof Error ? e.message : e)
+    return null
+  }
+}
+
 export async function GET(request: Request) {
   const t = new URL(request.url).searchParams.get('t') ?? ''
-  if (!readToken(t)) return invalid()
+  if (!read(t)) return invalid()
   return page(
     'Unsubscribe?',
     p("You'll stop getting emails from me: the guide follow-ups and the newsletter.") +
@@ -60,7 +71,7 @@ async function cancel(id: string): Promise<string | null> {
 
 export async function POST(request: Request) {
   const t = new URL(request.url).searchParams.get('t') ?? ''
-  const payload = readToken(t)
+  const payload = read(t)
   if (!payload) return invalid()
 
   const failedCancels = (await Promise.all(payload.ids.map(cancel))).filter((x): x is string => Boolean(x))
