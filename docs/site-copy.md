@@ -1,8 +1,10 @@
-# thresholdhp.com copy, draft 4 (2026-11-15)
+# thresholdhp.com copy, draft 5 (2026-11-15)
 
 Every word that goes on the redesigned site. Nothing goes live until you approve it. All your calls are settled; the list is at the bottom. Reviews are quoted word for word.
 
 Rules applied: Voice DNA (first person, no em dashes, no "not X, Y", no "we"), your USP, "athletes and active adults", no CSCS (lapsed), no fixed recovery timelines, nothing invented.
+
+**Added in draft 5 (2026-11-15):** a Physical therapy page, now first in the menu ("How I work" moved to the footer), with a "Not near Reston?" section pointing to online coaching, and a Good Faith Estimate page linked in the footer.
 
 **Changed in draft 4 (your calls, 2026-11-15):** the strength line now reads "a background in strength and conditioning and exercise, with a concentration in nutrition"; no mentors are named (the Kav section is now "Where I learned to coach"); the Olympic sprinter line became "I've coached everyone from middle school athletes all the way up to the Olympic stage"; reviews stay anonymous; no prices; the online page frames rehab as the stage after your clinician and says online coaching isn't physical therapy; Resend replaces GoHighLevel in the Privacy Policy and the Terms; the photos are OK; the three animations stay.
 
@@ -208,6 +210,63 @@ Online coaching is strength and fitness coaching. It isn't physical therapy, med
 ### Start with a free call
 
 **[Book a free call]**
+
+---
+
+## Physical therapy ( /physical-therapy, new in draft 5 )
+
+**Title tag:** Physical Therapy in Reston, VA | Threshold Health & Performance
+**Meta description:** In-person physical therapy for athletes and active adults in Reston, VA: 60-minute one-on-one sessions with Dr. Lars Stevenson, PT, DPT. No referral needed.
+
+# In-person physical therapy in Reston
+
+I see athletes and active adults in person in Reston. Every session is one-on-one with me for 60 minutes, on one plan built for you and tested as you go.
+
+**[Book a free call]**
+
+### How in-person care works
+
+**[See how I work]**
+
+1. **Book a free call.** Tell me what's going on and what you've tried. If I'm not the right person for it, I'll point you to who is.
+2. **Your first visit.** A full evaluation, joint by joint, and your first treatment. You leave knowing what's going on.
+3. **Weekly or every other week after that.** Hands-on treatment and the exercises that hold the change in place, on one plan I retest as you go. Between sessions, your plan lives in the app.
+
+### Questions people ask
+
+**Where are sessions?** 1908 Reston Metro Plaza, Reston, VA 20190.
+
+**How long is a session?** 60 minutes, and every session is with me, start to finish, with no techs or aides.
+
+**How often will I come in?** Weekly or every other week. I recommend one after your evaluation.
+
+**Do I need a referral from my doctor?** No. In Virginia, a physical therapist with a doctorate can evaluate and treat you without one. If another provider is already treating you for the same problem, I'll ask your OK to send them my evaluation.
+
+**What does it cost, and do you take insurance?** I go through cost on the free call, and once you book, I email you a written Good Faith Estimate. I don't bill insurance. You pay me directly, and I give you a superbill you can send your insurance company for possible out-of-network reimbursement. **[Your right to a Good Faith Estimate]**
+
+**What should I wear?** Clothes you can move and train in.
+
+### Not near Reston?
+
+I coach your return to training online, after rehab: a plan built around you, coaching in the app, and a call when you need one.
+
+**[See online coaching]**
+
+### Start with a free call
+
+**[Book a free call]**
+
+*(Sources: sessions at 1908 Reston Metro Plaza (you, 2026-11-15); 60 minutes (Practice Better's in-person service); weekly or every other week (your Threshold Performance Care plans); cash-pay with superbills; no referral needed for a DPT under Code of Virginia § 54.1-3482(B). "What should I wear?" is the one line with no source; it's new wording for your OK.)*
+
+---
+
+## Good Faith Estimate ( /good-faith-estimate, new in draft 5, linked in the footer )
+
+CMS's model notice word for word ("You have the right to receive a 'Good Faith Estimate' explaining how much your health care will cost" and its three points), with CMS's current link (www.cms.gov/medical-bill-rights), its email and its phone number. Then:
+
+### At Threshold Health & Performance
+
+I don't bill insurance, so this applies to every patient. After you book an evaluation or a plan of care, I email you a written Good Faith Estimate. To get one before you book, email dr.lars@thresholdhp.com and I'll send it within 3 business days.
 
 ---
 

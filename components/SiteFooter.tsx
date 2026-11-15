@@ -35,6 +35,7 @@ export default function SiteFooter() {
 
         <nav aria-label="Site" className="md:col-span-3">
           <ul className="space-y-3 font-montserrat text-[0.9375rem]">
+            <li><Link href="/physical-therapy" className={linkCls}>Physical therapy</Link></li>
             <li><Link href="/#how-i-work" className={linkCls}>How I work</Link></li>
             <li><Link href="/online-coaching" className={linkCls}>Online coaching</Link></li>
             <li><Link href="/about" className={linkCls}>About</Link></li>
@@ -48,6 +49,7 @@ export default function SiteFooter() {
             <li><Link href="/privacy-policy" className={linkCls}>Privacy Policy</Link></li>
             <li><Link href="/terms-and-conditions" className={linkCls}>Terms &amp; Conditions</Link></li>
             <li><Link href="/sms-policy" className={linkCls}>SMS Policy</Link></li>
+            <li><Link href="/good-faith-estimate" className={linkCls}>Good Faith Estimate</Link></li>
           </ul>
         </nav>
       </div>

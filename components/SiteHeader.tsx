@@ -7,10 +7,11 @@ import { DISCOVERY_CALL } from '@/lib/site'
 // disclosure, so it works with no JavaScript. Pass `current` to mark the page you're on.
 // (Named SiteHeader so it doesn't collide with the blog branch's SiteNav.tsx.)
 
-export type NavKey = 'home' | 'how' | 'online' | 'about' | 'book'
+export type NavKey = 'home' | 'pt' | 'online' | 'about' | 'book'
 
 const LINKS: { key: NavKey; href: string; label: string }[] = [
-  { key: 'how', href: '/#how-i-work', label: 'How I work' },
+  // In-person first (Lars, 2026-11-15); "How I work" lives in the footer and on /physical-therapy.
+  { key: 'pt', href: '/physical-therapy', label: 'Physical therapy' },
   { key: 'online', href: '/online-coaching', label: 'Online coaching' },
   { key: 'about', href: '/about', label: 'About' },
 ]
@@ -22,22 +23,23 @@ export default function SiteHeader({ current }: { current?: NavKey }) {
         <Link href="/" className="group flex items-center gap-3" aria-label="Threshold Health & Performance, home">
           <LogoMark className="h-6 w-auto text-purple-logo transition-colors duration-150 group-hover:text-purple" />
           <span className="font-cormorant text-[1.35rem] font-semibold leading-none text-ink">
-            Threshold<span className="hidden sm:inline"> Health &amp; Performance</span>
+            Threshold<span className="hidden sm:inline md:hidden lg:inline"> Health &amp; Performance</span>
           </span>
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-8 md:flex">
+        {/* 768-1023px: the short wordmark and tighter gaps keep every item on one line. */}
+        <nav aria-label="Main" className="hidden items-center gap-6 md:flex lg:gap-8">
           {LINKS.map((l) => (
             <Link
               key={l.key}
               href={l.href}
               aria-current={current === l.key ? 'page' : undefined}
-              className="py-2 font-montserrat text-[0.9375rem] font-medium text-ink-soft underline-offset-[0.35em] transition-colors duration-150 hover:text-ink hover:underline aria-[current=page]:text-ink aria-[current=page]:underline"
+              className="whitespace-nowrap py-2 font-montserrat text-[0.9375rem] font-medium text-ink-soft underline-offset-[0.35em] transition-colors duration-150 hover:text-ink hover:underline aria-[current=page]:text-ink aria-[current=page]:underline"
             >
               {l.label}
             </Link>
           ))}
-          <Link href={BOOKING_URL} className="btn !min-h-[2.75rem] !px-5" aria-current={current === 'book' ? 'page' : undefined}>
+          <Link href={BOOKING_URL} className="btn !min-h-[2.75rem] whitespace-nowrap !px-5" aria-current={current === 'book' ? 'page' : undefined}>
             {DISCOVERY_CALL.label}
           </Link>
         </nav>
