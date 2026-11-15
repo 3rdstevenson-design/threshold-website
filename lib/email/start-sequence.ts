@@ -104,9 +104,9 @@ export async function startSequence(lead: GuideLead, baseUrl: string, now = new 
           { name: 'sequence', value: 'baad-guide' },
           { name: 'step', value: copy.step },
         ],
-        // A double-click or a same-day repeat doesn't send twice. v2: the guide email changed on 2026-11-15
-        // (attachment, shorter copy), and Resend refuses a reused key with a different body.
-        idempotencyKey: `site-baad-v2-${copy.step}-${contact}-${keyBase}`,
+        // A double-click or a same-day repeat doesn't send twice. The copy's hash is in the key because Resend refuses a
+        // reused key with a different body for 24 hours, so a changed email must count as a new request.
+        idempotencyKey: `site-baad-${copy.step}-${contact}-${keyBase}-${createHash('sha256').update(JSON.stringify(copy)).digest('hex').slice(0, 8)}`,
       })
       later.unshift(id)
       result.sent.unshift({ step: copy.step, id, at: (at ?? now).toISOString() })
