@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   ...pageMeta({
     fullTitle: 'About Dr. Lars Stevenson, PT, DPT | Threshold Health & Performance',
     description:
-      'Dr. Lars Stevenson, PT, DPT, is a physical therapist in Reston, VA with a background in strength and conditioning, working with athletes and active adults.',
+      'Dr. Lars Stevenson, PT, DPT, is a physical therapist in Reston, VA with a background in strength and conditioning, exercise and nutrition, working with athletes and active adults.',
     path: '/about',
   }),
 }
@@ -23,7 +23,7 @@ const CREDENTIALS = [
   'St. Olaf College, Minnesota',
   'Fascial Stretch Therapy, Level 1',
   'Precision Nutrition, Level 1',
-  'Apprenticeship under Coach Justin Kavanaugh, SSI',
+  'Strength and conditioning apprenticeship, from age 20',
 ]
 
 const h2 = 'font-cormorant text-h2 font-medium text-ink'
@@ -38,8 +38,9 @@ export default function AboutPage() {
           <div className="md:col-span-7">
             <h1 className="font-cormorant text-display font-medium text-ink">Dr. Lars Stevenson, PT, DPT</h1>
             <p className="mt-8 max-w-[44ch] text-lede text-ink-soft">
-              Physical therapist in {BUSINESS.city}, {BUSINESS.regionName}, with a background in strength and
-              conditioning. I opened Threshold to take people the rest of the way after rehab.
+              Physical therapist in {BUSINESS.city}, {BUSINESS.regionName}. My background is in strength and
+              conditioning and exercise, with a concentration in nutrition. I opened Threshold to take people the
+              rest of the way after rehab.
             </p>
             <Link href={BOOKING_URL} className="btn mt-8">
               {DISCOVERY_CALL.label}
@@ -99,17 +100,17 @@ export default function AboutPage() {
 
         <section className="bg-band">
           <div className="mx-auto grid max-w-page gap-8 px-5 py-24 sm:px-8 md:grid-cols-12 md:py-32">
-            <h2 className={`${h2} md:col-span-5`}>Learning from Coach Kav</h2>
+            <h2 className={`${h2} md:col-span-5`}>Where I learned to coach</h2>
             <div className={`${prose} md:col-span-6 md:col-start-7`}>
               <p>
-                At 20 I started an apprenticeship under strength coach Justin Kavanaugh. It took me to Jamaica on his
-                Project Stronger Jamaica trip, working tracks alongside sprint coaches. Later I spent a year at his gym,
-                SSI, stretching an Olympic sprinter and running his control drills every day while Kav prepared him for
-                Tokyo. I&apos;ve worked with sprinters preparing for the Tokyo and Paris Games.
+                At 20 I started an apprenticeship with a strength coach. It took me to Jamaica, working tracks
+                alongside sprint coaches, and then to a year in his gym, stretching his sprinters and running their
+                control drills every day. I&apos;ve coached everyone from middle school athletes all the way up to the
+                Olympic stage.
               </p>
               <p>
-                Kav showed me what elite standards look like, and that the truth, said clearly and quickly, beats the
-                comfortable version. I tell my patients the truth about their progress.
+                That year showed me what elite standards look like, and that the truth, said clearly and quickly, beats
+                the comfortable version. I tell my patients the truth about their progress.
               </p>
             </div>
           </div>
@@ -158,7 +159,6 @@ export default function AboutPage() {
                 ))}
               </ul>
               <div className={`mt-8 ${prose}`}>
-                <p>I keep learning from Ian King, Mai-Linh Dovan of Rehab-U and Dr. Tom Roselle.</p>
                 <p>When I&apos;m not working, I&apos;m training or running a D&amp;D campaign.</p>
               </div>
             </div>

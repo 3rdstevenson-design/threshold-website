@@ -3,8 +3,8 @@
 import { useEffect, useRef } from 'react'
 
 // Moment "picture develops" (taste-skill: picture-develops). The photograph comes up out of a faint gray
-// print, darks first, then colour, once, the first time it is on screen. Without the switch, JavaScript
-// or motion, the photograph simply stands.
+// print, darks first, then colour, once, the first time it is on screen (styles in app/globals.css, gated on
+// the `js` class from app/layout.tsx). Without JavaScript, or with motion turned off, the photograph simply stands.
 export default function Develop({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
 

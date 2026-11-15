@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 
 // Moment "words fill in" (taste-skill: word-highlight). The paragraph's words turn from light gray to ink
 // as it scrolls through the viewport, so the statement completes as you read it. The full text is in the
-// HTML from the start; without the switch, JavaScript or motion, every word is plain ink.
+// HTML from the start; without JavaScript, or with motion turned off, every word is plain ink.
 export default function WordHighlight({ paragraphs, className = '' }: { paragraphs: string[]; className?: string }) {
   const root = useRef<HTMLDivElement>(null)
 
@@ -17,8 +17,7 @@ export default function WordHighlight({ paragraphs, className = '' }: { paragrap
 
     function paint() {
       frame = 0
-      const active = document.documentElement.hasAttribute('data-m-words') && !reduce.matches
-      if (!active) {
+      if (reduce.matches) {
         words.forEach((w) => (w.style.color = ''))
         return
       }
@@ -40,12 +39,10 @@ export default function WordHighlight({ paragraphs, className = '' }: { paragrap
     paint()
     window.addEventListener('scroll', schedule, { passive: true })
     window.addEventListener('resize', schedule)
-    window.addEventListener('moments-change', schedule)
     reduce.addEventListener('change', schedule)
     return () => {
       window.removeEventListener('scroll', schedule)
       window.removeEventListener('resize', schedule)
-      window.removeEventListener('moments-change', schedule)
       reduce.removeEventListener('change', schedule)
       if (frame) cancelAnimationFrame(frame)
     }

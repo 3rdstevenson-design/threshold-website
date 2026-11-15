@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;font-family:Nunito Sans,Helvetica,Arial,sans-serif;color:#1a1a2e;line-height:1.6">
 <h1 style="font-family:Cormorant Garamond,Georgia,serif;font-size:2.4rem;color:#7002AB">Privacy Policy</h1>
-<p><strong>Effective date:</strong> May 30, 2026</p>
+<p><strong>Effective date:</strong> November 15, 2026</p>
 <h2>1. Introduction</h2>
 <p>Threshold Health &amp; Performance ("Threshold," "we," "us," or "our"), operated by Dr. Lars Health Consulting Inc., is a premium physical therapy and performance practice based in Virginia. We provide clinical care, remote coaching, performance consulting, strength and conditioning guidance, mobility and recovery programming, and educational content to clients and prospective clients across the United States.</p>
 <p>This Privacy Policy explains what information we collect, how we collect it, how we use and protect it, and the choices you have. It applies to thresholdhp.com (the "Site"), our intake and scheduling tools, and our email and text-message communications. By using the Site or providing your information to us, you agree to the practices described here.</p>
@@ -33,7 +33,7 @@ const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;f
 <h2>7. Cookies and Analytics</h2>
 <p>The Site uses cookies and similar technologies to operate the Site, remember preferences, measure performance, and understand how the Site is used. You can control cookies through your browser settings; disabling certain cookies may affect Site functionality. We may use analytics providers that process usage data on our behalf.</p>
 <h2>8. Third-Party Platforms and Service Providers</h2>
-<p>We use trusted third-party platforms to operate our business, including a customer relationship management and messaging platform (GoHighLevel), scheduling tools, email and SMS delivery services, and analytics providers. These providers process information solely to perform services for us and are bound by confidentiality and data-protection obligations. We do not authorize them to use your information for their own marketing purposes.</p>
+<p>We use trusted third-party platforms to operate our business, including an email delivery service (Resend), scheduling tools, SMS delivery services, and analytics providers. These providers process information solely to perform services for us and are bound by confidentiality and data-protection obligations. We do not authorize them to use your information for their own marketing purposes.</p>
 <h2>9. Payment Processing</h2>
 <p>Payments are processed by Stripe, a third-party payment processor. When you make a payment, your payment card details are collected and processed directly by Stripe under its own terms and privacy policy. We receive limited transaction information (such as confirmation and the last digits of a card) and do not store full card numbers.</p>
 <h2>10. Email and SMS Communications</h2>

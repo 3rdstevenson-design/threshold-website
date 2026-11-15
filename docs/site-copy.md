@@ -1,8 +1,10 @@
-# thresholdhp.com copy, draft 3 (2026-11-14)
+# thresholdhp.com copy, draft 4 (2026-11-15)
 
-Every word that goes on the redesigned site. Nothing goes live until you approve it. Lines marked ⚑ need your call; the list is at the bottom. Reviews are quoted word for word.
+Every word that goes on the redesigned site. Nothing goes live until you approve it. All your calls are settled; the list is at the bottom. Reviews are quoted word for word.
 
 Rules applied: Voice DNA (first person, no em dashes, no "not X, Y", no "we"), your USP, "athletes and active adults", no CSCS (lapsed), no fixed recovery timelines, nothing invented.
+
+**Changed in draft 4 (your calls, 2026-11-15):** the strength line now reads "a background in strength and conditioning and exercise, with a concentration in nutrition"; no mentors are named (the Kav section is now "Where I learned to coach"); the Olympic sprinter line became "I've coached everyone from middle school athletes all the way up to the Olympic stage"; reviews stay anonymous; no prices; the online page frames rehab as the stage after your clinician and says online coaching isn't physical therapy; Resend replaces GoHighLevel in the Privacy Policy and the Terms; the photos are OK; the three animations stay.
 
 **Changed since draft 2 (your calls, 2026-11-14):** the guide goes out by email only, with no download on the site, even when sending fails; nothing under the button explains the follow-ups or the newsletter, so the day 2 and day 5 emails say they're promotional instead; the guide email no longer mentions the follow-ups; the bench press photo keeps the bar and plates in color.
 
@@ -30,7 +32,7 @@ Links: How I work · Online coaching · About · Book a free call · Contact · 
 
 # When the pain backs off, you're halfway there.
 
-I'm a physical therapist with a background in strength and conditioning, so I take athletes and active adults the rest of the way, on one plan built for them and tested as they go. ⚑1
+I'm a physical therapist with a background in strength and conditioning and exercise, with a concentration in nutrition. I take athletes and active adults the rest of the way, on one plan built for them and tested as they go.
 
 **[Book a free call]** · Call (402) 536-0203
 
@@ -65,7 +67,7 @@ Every patient goes through the same five parts, in this order. I call it the CRO
 A high school football player came in with hip tightness that had limited his training for years. He'd picked up advice from coaches and trainers, and nothing had fixed it. I evaluated him, found where the system had broken down, and started treatment that day, built around his body and his sport. He got back to training without restriction and went on to play Division I college football.
 
 “Lars Stevenson is by far the best physical therapist I've ever worked with. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.”
-Patient review, January 2025 ⚑2
+Patient review, January 2025
 
 “After one session I immediately felt relief from my back and hip pain. He was very detailed and clear, and gave me exercises to do at home before our next visit.”
 Patient review, January 2025
@@ -77,7 +79,7 @@ Patient review, February 2025
 
 I grew up an Air Force kid and played football from age 7 through Division III at St. Olaf College. I was top 5 on my team in every lift and barely played, which is a big part of why I train athletes the way I do.
 
-At 20 I started an apprenticeship under strength coach Justin Kavanaugh, and I've worked with sprinters preparing for the Tokyo and Paris Games. Every session is with me, start to finish, with no techs or aides.
+At 20 I started an apprenticeship with a strength coach, and I've coached everyone from middle school athletes all the way up to the Olympic stage. Every session is with me, start to finish, with no techs or aides.
 
 **[Read my story]**
 
@@ -89,7 +91,7 @@ First name · Email · **[Send me the guide]**
 
 ### Online coaching, wherever you train
 
-Not near Reston? I coach rehab and training online: a plan built around you, coaching in the app, and a call when you need one.
+Not near Reston? I coach your return to training online, after rehab: a plan built around you, coaching in the app, and a call when you need one.
 
 **[See online coaching]**
 
@@ -109,11 +111,11 @@ Dr. Lars Stevenson
 ## About ( /about )
 
 **Title tag:** About Dr. Lars Stevenson, PT, DPT | Threshold Health & Performance
-**Meta description:** Dr. Lars Stevenson, PT, DPT, is a physical therapist in Reston, VA with a background in strength and conditioning, working with athletes and active adults.
+**Meta description:** Dr. Lars Stevenson, PT, DPT, is a physical therapist in Reston, VA with a background in strength and conditioning, exercise and nutrition, working with athletes and active adults.
 
 # Dr. Lars Stevenson, PT, DPT
 
-Physical therapist in Reston, Virginia, with a background in strength and conditioning. I opened Threshold to take people the rest of the way after rehab.
+Physical therapist in Reston, Virginia. My background is in strength and conditioning and exercise, with a concentration in nutrition. I opened Threshold to take people the rest of the way after rehab.
 
 **[Book a free call]**
 
@@ -125,11 +127,11 @@ In my senior year of high school, a teammate talked my football friends and me i
 
 I played Division III football at St. Olaf College in Minnesota. I was top 5 on my team in every lift and barely played. That gap between the weight room and the field is a big part of why I train athletes the way I do. Six concussions ended my playing days before my senior season, so I stayed with the program from the sideline and coached in the school's performance program.
 
-### Learning from Coach Kav
+### Where I learned to coach
 
-At 20 I started an apprenticeship under strength coach Justin Kavanaugh. It took me to Jamaica on his Project Stronger Jamaica trip, working tracks alongside sprint coaches. Later I spent a year at his gym, SSI, stretching an Olympic sprinter and running his control drills every day while Kav prepared him for Tokyo. ⚑3 I've worked with sprinters preparing for the Tokyo and Paris Games.
+At 20 I started an apprenticeship with a strength coach. It took me to Jamaica, working tracks alongside sprint coaches, and then to a year in his gym, stretching his sprinters and running their control drills every day. I've coached everyone from middle school athletes all the way up to the Olympic stage.
 
-Kav showed me what elite standards look like, and that the truth, said clearly and quickly, beats the comfortable version. I tell my patients the truth about their progress.
+That year showed me what elite standards look like, and that the truth, said clearly and quickly, beats the comfortable version. I tell my patients the truth about their progress.
 
 ### Why I opened Threshold
 
@@ -143,9 +145,7 @@ Threshold holds the whole arc in one place: rehab, strength, and the return to w
 - St. Olaf College, Minnesota
 - Fascial Stretch Therapy, Level 1
 - Precision Nutrition, Level 1
-- Apprenticeship under Coach Justin Kavanaugh, SSI
-
-I keep learning from Ian King, Mai-Linh Dovan of Rehab-U and Dr. Tom Roselle. ⚑3
+- Strength and conditioning apprenticeship, from age 20
 
 When I'm not working, I'm training or running a D&D campaign.
 
@@ -166,7 +166,7 @@ Tell me what's going on and what you've tried. If I'm not the right person for i
 
 # Book a free 30-minute call
 
-It's a video call with me. ⚑5 Tell me what's going on and what you've tried, and I'll tell you what I'd do next. If I'm not the right person for it, I'll point you to who is.
+It's a video call with me. Tell me what's going on and what you've tried, and I'll tell you what I'd do next. If I'm not the right person for it, I'll point you to who is.
 
 ### After the call
 
@@ -183,17 +183,17 @@ Booking runs on Practice Better, my patient portal.
 ## Online coaching ( /online-coaching, new )
 
 **Title tag:** Online Coaching for Athletes and Active Adults | Threshold Health & Performance
-**Meta description:** Online rehab and training coaching from Dr. Lars Stevenson, PT, DPT: a plan built around you, coaching in the app, and a call when you need one.
+**Meta description:** Online strength coaching for your return to training after rehab: a plan built around you, coaching in the app, and a call when you need one.
 
 # Online coaching for athletes and active adults
 
-When the pain backs off, you're halfway there. Online, I coach the rest of your rehab and your return to training: a plan built around you, coaching through the app, and a call when you need one.
+When the pain backs off, you're halfway there. Online, I coach the rest of the way after rehab, back to your sport and your training: a plan built around you, coaching through the app, and a call when you need one.
 
 **[Book a free call]**
 
 ### Who it's for
 
-You're finishing rehab, or you finished it with less pain, and you're not back to your sport or your training yet. You're not near Reston, or you'd rather train on your own schedule.
+You finished rehab with less pain, or your clinician has cleared you to train, and you're not back to your sport or your training yet. You're not near Reston, or you'd rather train on your own schedule.
 
 ### How online coaching works
 
@@ -203,9 +203,7 @@ You're finishing rehab, or you finished it with less pain, and you're not back t
 
 ### Coaching, and when you need more
 
-Online coaching is coaching. If what you need is hands-on treatment, I'll tell you, and help you get it, in person with me or with someone near you. ⚑4
-
-⚑4 Price line, only if you want it: "$299 every 4 weeks."
+Online coaching is strength and fitness coaching. It isn't physical therapy, medical care, diagnosis or treatment, and it doesn't replace care from a licensed clinician in your state. If you have an injury, check with your clinician before you start. If what you need is hands-on treatment, I'll tell you, and help you get it, in person with me in Reston or with someone near you.
 
 ### Start with a free call
 
@@ -260,14 +258,14 @@ P.S. Rather ask a question first? Hit reply. It comes straight to me.
 
 **Unsubscribe page:** "Unsubscribe? You'll stop getting emails from me: the guide follow-ups and the newsletter. [Unsubscribe me]" then "You're unsubscribed. You won't get any more emails from me. Thanks for reading the guide."
 
-## Your calls (⚑)
+## Your calls (all settled)
 
-1. **"Strength coach."** Your USP says "I'm a physical therapist and a strength coach". Since your CSCS lapsed, your Nov 14 rule says "background in strength and conditioning", so I swapped that phrase. OK, or keep "strength coach"?
-2. **Reviews.** Where are these 6 from (Google? PT Solutions patients?), and can I show first names or initials? As drafted they say "Patient review" and the month.
-3. **Names.** OK to name Coach Justin Kavanaugh, and your mentors (Ian King, Mai-Linh Dovan, Dr. Tom Roselle)? Want Jason Rogers named, or keep "an Olympic sprinter"?
-4. **Online coaching.** No price and no checkout link on the page (you didn't pick prices). Add "$299 every 4 weeks" and the Coach Catalyst checkout? And the copy now says I coach "the rest of your rehab" online: OK for clients outside Virginia, next to the "coaching, not treatment" line?
-5. **The call.** 30 minutes, matching Practice Better (the site said 20). Is it always a video call?
+1. **Strength line.** Settled (you, 2026-11-15): "a background in strength and conditioning and exercise, with a concentration in nutrition" (Home, About and the About meta description).
+2. **Reviews.** Settled (you, 2026-11-15): they stay anonymous ("Patient review" and the month).
+3. **Names.** Settled (you, 2026-11-15): no mentors named (Justin Kavanaugh, Ian King, Mai-Linh Dovan, Dr. Tom Roselle all came out, and the Kav section is now "Where I learned to coach"). The Olympic sprinter line is now "I've coached everyone from middle school athletes all the way up to the Olympic stage."
+4. **Online coaching.** Settled (you, 2026-11-15): no price and no checkout link. "Rehab" stays, but never "physical therapy" as the offer: a wording check (2026-11-15) found "rehab" isn't a protected term in Virginia, California, Texas or New York, while practice happens where the client is (Virginia Board of Physical Therapy guidance 112-21; FSBPT). So the page frames rehab as the stage after the client's own clinician, keeps treatment words and the PT/DPT credential line off, and says online coaching isn't physical therapy. A health-care attorney should confirm the wording for the states you coach in most.
+5. **The call.** Settled (you, 2026-11-15): 30 minutes, on video.
 6. **Newsletter consent.** Settled (you, 2026-11-14): nothing on the form; the follow-ups and the newsletter say they're promotional, which US law accepts. Signups from Canada, the UK or the EU wouldn't meet their consent rules.
-7. **Privacy Policy.** It still names GoHighLevel as your CRM and doesn't name Resend. Proposed change to section 7's provider sentence: "...including an email delivery service (Resend), scheduling tools, SMS delivery services, and analytics providers." Approve, or have the attorney look first?
-8. **Photos.** OK to show everyone pictured with you: the three in the boxing-gym shots (navy jacket, Beast Mode shirt, Ice Cube shirt), the lifter you're spotting and the lifter you're talking with at Exile Barbell Club, and the woman on the table in the treatment photo? And is that treatment room somewhere you can show (not a past employer's clinic)?
-9. **Animations.** Pick from the demo at localhost:3010 (words fill in, portrait develops, headline behind you). Photo chapters is out (Lars, 2026-11-14).
+7. **Privacy Policy.** Settled (you, 2026-11-15): Resend named as the email delivery service and GoHighLevel left off, in the Privacy Policy and the Terms; both effective dates are now November 15, 2026.
+8. **Photos.** Settled (you, 2026-11-15): "the photos are okay", so everyone pictured and the treatment room stay.
+9. **Animations.** Settled (you, 2026-11-15): words fill in, portrait develops and headline behind you stay; photo chapters is out. The demo panel is gone.

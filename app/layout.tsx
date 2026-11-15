@@ -3,7 +3,6 @@ import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import StructuredData from '@/components/StructuredData'
-import DemoPanel from '@/components/demo/DemoPanel'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/site'
 
 // Brand fonts, self-hosted as latin woff2 subsets (SIL OFL, licenses beside the files in app/fonts).
@@ -71,7 +70,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${montserrat.variable} ${nunitoSans.variable}`}>
+    // suppressHydrationWarning: the inline script below adds `js` to <html> before React hydrates.
+    <html lang="en" className={`${cormorant.variable} ${montserrat.variable} ${nunitoSans.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Marks JavaScript as on before first paint, so the About portrait starts as a faint print without a
+            flash of the finished photo. Without JavaScript it never gets the class and the photo simply stands. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body className="bg-paper font-nunito text-ink antialiased">
         <a
           href="#main"
@@ -81,8 +86,6 @@ export default function RootLayout({
         </a>
         <StructuredData />
         {children}
-        {/* Local animation demo for Lars to compare; never rendered in production builds. */}
-        {process.env.NODE_ENV === 'development' && <DemoPanel />}
         {/* Vercel Web Analytics (free on Hobby). Replaced Plausible, whose trial lapsed in June 2026. */}
         <Analytics />
       </body>

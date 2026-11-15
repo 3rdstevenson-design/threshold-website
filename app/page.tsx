@@ -86,8 +86,9 @@ export default function HomePage() {
           <div className="mt-10 grid gap-12 md:mt-14 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-5 md:row-start-1 lg:col-span-4">
               <p className="text-lede text-ink-soft">
-                I&apos;m a physical therapist with a background in strength and conditioning, so I take athletes and
-                active adults the rest of the way, on one plan built for them and tested as they go.
+                I&apos;m a physical therapist with a background in strength and conditioning and exercise, with a
+                concentration in nutrition. I take athletes and active adults the rest of the way, on one plan built
+                for them and tested as they go.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <a href="#book" className="btn">
@@ -102,22 +103,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Default: the photograph with the room grayed out, bleeding off the right edge. */}
-            <div className="hero-photo-variant -mx-5 sm:-mx-8 md:col-span-7 md:row-start-1 md:mx-0 md:mr-[calc(-1*max(2rem,(100vw-78rem)/2+2rem))] lg:col-span-8">
-              <div className="settle relative aspect-[3/2] overflow-hidden bg-band">
-                <Image
-                  src="/photos/hands-on-forearm.jpg"
-                  alt="Dr. Lars Stevenson working hands-on on a client's wrist and forearm"
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 62vw, (min-width: 768px) 58vw, 100vw"
-                  className="object-cover object-[45%_40%]"
-                />
-              </div>
-            </div>
-
-            {/* Demo variant "headline behind you": the cut-out stands over the headline's second line. */}
-            <div className="hero-behind-variant relative z-[2] -mt-6 md:col-span-7 md:row-start-1 md:-mt-[clamp(3.25rem,5.6vw,5.75rem)] lg:col-span-8">
+            {/* Headline behind you (Lars kept it, 2026-11-15): the cut-out stands over the headline's second line. */}
+            <div className="relative z-[2] -mt-6 md:col-span-7 md:row-start-1 md:-mt-[clamp(3.25rem,5.6vw,5.75rem)] lg:col-span-8">
               <div className="relative aspect-[3/2]">
                 <Image
                   src="/photos/hands-on-forearm-cutout.png"
@@ -229,9 +216,9 @@ export default function HomePage() {
                   way I do.
                 </p>
                 <p>
-                  At 20 I started an apprenticeship under strength coach Justin Kavanaugh, and I&apos;ve worked with
-                  sprinters preparing for the Tokyo and Paris Games. Every session is with me, start to finish, with no
-                  techs or aides.
+                  At 20 I started an apprenticeship with a strength coach, and I&apos;ve coached everyone from middle
+                  school athletes all the way up to the Olympic stage. Every session is with me, start to finish, with
+                  no techs or aides.
                 </p>
               </div>
               <Link href="/about" className="link mt-8 inline-block font-montserrat text-[0.9375rem] font-semibold">
@@ -273,8 +260,8 @@ export default function HomePage() {
             <div className="md:col-span-6 md:col-start-7">
               <h2 className={h2}>Online coaching, wherever you train</h2>
               <p className="mt-5 max-w-measure text-lede text-ink-soft">
-                Not near Reston? I coach rehab and training online: a plan built around you, coaching in the app, and a
-                call when you need one.
+                Not near Reston? I coach your return to training online, after rehab: a plan built around you, coaching
+                in the app, and a call when you need one.
               </p>
               <Link
                 href="/online-coaching"

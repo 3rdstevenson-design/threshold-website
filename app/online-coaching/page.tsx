@@ -9,14 +9,16 @@ import SiteFooter from '@/components/SiteFooter'
 
 // Remote Performance Care (wiki reference-threshold-offers): the plan built around the client,
 // coaching by messaging in the app, a call when it's needed, no scheduled live sessions.
-// No price on the page until Lars decides to show it (docs/site-copy.md, call 4).
+// No price on the page (Lars, 2026-11-15). Wording (docs/site-copy.md, call 4): rehab is the stage after the
+// client's own clinician; no physical therapy offered, no treatment language, no PT/DPT credential line here,
+// because practice happens where the client is and Lars is licensed in Virginia only.
 
 export const metadata: Metadata = {
   title: 'Online Coaching for Athletes and Active Adults',
   ...pageMeta({
     fullTitle: 'Online Coaching for Athletes and Active Adults | Threshold Health & Performance',
     description:
-      'Online rehab and training coaching from Dr. Lars Stevenson, PT, DPT: a plan built around you, coaching in the app, and a call when you need one.',
+      'Online strength coaching for your return to training after rehab: a plan built around you, coaching in the app, and a call when you need one.',
     path: '/online-coaching',
   }),
 }
@@ -46,8 +48,8 @@ export default function OnlineCoachingPage() {
               Online coaching for athletes and active adults
             </h1>
             <p className="mt-8 max-w-[44ch] text-lede text-ink-soft">
-              {USP_LINE} Online, I coach the rest of your rehab and your return to training: a plan built around you,
-              coaching through the app, and a call when you need one.
+              {USP_LINE} Online, I coach the rest of the way after rehab, back to your sport and your training: a plan
+              built around you, coaching through the app, and a call when you need one.
             </p>
             <Link href={BOOKING_URL} className="btn mt-8">
               {DISCOVERY_CALL.label}
@@ -72,8 +74,8 @@ export default function OnlineCoachingPage() {
             <h2 className={`${h2} md:col-span-5`}>Who it&apos;s for</h2>
             <div className="max-w-measure space-y-5 text-lede text-ink-soft md:col-span-6 md:col-start-7">
               <p>
-                You&apos;re finishing rehab, or you finished it with less pain, and you&apos;re not back to your sport or
-                your training yet.
+                You finished rehab with less pain, or your clinician has cleared you to train, and you&apos;re not back
+                to your sport or your training yet.
               </p>
               <p>You&apos;re not near Reston, or you&apos;d rather train on your own schedule.</p>
             </div>
@@ -107,8 +109,10 @@ export default function OnlineCoachingPage() {
             <div className="md:col-span-6">
               <h2 className={h2}>Coaching, and when you need more</h2>
               <p className="mt-6 max-w-measure text-lede text-ink-soft">
-                Online coaching is coaching. If what you need is hands-on treatment, I&apos;ll tell you, and help you get
-                it, in person with me or with someone near you.
+                Online coaching is strength and fitness coaching. It isn&apos;t physical therapy, medical care, diagnosis or
+                treatment, and it doesn&apos;t replace care from a licensed clinician in your state. If you have an injury,
+                check with your clinician before you start. If what you need is hands-on treatment, I&apos;ll tell you,
+                and help you get it, in person with me in Reston or with someone near you.
               </p>
               <h2 className={`${h2} mt-16`}>Start with a free call</h2>
               <Link href={BOOKING_URL} className="btn mt-8">

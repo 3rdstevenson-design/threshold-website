@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;font-family:Nunito Sans,Helvetica,Arial,sans-serif;color:#1a1a2e;line-height:1.6">
 <h1 style="font-family:Cormorant Garamond,Georgia,serif;font-size:2.4rem;color:#7002AB">Terms &amp; Conditions</h1>
-<p><strong>Effective date:</strong> May 30, 2026</p>
+<p><strong>Effective date:</strong> November 15, 2026</p>
 <h2>1. Acceptance of Terms</h2>
 <p>These Terms &amp; Conditions ("Terms") govern your access to and use of thresholdhp.com (the "Site") and the services provided by Threshold Health &amp; Performance, operated by Dr. Lars Health Consulting Inc. ("Threshold," "we," "us," or "our"). By accessing the Site, communicating with us, or using our services, you agree to these Terms. If you do not agree, do not use the Site or our services.</p>
 <h2>2. Services Offered</h2>
@@ -38,7 +38,7 @@ const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;f
 <h2>12. Assumption of Risk</h2>
 <p>Physical therapy, exercise, strength and conditioning, and performance activities involve inherent risks, including the risk of injury. By participating, you acknowledge and voluntarily assume these risks. You represent that you are physically able to participate, agree to follow safety guidance, and agree to stop and seek medical attention if you experience pain or symptoms that feel wrong. This Section does not limit any rights that cannot be waived under applicable law.</p>
 <h2>13. Third-Party Software and Platforms</h2>
-<p>We use third-party platforms to operate our business, including GoHighLevel (CRM and messaging), scheduling tools, Stripe (payments), and email and SMS delivery providers. Your use of features powered by these providers may be subject to their respective terms and privacy policies. We are not responsible for the acts or omissions of third-party providers.</p>
+<p>We use third-party platforms to operate our business, including Resend (email delivery), scheduling tools, Stripe (payments), and SMS delivery providers. Your use of features powered by these providers may be subject to their respective terms and privacy policies. We are not responsible for the acts or omissions of third-party providers.</p>
 <h2>14. Communication Consent</h2>
 <p>By providing your contact information, you agree that we may contact you by email, telephone, and, where you have consented, text message, regarding your inquiries, appointments, and services, including through automated systems. See our Privacy Policy and SMS Communications and Consent Policy.</p>
 <h2>15. SMS Terms</h2>

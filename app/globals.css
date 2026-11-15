@@ -162,18 +162,13 @@
   text-underline-offset: 0.2em;
 }
 
-/* ---------- Animation demo (dev only switches; see components/demo/DemoPanel.tsx) ----------
-   The losing variants and these switches are removed once Lars picks. */
+/* ---------- Moments (Lars kept these three on 2026-11-15; photo chapters were dropped) ----------
+   Words fill in: components/moments/WordHighlight.tsx ("The other half" on the homepage).
+   Headline behind you: the hero's cut-out stands over the headline (app/page.tsx); layout only, no motion.
+   Portrait develops: the About portrait, below. Every moment is off for people who turn motion off.
+   The `js` class comes from the inline script in app/layout.tsx; without JavaScript the photo simply stands. */
 
-/* Headline behind you: the cut-out variant of the hero replaces the grayed-room photo. */
-html[data-m-behind] .hero-photo-variant {
-  display: none;
-}
-html:not([data-m-behind]) .hero-behind-variant {
-  display: none;
-}
-
-/* Portrait develops: a faint gray print that comes up, darks first, then colour. */
+/* Portrait develops: a faint gray print that comes up, darks first, then colour, once. */
 @keyframes develop {
   0% {
     filter: grayscale(1) contrast(0.55) brightness(1.45);
@@ -185,15 +180,15 @@ html:not([data-m-behind]) .hero-behind-variant {
     filter: grayscale(0) contrast(1) brightness(1);
   }
 }
-html[data-m-develop] .m-develop img {
+html.js .m-develop img {
   filter: grayscale(1) contrast(0.55) brightness(1.45);
 }
-html[data-m-develop] .m-develop.is-developing img {
+html.js .m-develop.is-developing img {
   animation: develop 1600ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 @media (prefers-reduced-motion: reduce) {
-  html[data-m-develop] .m-develop img,
-  html[data-m-develop] .m-develop.is-developing img {
+  html.js .m-develop img,
+  html.js .m-develop.is-developing img {
     filter: none;
     animation: none;
   }

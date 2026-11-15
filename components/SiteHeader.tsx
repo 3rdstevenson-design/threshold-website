@@ -43,8 +43,14 @@ export default function SiteHeader({ current }: { current?: NavKey }) {
         </nav>
 
         <div className="flex items-center gap-3 md:hidden">
-          <Link href={BOOKING_URL} className="btn !min-h-[2.75rem] !px-4 !text-[0.875rem]">
-            {DISCOVERY_CALL.label}
+          {/* Phones: "Book a free call" wrapped to 3 lines at 375px, so the label shortens to fit on one line. */}
+          <Link
+            href={BOOKING_URL}
+            aria-label={DISCOVERY_CALL.label}
+            className="btn !min-h-[2.75rem] whitespace-nowrap !px-3 !text-[0.875rem]"
+          >
+            <span className="min-[390px]:hidden">Book</span>
+            <span className="hidden min-[390px]:inline">Book a call</span>
           </Link>
           <details className="group relative">
             <summary className="flex h-11 cursor-pointer list-none items-center px-2 font-montserrat text-[0.9375rem] font-medium text-ink [&::-webkit-details-marker]:hidden">
