@@ -9,7 +9,7 @@ import { makeToken } from './unsubscribe-token'
 // Ported 2026-11-14 from pdf-lead-magnets/threshold-baad-guide, with the fixes from the CAN-SPAM review:
 // a past unsubscriber is never silently re-subscribed, and a full contact list still delivers the guide.
 
-/** e.g. "Dr. Lars Stevenson <lars@send.thresholdhp.com>": must be on a domain verified in Resend. */
+/** "Dr. Lars Stevenson <dr.lars@thresholdhp.com>": thresholdhp.com is verified in Resend (2026-11-12). */
 function from(): string {
   const f = process.env.EMAIL_FROM
   if (!f) throw new Error('EMAIL_FROM is not set')
