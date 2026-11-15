@@ -60,7 +60,12 @@ async function main() {
   assert.equal(r.sent[1].at, '2026-11-16T14:00:00.000Z') // 9:00 AM EST
   assert.equal(r.sent[2].at, '2026-11-19T14:00:00.000Z')
   const thanks = sentEmails().find((c) => c.body.tags?.some((t: any) => t.value === 'thanks'))!
-  assert.ok(thanks.body.text.includes('https://preview.example/guides/stretch-smarter-k7q2m9.pdf'))
+  // The guide email carries the PDF as an attachment, with no link to the site and no page 6 tip (Lars, 2026-11-15).
+  assert.equal(thanks.body.attachments?.[0]?.filename, 'Stretch-Smarter-The-BAAD-Model.pdf')
+  assert.equal(Buffer.from(thanks.body.attachments[0].content, 'base64').subarray(0, 5).toString(), '%PDF-')
+  assert.ok(!thanks.body.text.includes('/guides/') && !thanks.body.html.includes('/guides/'))
+  assert.ok(!thanks.body.text.toLowerCase().includes('page 6'))
+  assert.ok(thanks.body.text.includes('Your Stretch Smarter guide is attached.'))
   assert.ok(thanks.body.text.includes('1908 Reston Metro Plaza'))
   assert.ok(thanks.body.text.includes("You're getting this because you asked for my Stretch Smarter guide"))
   assert.equal(thanks.body.headers['List-Unsubscribe-Post'], 'List-Unsubscribe=One-Click')
@@ -68,6 +73,7 @@ async function main() {
   assert.ok(!thanks.body.text.includes('2 short emails'))
   assert.ok(!thanks.body.text.includes('This is a promotional email'))
   const d2 = sentEmails().find((c) => c.body.tags?.some((t: any) => t.value === 'd2'))!
+  assert.ok(!('attachments' in d2.body))
   assert.ok(d2.body.text.includes('This is a promotional email from Threshold Health & Performance.'))
   assert.ok(d2.body.html.includes('This is a promotional email from Threshold Health &amp; Performance.'))
   assert.ok(!('scheduled_at' in thanks.body))

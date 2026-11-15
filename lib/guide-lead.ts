@@ -9,8 +9,11 @@ import type { SequenceResult } from '@/lib/email/start-sequence'
 export const GUIDE = {
   title: 'Stretch Smarter',
   subtitle: 'the BAAD model',
-  // Not linked from any page: the guide goes out by email only. robots.txt and an X-Robots-Tag keep it out of search.
+  // Since 2026-11-15 the guide email attaches this file (Lars: no routing through the website). It stays here because
+  // next.config.js traces it into /api/guide, and links in emails sent before then still point to it.
+  // No page links to it; robots.txt and an X-Robots-Tag keep it out of search.
   pdfPath: '/guides/stretch-smarter-k7q2m9.pdf',
+  attachmentName: 'Stretch-Smarter-The-BAAD-Model.pdf',
   thankYouPath: '/guide/thank-you',
 }
 

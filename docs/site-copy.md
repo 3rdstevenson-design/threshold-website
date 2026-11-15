@@ -287,13 +287,10 @@ Want a plan built around your body? **[Book a free call]**
 
 ### The 3 guide emails (from the Nov 12 build; links now say "free call")
 
-Every email ends with: "You're getting this because you asked for my Stretch Smarter guide on thresholdhp.com." · Threshold Health & Performance, 1908 Reston Metro Plaza, Reston, VA 20190 · Unsubscribe. Day 2 and day 5 put "This is a promotional email from Threshold Health & Performance." first in that footer, because the form doesn't ask for consent. The guide link is a PDF no page links to, and search engines are told to skip it, so the guide only reaches people who gave their email. Signed: Be Good. Help Someone. Learn Lots. / Dr. Lars Stevenson, PT, DPT / Threshold Health & Performance.
+Every email ends with: "You're getting this because you asked for my Stretch Smarter guide on thresholdhp.com." · Threshold Health & Performance, 1908 Reston Metro Plaza, Reston, VA 20190 · Unsubscribe. Day 2 and day 5 put "This is a promotional email from Threshold Health & Performance." first in that footer, because the form doesn't ask for consent. The guide arrives as an email attachment (since 2026-11-15); the copy on the site is a PDF no page links to, and search engines are told to skip it, so the guide only reaches people who gave their email. Signed: Be Good. Help Someone. Learn Lots. / Dr. Lars Stevenson, PT, DPT / Threshold Health & Performance.
 
-**Right away. Subject: Your stretching guide is here** (preview: "Start on page 6. It takes about a minute.")
-Hey {first name}, Here's your guide: [Download Stretch Smarter: The BAAD Model]
-Okay, where to start. Skip to page 6 (Breathing) and try the hip flexor check in the box at the bottom. It takes about a minute, and it's the fastest way to feel what the rest of the guide is talking about.
-Push the stretch as far as it goes while you hold your breath. Then reset, take 3 slow breaths through your nose, and ease back in at half the effort, letting each exhale take you a little deeper.
-You'll probably feel the difference on the first try.
+**Right away. Subject: Your stretching guide is here** (preview: "Your Stretch Smarter guide is attached.")
+Hey {first name}, Your Stretch Smarter guide is attached. *(The PDF rides along as an attachment, Stretch-Smarter-The-BAAD-Model.pdf, so nothing routes through the website, and the "skip to page 6" tip is gone: your calls, 2026-11-15.)*
 If anything in the guide doesn't make sense, hit reply. It comes straight to me.
 
 **Day 2, 9 AM ET. Subject: Stretch at a 2 out of 10** (preview: "It'll feel too easy. That's the point.")

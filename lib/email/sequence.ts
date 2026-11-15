@@ -21,7 +21,9 @@ export type EmailCopy = {
   preview: string
   /** Paragraphs before the link. `{firstName}` is filled in. */
   before: string[]
-  link: { label: string; href: string }
+  link?: { label: string; href: string }
+  /** Attach the guide PDF (the guide email only, Lars 2026-11-15: no routing through the website). */
+  attachGuide?: boolean
   /** Paragraphs after the link, before the sign-off. */
   after: string[]
   postscript?: string
@@ -42,15 +44,11 @@ export const SEQUENCE: EmailCopy[] = [
     step: 'thanks',
     dayOffset: 0,
     subject: 'Your stretching guide is here',
-    preview: 'Start on page 6. It takes about a minute.',
-    before: ['Hey {firstName},', "Here's your guide:"],
-    link: { label: 'Download Stretch Smarter: The BAAD Model', href: '{guideUrl}' },
-    after: [
-      'Okay, where to start. Skip to page 6 (Breathing) and try the hip flexor check in the box at the bottom. It takes about a minute, and it\'s the fastest way to feel what the rest of the guide is talking about.',
-      'Push the stretch as far as it goes while you hold your breath. Then reset, take 3 slow breaths through your nose, and ease back in at half the effort, letting each exhale take you a little deeper.',
-      "You'll probably feel the difference on the first try.",
-      "If anything in the guide doesn't make sense, hit reply. It comes straight to me.",
-    ],
+    preview: 'Your Stretch Smarter guide is attached.',
+    // The PDF rides along as an attachment, and the "start on page 6" tip is gone (Lars, 2026-11-15).
+    attachGuide: true,
+    before: ['Hey {firstName},', 'Your Stretch Smarter guide is attached.'],
+    after: ["If anything in the guide doesn't make sense, hit reply. It comes straight to me."],
   },
   {
     step: 'd2',
