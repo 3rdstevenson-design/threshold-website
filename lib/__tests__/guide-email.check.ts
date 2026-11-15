@@ -130,6 +130,31 @@ async function main() {
   const bad = await unsub.POST(new Request('https://preview.example/api/unsubscribe?t=abc.def', { method: 'POST' }))
   assert.equal(bad.status, 400)
 
+  // 8. With RESEND_API_KEY as the only secret (the live setup), tokens use a key derived from it. Adding
+  //    UNSUBSCRIBE_SECRET later keeps those links working, and with no key at all signing fails loudly.
+  const { makeToken } = await import('@/lib/email/unsubscribe-token')
+  const own = process.env.UNSUBSCRIBE_SECRET
+  delete process.env.UNSUBSCRIBE_SECRET
+  calls.length = 0
+  r = await startSequence({ firstName: 'Sam', email: 'sam@example.com' }, 'https://preview.example', now)
+  assert.deepEqual(r.sent.map((s) => s.step), ['thanks', 'd2', 'd5'])
+  const samThanks = sentEmails().find((c) => c.body.tags?.some((t: any) => t.value === 'thanks'))!
+  const samTok = decodeURIComponent(samThanks.body.headers['List-Unsubscribe'].match(/t=([^>]+)/)[1])
+  assert.equal(readToken(samTok)!.ids.length, 2)
+  assert.equal(readToken(tok), null) // signed with the UNSUBSCRIBE_SECRET that's gone now
+  const samGet = await unsub.GET(new Request(`https://preview.example/api/unsubscribe?t=${encodeURIComponent(samTok)}`))
+  assert.equal(samGet.status, 200)
+  process.env.UNSUBSCRIBE_SECRET = own
+  assert.equal(readToken(samTok)!.ids.length, 2)
+  const resendKey = process.env.RESEND_API_KEY
+  delete process.env.RESEND_API_KEY
+  delete process.env.UNSUBSCRIBE_SECRET
+  assert.throws(() => makeToken({ e: 'x@example.com', ids: [] }), /No key for unsubscribe tokens/)
+  const noKey = await unsub.GET(new Request(`https://preview.example/api/unsubscribe?t=${encodeURIComponent(samTok)}`))
+  assert.equal(noKey.status, 400)
+  process.env.RESEND_API_KEY = resendKey
+  process.env.UNSUBSCRIBE_SECRET = own
+
   console.log('guide email flow: all checks passed')
 }
 

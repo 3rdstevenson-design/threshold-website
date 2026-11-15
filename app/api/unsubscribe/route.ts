@@ -32,7 +32,7 @@ const invalid = () =>
     400,
   )
 
-/** null for a bad token, and also when tokens can't be checked (UNSUBSCRIBE_SECRET missing), so a visitor
+/** null for a bad token, and also when tokens can't be checked (no RESEND_API_KEY or UNSUBSCRIBE_SECRET), so a visitor
  *  sees "That link didn't work" and the reply-to-unsubscribe route instead of a server error. */
 function read(t: string) {
   try {
