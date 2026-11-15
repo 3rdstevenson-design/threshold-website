@@ -40,31 +40,29 @@ export default function OnlineCoachingPage() {
     <>
       <SiteHeader current="online" />
       <main id="main" className="overflow-x-clip">
-        <section className="mx-auto max-w-page px-5 pb-20 pt-12 sm:px-8 md:pb-28 md:pt-20">
-          <h1 className="max-w-[20ch] font-cormorant text-display font-medium text-ink">
-            Online coaching for athletes and active adults
-          </h1>
-          <div className="mt-10 grid gap-12 md:mt-14 md:grid-cols-12 md:gap-8">
-            <div className="md:col-span-5 lg:col-span-4">
-              <p className="text-lede text-ink-soft">
-                {USP_LINE} Online, I coach the rest of your rehab and your return to training: a plan built around
-                you, coaching through the app, and a call when you need one.
-              </p>
-              <Link href={BOOKING_URL} className="btn mt-8">
-                {DISCOVERY_CALL.label}
-              </Link>
-            </div>
-            <div className="-mx-5 sm:-mx-8 md:col-span-7 md:mx-0 md:mr-[calc(-1*max(2rem,(100vw-78rem)/2+2rem))] lg:col-span-8">
-              <div className="settle relative aspect-[3/2] overflow-hidden bg-band">
-                <Image
-                  src="/photos/online-coaching-focus.jpg"
-                  alt="Dr. Lars Stevenson reviewing a client's plan on his laptop"
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 62vw, (min-width: 768px) 58vw, 100vw"
-                  className="object-cover object-[55%_30%]"
-                />
-              </div>
+        <section className="mx-auto grid max-w-page items-end gap-12 px-5 pb-20 pt-12 sm:px-8 md:grid-cols-12 md:gap-8 md:pb-28 md:pt-20">
+          <div className="md:col-span-7">
+            <h1 className="font-cormorant text-display font-medium text-ink">
+              Online coaching for athletes and active adults
+            </h1>
+            <p className="mt-8 max-w-[44ch] text-lede text-ink-soft">
+              {USP_LINE} Online, I coach the rest of your rehab and your return to training: a plan built around you,
+              coaching through the app, and a call when you need one.
+            </p>
+            <Link href={BOOKING_URL} className="btn mt-8">
+              {DISCOVERY_CALL.label}
+            </Link>
+          </div>
+          <div className="md:col-span-5">
+            <div className="settle relative aspect-[4/5] overflow-hidden bg-band">
+              <Image
+                src="/photos/coaching-bench-spot.jpg"
+                alt="Dr. Lars Stevenson spotting a client on the bench press"
+                fill
+                priority
+                sizes="(min-width: 768px) 40vw, 100vw"
+                className="object-cover object-[50%_45%]"
+              />
             </div>
           </div>
         </section>
@@ -120,11 +118,11 @@ export default function OnlineCoachingPage() {
             <div className="md:col-span-5 md:col-start-8">
               <div className="relative aspect-[4/3] overflow-hidden bg-band">
                 <Image
-                  src="/photos/online-coaching-laptop.jpg"
-                  alt="Dr. Lars Stevenson writing a client's plan on his laptop"
+                  src="/photos/coaching-conversation.jpg"
+                  alt="Dr. Lars Stevenson talking a lifter through his training"
                   fill
                   sizes="(min-width: 768px) 38vw, 100vw"
-                  className="object-cover object-[40%_35%]"
+                  className="object-cover object-[55%_40%]"
                 />
               </div>
             </div>

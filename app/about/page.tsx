@@ -48,12 +48,12 @@ export default function AboutPage() {
           <div className="md:col-span-5">
             <Develop className="relative aspect-[4/5] overflow-hidden bg-band">
               <Image
-                src="/photos/lars-portrait.jpg"
-                alt="Dr. Lars Stevenson, PT, DPT"
+                src="/photos/lars-treating-hip.jpg"
+                alt="Dr. Lars Stevenson treating a patient's hip"
                 fill
                 priority
                 sizes="(min-width: 768px) 40vw, 100vw"
-                className="object-cover object-[50%_25%]"
+                className="object-cover object-[50%_30%]"
               />
             </Develop>
           </div>

@@ -34,7 +34,7 @@ I'm a physical therapist with a background in strength and conditioning, so I ta
 
 Free 30-minute call. Based in Reston, Virginia.
 
-*(Photo: you assessing a client's shoulder at the gym.)*
+*(Photo: you working hands-on on a client's wrist and forearm, gym grayed out.)*
 
 ### The other half of recovery
 
@@ -271,5 +271,5 @@ P.S. Rather ask a question first? Hit reply. It comes straight to me.
 5. **The call.** 30 minutes, matching Practice Better (the site said 20). Is it always a video call?
 6. **Newsletter consent.** As drafted, one clearly worded line covers the guide, both follow-ups and the newsletter, which US law allows. Canada, the UK and the EU want a separate unticked "also send me the newsletter" box. Keep one line (US audience), or add the box?
 7. **Privacy Policy.** It still names GoHighLevel as your CRM and doesn't name Resend. Proposed change to section 7's provider sentence: "...including an email delivery service (Resend), scheduling tools, SMS delivery services, and analytics providers." Approve, or have the attorney look first?
-8. **Photos.** Are the three people in the gym shots (navy jacket, Beast Mode shirt, Ice Cube shirt) OK to show?
-9. **Animations.** Pick from the demo at localhost:3010 (photo chapters, words fill in, portrait develops, headline behind you).
+8. **Photos.** OK to show everyone pictured with you: the three in the boxing-gym shots (navy jacket, Beast Mode shirt, Ice Cube shirt), the lifter you're spotting and the lifter you're talking with at Exile Barbell Club, and the woman on the table in the treatment photo? And is that treatment room somewhere you can show (not a past employer's clinic)?
+9. **Animations.** Pick from the demo at localhost:3010 (words fill in, portrait develops, headline behind you). Photo chapters is out (Lars, 2026-11-14).

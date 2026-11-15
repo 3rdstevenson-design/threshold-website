@@ -165,35 +165,6 @@
 /* ---------- Animation demo (dev only switches; see components/demo/DemoPanel.tsx) ----------
    The losing variants and these switches are removed once Lars picks. */
 
-/* Photo chapters: sticky stacking, each chapter a screen under the header. */
-.m-chapter {
-  position: sticky;
-  top: 4.5rem;
-  height: calc(100svh - 4.5rem);
-}
-@media (prefers-reduced-motion: reduce) {
-  .m-chapter {
-    position: relative;
-    top: auto;
-    height: auto;
-  }
-  .m-chapter-photo {
-    aspect-ratio: 3 / 2;
-    height: auto;
-  }
-  .m-chapter-panel {
-    position: relative;
-    inset: auto;
-    max-width: none;
-  }
-}
-html[data-m-chapters] .how-static {
-  display: none;
-}
-html:not([data-m-chapters]) .how-chapters {
-  display: none;
-}
-
 /* Headline behind you: the cut-out variant of the hero replaces the grayed-room photo. */
 html[data-m-behind] .hero-photo-variant {
   display: none;

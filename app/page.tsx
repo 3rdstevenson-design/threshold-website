@@ -8,7 +8,6 @@ import SiteFooter from '@/components/SiteFooter'
 import BookingWidget from '@/components/BookingWidget'
 import GuideSignup from '@/components/GuideSignup'
 import WordHighlight from '@/components/moments/WordHighlight'
-import PhotoChapters, { type Chapter } from '@/components/moments/PhotoChapters'
 
 export const metadata: Metadata = {
   ...pageMeta({
@@ -21,46 +20,31 @@ export const metadata: Metadata = {
 
 // The CROSS method, in the order a patient goes through it (copy for Lars's approval: docs/site-copy.md).
 // The letters spell the method's name, so they stand in for list numbers.
-const STEPS: Chapter[] = [
+const STEPS: { letter: string; title: string; body: string }[] = [
   {
     letter: 'C',
     title: 'Assess every joint.',
     body: "A full evaluation, joint by joint, to find where things broke down and why. You leave the first visit knowing what's going on.",
-    photo: '/photos/shoulder-assessment.jpg',
-    alt: "Dr. Lars Stevenson assessing a client's shoulder",
-    focus: '55% 35%',
   },
   {
     letter: 'R',
     title: 'Treat from the first session.',
     body: 'Hands-on treatment starts that day, along with the exercises that hold the change in place.',
-    photo: '/photos/treatment-hands-on.jpg',
-    alt: "Dr. Lars Stevenson treating a client's wrist and forearm by hand",
-    focus: '50% 40%',
   },
   {
     letter: 'O',
     title: 'Rebuild your confidence.',
     body: 'Pain changes what you believe your body can handle. Part of the work is proving to yourself that it can.',
-    photo: '/photos/strength-test.jpg',
-    alt: "Dr. Lars Stevenson testing a client's forearm strength",
-    focus: '50% 35%',
   },
   {
     letter: 'S',
     title: 'Follow a plan with a reason.',
     body: "Every exercise has a place in the sequence, and you'll always know why you're doing it.",
-    photo: '/photos/coaching-athlete.jpg',
-    alt: 'Dr. Lars Stevenson coaching a client through a wrist exercise',
-    focus: '45% 40%',
   },
   {
     letter: 'S',
     title: 'Test it, then trust it.',
     body: "I retest as you go and stay with you until you're back, in person and between sessions in the app.",
-    photo: '/photos/shoulder-mobility-test.jpg',
-    alt: "Dr. Lars Stevenson testing a client's shoulder mobility",
-    focus: '45% 35%',
   },
 ]
 
@@ -158,57 +142,46 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div id="how-i-work">
-          {/* Default: the five parts as a list beside one photograph. */}
-          <section className="how-static bg-band">
-            <div className="mx-auto grid max-w-page gap-14 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">
-              <div className="md:col-span-5">
-                <div className="md:sticky md:top-28">
-                  <h2 className={h2}>How I work with you</h2>
-                  <p className="mt-5 max-w-[34ch] text-lede text-ink-soft">
-                    Every patient goes through the same five parts, in this order. I call it the CROSS method.
-                  </p>
-                  <div className="relative mt-10 aspect-[4/3] overflow-hidden bg-hairline">
-                    <Image
-                      src="/photos/shoulder-assessment.jpg"
-                      alt="Dr. Lars Stevenson assessing a client's shoulder"
-                      fill
-                      sizes="(min-width: 768px) 38vw, 100vw"
-                      className="object-cover object-[55%_35%]"
-                    />
-                  </div>
+        <section id="how-i-work" className="bg-band">
+          <div className="mx-auto grid max-w-page gap-14 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">
+            <div className="md:col-span-5">
+              <div className="md:sticky md:top-28">
+                <h2 className={h2}>How I work with you</h2>
+                <p className="mt-5 max-w-[34ch] text-lede text-ink-soft">
+                  Every patient goes through the same five parts, in this order. I call it the CROSS method.
+                </p>
+                <div className="relative mt-10 aspect-[4/3] overflow-hidden bg-hairline">
+                  <Image
+                    src="/photos/shoulder-assessment.jpg"
+                    alt="Dr. Lars Stevenson assessing a client's shoulder"
+                    fill
+                    sizes="(min-width: 768px) 38vw, 100vw"
+                    className="object-cover object-[55%_35%]"
+                  />
                 </div>
               </div>
-              <ol className="md:col-span-6 md:col-start-7">
-                {STEPS.map((step, i) => (
-                  <li
-                    key={i}
-                    className="grid grid-cols-[3rem_1fr] gap-x-5 border-t border-[#d9d9e1] py-8 first:border-t-0 first:pt-0 sm:grid-cols-[3.75rem_1fr]"
+            </div>
+            <ol className="md:col-span-6 md:col-start-7">
+              {STEPS.map((step, i) => (
+                <li
+                  key={i}
+                  className="grid grid-cols-[3rem_1fr] gap-x-5 border-t border-[#d9d9e1] py-8 first:border-t-0 first:pt-0 sm:grid-cols-[3.75rem_1fr]"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="font-cormorant text-[2.9rem] font-medium leading-[0.85] text-ink sm:text-[3.4rem]"
                   >
-                    <span aria-hidden="true" className="font-cormorant text-[2.9rem] font-medium leading-[0.85] text-ink sm:text-[3.4rem]">
-                      {step.letter}
-                    </span>
-                    <div>
-                      <h3 className="font-nunito text-h3 font-bold text-ink">{step.title}</h3>
-                      <p className="mt-2 max-w-measure text-body text-ink-soft">{step.body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </section>
-
-          {/* Demo variant "photo chapters": one full-width photograph per part, stacking as you scroll. */}
-          <section className="how-chapters bg-paper">
-            <div className="mx-auto max-w-page px-5 pb-12 pt-24 sm:px-8 md:pb-16 md:pt-32">
-              <h2 className={h2}>How I work with you</h2>
-              <p className="mt-5 max-w-[46ch] text-lede text-ink-soft">
-                Every patient goes through the same five parts, in this order. I call it the CROSS method.
-              </p>
-            </div>
-            <PhotoChapters chapters={STEPS} />
-          </section>
-        </div>
+                    {step.letter}
+                  </span>
+                  <div>
+                    <h3 className="font-nunito text-h3 font-bold text-ink">{step.title}</h3>
+                    <p className="mt-2 max-w-measure text-body text-ink-soft">{step.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
 
         <section className="mx-auto max-w-page px-5 py-24 sm:px-8 md:py-32">
           <h2 className={h2}>Results and reviews</h2>
@@ -217,8 +190,8 @@ export default function HomePage() {
               <p className="max-w-measure text-lede text-ink-soft md:sticky md:top-28">
                 A high school football player came in with hip tightness that had limited his training for years.
                 He&apos;d picked up advice from coaches and trainers, and nothing had fixed it. I evaluated him, found
-                where the system had broken down, and started treatment that day, built around his body and his
-                sport. He got back to training without restriction and went on to play Division I college football.
+                where the system had broken down, and started treatment that day, built around his body and his sport.
+                He got back to training without restriction and went on to play Division I college football.
               </p>
             </div>
             <div className="space-y-10 md:col-span-5 md:col-start-8">
@@ -239,11 +212,11 @@ export default function HomePage() {
             <div className="md:col-span-5">
               <div className="relative aspect-[4/5] overflow-hidden bg-hairline">
                 <Image
-                  src="/photos/lars-portrait.jpg"
-                  alt="Dr. Lars Stevenson, PT, DPT"
+                  src="/photos/lars-treating-hip.jpg"
+                  alt="Dr. Lars Stevenson treating a patient's hip"
                   fill
                   sizes="(min-width: 768px) 40vw, 100vw"
-                  className="object-cover object-[50%_25%]"
+                  className="object-cover object-[50%_30%]"
                 />
               </div>
             </div>
@@ -251,9 +224,9 @@ export default function HomePage() {
               <h2 className={h2}>Dr. Lars Stevenson, PT, DPT</h2>
               <div className="mt-6 max-w-measure space-y-5 text-lede text-ink-soft">
                 <p>
-                  I grew up an Air Force kid and played football from age 7 through Division III at St. Olaf College.
-                  I was top 5 on my team in every lift and barely played, which is a big part of why I train athletes
-                  the way I do.
+                  I grew up an Air Force kid and played football from age 7 through Division III at St. Olaf College. I
+                  was top 5 on my team in every lift and barely played, which is a big part of why I train athletes the
+                  way I do.
                 </p>
                 <p>
                   At 20 I started an apprenticeship under strength coach Justin Kavanaugh, and I&apos;ve worked with
@@ -274,8 +247,8 @@ export default function HomePage() {
               <h2 className={h2}>A free guide to stretching smarter</h2>
               <p className="mt-5 max-w-measure text-lede text-ink-soft">
                 Stretch Smarter is my 15-page guide to the BAAD model: the 4 things that decide whether a stretch
-                changes anything (breathing, angle, amplitude and duration), with a body-region guide and a
-                4&#8209;week plan.
+                changes anything (breathing, angle, amplitude and duration), with a body-region guide and a 4&#8209;week
+                plan.
               </p>
             </div>
             <div className="md:col-span-6 md:col-start-7 md:pt-2">
@@ -286,14 +259,14 @@ export default function HomePage() {
 
         <section className="bg-band">
           <div className="mx-auto grid max-w-page items-center gap-10 px-5 py-20 sm:px-8 md:grid-cols-12 md:gap-8 md:py-24">
-            <div className="md:col-span-5">
-              <div className="relative aspect-[3/2] overflow-hidden bg-hairline">
+            <div className="md:col-span-4">
+              <div className="relative aspect-[4/5] overflow-hidden bg-hairline">
                 <Image
-                  src="/photos/online-coaching-laptop.jpg"
-                  alt="Dr. Lars Stevenson writing a client's plan on his laptop"
+                  src="/photos/coaching-bench-spot.jpg"
+                  alt="Dr. Lars Stevenson spotting a client on the bench press"
                   fill
-                  sizes="(min-width: 768px) 40vw, 100vw"
-                  className="object-cover object-[40%_35%]"
+                  sizes="(min-width: 768px) 32vw, 100vw"
+                  className="object-cover object-[50%_45%]"
                 />
               </div>
             </div>

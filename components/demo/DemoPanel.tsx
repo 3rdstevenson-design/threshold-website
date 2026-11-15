@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react'
 
-// DEV ONLY: a switch panel for comparing the four candidate animations on localhost.
+// DEV ONLY: a switch panel for comparing the candidate animations on localhost.
 // Each switch sets a data-m-* attribute on <html>; the moments read it. Lars picks the keepers,
 // then this panel and the losing variants are deleted before launch.
 
 export const MOMENTS = [
-  { key: 'chapters', label: 'Photo chapters (How I work)' },
   { key: 'words', label: 'Words fill in (The other half)' },
   { key: 'develop', label: 'Portrait develops (About)' },
   { key: 'behind', label: 'Headline behind you (hero)' },
