@@ -19,9 +19,10 @@ export const zoomEmbedUrl = (page: string) => (page ? `${page}?${ZOOM_EMBED_STYL
 // Sat 5:30-7 pm ET. Set to '' to show only email / call / text.
 export const HANDOFF_BOOKING_PAGE = 'https://scheduler.zoom.us/lars-stevenson/the-handoff'
 
-// Strategy Call (LinkedIn / outreach leads), embedded on /strategy-call.
-// Replaced Calendly on 2026-11-14. 30 min on Zoom, 4 h notice, 3 intake
-// questions. Availability "Strategy Call": Tue 8-6, Thu 8-12:30, Sat 2-6 ET.
-// thresholdhp.com/strategy-call is the link to hand out, so PDFs and DMs keep
+// Intro Call (LinkedIn / outreach leads and the PDF lead magnets), embedded on
+// /intro-call. Replaced Calendly's "Strategy Call" on 2026-11-14 and took the
+// site's "intro call" name. 30 min on Zoom, 4 h notice, 3 intake questions.
+// Availability "Intro Call": Tue 8-6, Thu 8-12:30, Sat 2-6 ET.
+// thresholdhp.com/intro-call is the link to hand out, so PDFs and DMs keep
 // working if the scheduler changes again.
-export const STRATEGY_CALL_BOOKING_PAGE = 'https://scheduler.zoom.us/lars-stevenson/strategy-call'
+export const INTRO_CALL_BOOKING_PAGE = 'https://scheduler.zoom.us/lars-stevenson/intro-call'

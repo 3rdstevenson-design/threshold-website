@@ -1,20 +1,20 @@
 import type { Metadata } from 'next'
 import { pageMeta } from '@/lib/metadata'
-import { STRATEGY_CALL_BOOKING_PAGE } from '@/lib/booking'
+import { INTRO_CALL_BOOKING_PAGE } from '@/lib/booking'
 import SiteFooter from '@/components/SiteFooter'
 import SchedulerBooking from '@/components/SchedulerBooking'
 import { BookingNav, SectionLabel } from '@/components/BookingChrome'
 
-// /strategy-call is the booking link for LinkedIn and outreach leads, and the
-// call-to-action in the PDF lead magnets. It replaced Calendly on 2026-11-14;
+// /intro-call is the booking link for LinkedIn and outreach leads, and the
+// call-to-action in the PDF lead magnets. It replaced Calendly ("Strategy Call") on 2026-11-14;
 // hand out this URL, never the Zoom one, so links survive a scheduler change.
 // Kept out of search results and the sitemap: people arrive from a DM or PDF.
 export const metadata: Metadata = {
-  title: 'Strategy Call',
+  title: 'Intro Call',
   ...pageMeta({
-    fullTitle: 'Strategy Call | Threshold Health & Performance',
-    description: 'Book a 30-minute strategy call on Zoom with Dr. Lars Stevenson, PT, DPT.',
-    path: '/strategy-call',
+    fullTitle: 'Intro Call | Threshold Health & Performance',
+    description: 'Book a 30-minute intro call on Zoom with Dr. Lars Stevenson, PT, DPT.',
+    path: '/intro-call',
   }),
   robots: { index: false, follow: true },
 }
@@ -26,7 +26,7 @@ const ON_THE_CALL = [
   'The next step that fits, whether that’s working with me or not.',
 ]
 
-export default function StrategyCallPage() {
+export default function IntroCallPage() {
   return (
     <>
       <BookingNav />
@@ -36,9 +36,9 @@ export default function StrategyCallPage() {
         <section className="relative bg-obsidian overflow-hidden pt-16 pb-0">
           <div className="hero-beam" aria-hidden="true" />
           <div className="relative z-10 max-w-5xl mx-auto px-6 pb-14 pt-20 md:pt-24">
-            <SectionLabel>Strategy Call</SectionLabel>
+            <SectionLabel>Intro Call</SectionLabel>
             <h1 className="font-cormorant font-light text-clinical-white leading-[1.05] text-5xl md:text-7xl mb-8 max-w-3xl">
-              Book your strategy call.
+              Book your intro call.
             </h1>
             <div className="space-y-4 font-nunito text-base md:text-lg text-sterling-silver leading-[1.85] max-w-2xl">
               <p>
@@ -56,9 +56,9 @@ export default function StrategyCallPage() {
           <div className="max-w-3xl mx-auto px-6">
             <SectionLabel>Pick a Time</SectionLabel>
             <SchedulerBooking
-              bookingPage={STRATEGY_CALL_BOOKING_PAGE}
-              title="Book a strategy call with Dr. Lars Stevenson"
-              emailSubject="Strategy call"
+              bookingPage={INTRO_CALL_BOOKING_PAGE}
+              title="Book an intro call with Dr. Lars Stevenson"
+              emailSubject="Intro call"
             />
           </div>
         </section>

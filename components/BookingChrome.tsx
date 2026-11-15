@@ -2,7 +2,7 @@ import Link from 'next/link'
 import LogoMark from '@/components/LogoMark'
 
 // Top bar and section label shared by the booking pages (/handoff,
-// /strategy-call). The nav button jumps to the page's #book section.
+// /intro-call). The nav button jumps to the page's #book section.
 export function BookingNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-sm border-b border-white/5">
