@@ -10,8 +10,8 @@ import SiteFooter from '@/components/SiteFooter'
 // In-person physical therapy (Lars, 2026-11-15: the menu made it look like all he does is online coaching).
 // Every fact has a source: sessions at 1908 Reston Metro Plaza (Lars, 2026-11-15); 60 minutes, face to face
 // (Practice Better service "Threshold Performance Care - In-Person Session"); weekly or every other week (wiki
-// reference-threshold-offers); cash-pay with superbills (wiki project-life-hq, how-to-build-pb-superbill); no
-// referral needed for a DPT (Code of Virginia § 54.1-3482(B)). No prices on the site (Lars, 2026-11-15).
+// reference-threshold-offers); no referral needed for a DPT (Code of Virginia § 54.1-3482(B)). No prices, and no
+// cost or insurance answer for now (Lars, 2026-11-15); the Good Faith Estimate notice is in the footer.
 
 const ADDRESS = { street: '1908 Reston Metro Plaza', city: 'Reston, VA 20190' }
 
@@ -50,11 +50,6 @@ const FAQ: { q: string; a: string; link?: { href: string; label: string } }[] = 
   {
     q: 'Do I need a referral from my doctor?',
     a: "No. In Virginia, a physical therapist with a doctorate can evaluate and treat you without one. If another provider is already treating you for the same problem, I'll ask your OK to send them my evaluation.",
-  },
-  {
-    q: 'What does it cost, and do you take insurance?',
-    a: "I go through cost on the free call, and once you book, I email you a written Good Faith Estimate. I don't bill insurance. You pay me directly, and I give you a superbill you can send your insurance company for possible out-of-network reimbursement.",
-    link: { href: '/good-faith-estimate', label: 'Your right to a Good Faith Estimate' },
   },
   { q: 'What should I wear?', a: 'Clothes you can move and train in.' },
 ]
@@ -123,7 +118,7 @@ export default function PhysicalTherapyPage() {
 
         <section className="bg-band">
           <div className="mx-auto grid max-w-page gap-12 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">
-            <h2 className={`${h2} md:col-span-5`}>Questions people ask</h2>
+            <h2 className={`${h2} md:col-span-5`}>Frequently asked questions</h2>
             <dl className="md:col-span-6 md:col-start-7">
               {FAQ.map((f) => (
                 <div key={f.q} className="border-t border-[#d9d9e1] py-7 first:border-t-0 first:pt-0">

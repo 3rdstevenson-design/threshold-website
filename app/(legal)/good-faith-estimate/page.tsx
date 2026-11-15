@@ -5,7 +5,7 @@ import { pageMeta } from '@/lib/metadata'
 // The notice text is CMS's model notice, word for word (Appendix 1, "Right to Receive a Good Faith Estimate of
 // Expected Charges"), except its consumer link, which now redirects to www.cms.gov/medical-bill-rights (wiki
 // reference-no-surprises-act-good-faith-estimate). The rule wants it easy to find from a search engine, so this
-// page is in the sitemap and not noindexed. Linked from the footer (Lars, 2026-11-15) and the /physical-therapy FAQ.
+// page is in the sitemap and not noindexed. Linked from the footer (Lars, 2026-11-15).
 
 export const metadata: Metadata = {
   title: { absolute: 'Good Faith Estimate | Threshold Health & Performance' },

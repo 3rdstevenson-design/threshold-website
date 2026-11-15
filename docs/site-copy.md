@@ -232,7 +232,7 @@ I see athletes and active adults in person in Reston. Every session is one-on-on
 2. **Your first visit.** A full evaluation, joint by joint, and your first treatment. You leave knowing what's going on.
 3. **Weekly or every other week after that.** Hands-on treatment and the exercises that hold the change in place, on one plan I retest as you go. Between sessions, your plan lives in the app.
 
-### Questions people ask
+### Frequently asked questions
 
 **Where are sessions?** 1908 Reston Metro Plaza, Reston, VA 20190.
 
@@ -241,8 +241,6 @@ I see athletes and active adults in person in Reston. Every session is one-on-on
 **How often will I come in?** Weekly or every other week. I recommend one after your evaluation.
 
 **Do I need a referral from my doctor?** No. In Virginia, a physical therapist with a doctorate can evaluate and treat you without one. If another provider is already treating you for the same problem, I'll ask your OK to send them my evaluation.
-
-**What does it cost, and do you take insurance?** I go through cost on the free call, and once you book, I email you a written Good Faith Estimate. I don't bill insurance. You pay me directly, and I give you a superbill you can send your insurance company for possible out-of-network reimbursement. **[Your right to a Good Faith Estimate]**
 
 **What should I wear?** Clothes you can move and train in.
 
@@ -256,7 +254,7 @@ I coach your return to training online, after rehab: a plan built around you, co
 
 **[Book a free call]**
 
-*(Sources: sessions at 1908 Reston Metro Plaza (you, 2026-11-15); 60 minutes (Practice Better's in-person service); weekly or every other week (your Threshold Performance Care plans); cash-pay with superbills; no referral needed for a DPT under Code of Virginia § 54.1-3482(B). "What should I wear?" is the one line with no source; it's new wording for your OK.)*
+*(Sources: sessions at 1908 Reston Metro Plaza (you, 2026-11-15); 60 minutes (Practice Better's in-person service); weekly or every other week (your Threshold Performance Care plans); no referral needed for a DPT under Code of Virginia § 54.1-3482(B). "What should I wear?" approved by you, 2026-11-15. The cost and insurance answer is off for now (you, 2026-11-15).)*
 
 ---
 
