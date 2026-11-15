@@ -1,60 +1,58 @@
 import Link from 'next/link'
-import LogoMark from '@/components/LogoMark'
 import InstagramLink from '@/components/InstagramLink'
 import { BOOKING_URL } from '@/lib/booking'
-import { SITE_NAME, BUSINESS } from '@/lib/site'
+import { SITE_NAME, BUSINESS, DISCOVERY_CALL } from '@/lib/site'
 
-const linkClass = 'hover:text-clinical-white transition-colors duration-200'
+// One footer for every public page: the logo (its only appearance), how to reach Lars,
+// the site links and the legal links. Dark, the one dark surface in the light system.
 
-// One footer for every public page: name, city, phone, booking, Instagram,
-// and the legal links. Replaces four hand-copied footers.
+const linkCls = 'text-clinical-white/90 underline-offset-[0.25em] transition-colors duration-150 hover:text-white hover:underline'
+
 export default function SiteFooter() {
   return (
-    <footer className="bg-obsidian border-t border-white/10 py-10">
-      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-        <Link href="/" className="flex items-center gap-3">
-          <LogoMark className="h-5 w-auto text-threshold-purple" />
-          <span className="font-montserrat text-xs tracking-[0.18em] text-sterling-silver uppercase">
-            Threshold Health &amp; Performance
-          </span>
-        </Link>
-        <p className="font-montserrat text-xs text-sterling-silver text-center leading-relaxed">
-          {BUSINESS.city}, {BUSINESS.regionName} &nbsp;·&nbsp;{' '}
-          <a href={`tel:${BUSINESS.phone.replace(/-/g, '')}`} className={linkClass}>
-            {BUSINESS.phoneDisplay}
-          </a>{' '}
-          &nbsp;·&nbsp;{' '}
-          <Link href={BOOKING_URL} className={linkClass}>
-            Book an Appointment
-          </Link>
-        </p>
-        <InstagramLink
-          showHandle
-          className={`font-montserrat text-xs text-sterling-silver ${linkClass}`}
-        />
-      </div>
-      <div className="max-w-6xl mx-auto px-6 mt-6 pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-        <nav
-          aria-label="Legal"
-          className="font-montserrat text-xs text-sterling-silver flex flex-wrap items-center justify-center gap-x-4 gap-y-2"
-        >
-          <Link href="/contact" className={linkClass}>
-            Contact
-          </Link>
-          <span className="text-white/20">·</span>
-          <Link href="/privacy-policy" className={linkClass}>
-            Privacy Policy
-          </Link>
-          <span className="text-white/20">·</span>
-          <Link href="/terms-and-conditions" className={linkClass}>
-            Terms &amp; Conditions
-          </Link>
-          <span className="text-white/20">·</span>
-          <Link href="/sms-policy" className={linkClass}>
-            SMS Policy
-          </Link>
+    <footer className="bg-ink text-clinical-white">
+      <div className="mx-auto grid max-w-page gap-12 px-5 py-16 sm:px-8 md:grid-cols-12 md:py-20">
+        <div className="md:col-span-5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-dark.svg" alt={SITE_NAME} width={208} height={97} className="h-auto w-44" />
+          <address className="mt-8 space-y-1.5 text-small not-italic text-night-muted">
+            <p>Physical therapy in {BUSINESS.city}, {BUSINESS.regionName}</p>
+            <p>
+              <a href={`tel:${BUSINESS.phone.replace(/-/g, '')}`} className={`${linkCls} tabular`}>
+                {BUSINESS.phoneDisplay}
+              </a>
+            </p>
+            <p>
+              <a href={`mailto:${BUSINESS.email}`} className={linkCls}>
+                {BUSINESS.email}
+              </a>
+            </p>
+            <p>
+              <InstagramLink showHandle iconClassName="h-4 w-4" className={linkCls} />
+            </p>
+          </address>
+        </div>
+
+        <nav aria-label="Site" className="md:col-span-3">
+          <ul className="space-y-3 font-montserrat text-[0.9375rem]">
+            <li><Link href="/#how-i-work" className={linkCls}>How I work</Link></li>
+            <li><Link href="/online-coaching" className={linkCls}>Online coaching</Link></li>
+            <li><Link href="/about" className={linkCls}>About</Link></li>
+            <li><Link href={BOOKING_URL} className={linkCls}>{DISCOVERY_CALL.label}</Link></li>
+            <li><Link href="/contact" className={linkCls}>Contact</Link></li>
+          </ul>
         </nav>
-        <p className="font-montserrat text-xs text-white/30">
+
+        <nav aria-label="Legal" className="md:col-span-4">
+          <ul className="space-y-3 font-montserrat text-[0.9375rem]">
+            <li><Link href="/privacy-policy" className={linkCls}>Privacy Policy</Link></li>
+            <li><Link href="/terms-and-conditions" className={linkCls}>Terms &amp; Conditions</Link></li>
+            <li><Link href="/sms-policy" className={linkCls}>SMS Policy</Link></li>
+          </ul>
+        </nav>
+      </div>
+      <div className="border-t border-white/10">
+        <p className="mx-auto max-w-page px-5 py-6 text-small text-night-muted sm:px-8">
           &copy; {new Date().getFullYear()} {SITE_NAME}
         </p>
       </div>
