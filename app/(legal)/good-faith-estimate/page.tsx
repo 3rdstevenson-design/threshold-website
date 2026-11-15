@@ -28,7 +28,7 @@ const BODY_HTML = `<div style="max-width:820px;margin:0 auto;padding:48px 24px;f
 </ul>
 <p>For questions or more information about your right to a Good Faith Estimate, visit <a href="https://www.cms.gov/medical-bill-rights">www.cms.gov/medical-bill-rights</a>, email <a href="mailto:FederalPPDRQuestions@cms.hhs.gov">FederalPPDRQuestions@cms.hhs.gov</a>, or call 1-800-985-3059.</p>
 <h2>At Threshold Health &amp; Performance</h2>
-<p>I don&rsquo;t bill insurance, so this applies to every patient. After you book an evaluation or a plan of care, I email you a written Good Faith Estimate. To get one before you book, email <a href="mailto:dr.lars@thresholdhp.com">dr.lars@thresholdhp.com</a> and I&rsquo;ll send it within 3 business days.</p>
+<p>I don&rsquo;t bill insurance, so this applies to every patient. After you book an evaluation or a plan of care, I send you a written Good Faith Estimate through my patient portal. To get one before you book, email <a href="mailto:dr.lars@thresholdhp.com">dr.lars@thresholdhp.com</a> and I&rsquo;ll send it within 3 business days.</p>
 </div>`
 
 export default function GoodFaithEstimatePage() {

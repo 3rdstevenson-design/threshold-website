@@ -264,7 +264,7 @@ CMS's model notice word for word ("You have the right to receive a 'Good Faith E
 
 ### At Threshold Health & Performance
 
-I don't bill insurance, so this applies to every patient. After you book an evaluation or a plan of care, I email you a written Good Faith Estimate. To get one before you book, email dr.lars@thresholdhp.com and I'll send it within 3 business days.
+I don't bill insurance, so this applies to every patient. After you book an evaluation or a plan of care, I send you a written Good Faith Estimate through my patient portal (Practice Better, your call 2026-11-15). To get one before you book, email dr.lars@thresholdhp.com and I'll send it within 3 business days.
 
 ---
 
