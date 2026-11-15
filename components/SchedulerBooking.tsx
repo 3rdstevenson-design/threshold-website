@@ -2,15 +2,18 @@ import { BUSINESS } from '@/lib/site'
 import { zoomEmbedUrl } from '@/lib/booking'
 
 // An embedded Zoom Scheduler booking page with email / call / text under it.
-// With no bookingPage, only the contact options show.
+// contact={false} hides email / call / text (Lars, 2026-11-14: /intro-call is
+// calendar only). With no bookingPage, the contact options always show.
 export default function SchedulerBooking({
   bookingPage,
   title,
   emailSubject,
+  contact = true,
 }: {
   bookingPage: string
   title: string
   emailSubject: string
+  contact?: boolean
 }) {
   const embed = zoomEmbedUrl(bookingPage)
   return (
@@ -34,7 +37,7 @@ export default function SchedulerBooking({
           </p>
         </>
       )}
-      <ContactOptions alone={!embed} emailSubject={emailSubject} />
+      {(contact || !embed) && <ContactOptions alone={!embed} emailSubject={emailSubject} />}
     </>
   )
 }
