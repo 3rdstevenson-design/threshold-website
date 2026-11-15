@@ -46,7 +46,7 @@ globalThis.fetch = (async (input: any, init?: any) => {
 
 async function main() {
   const { startSequence } = await import('@/lib/email/start-sequence')
-  const { formatGuideMessage, CONSENT } = await import('@/lib/guide-lead')
+  const { formatGuideMessage, SIGNUP_FORM } = await import('@/lib/guide-lead')
   const { readToken } = await import('@/lib/email/unsubscribe-token')
   const unsub = await import('@/app/api/unsubscribe/route')
 
@@ -60,10 +60,16 @@ async function main() {
   assert.equal(r.sent[1].at, '2026-11-16T14:00:00.000Z') // 9:00 AM EST
   assert.equal(r.sent[2].at, '2026-11-19T14:00:00.000Z')
   const thanks = sentEmails().find((c) => c.body.tags?.some((t: any) => t.value === 'thanks'))!
-  assert.ok(thanks.body.text.includes('https://preview.example/guides/stretch-smarter-baad-model.pdf'))
+  assert.ok(thanks.body.text.includes('https://preview.example/guides/stretch-smarter-k7q2m9.pdf'))
   assert.ok(thanks.body.text.includes('1908 Reston Metro Plaza'))
   assert.ok(thanks.body.text.includes("You're getting this because you asked for my Stretch Smarter guide"))
   assert.equal(thanks.body.headers['List-Unsubscribe-Post'], 'List-Unsubscribe=One-Click')
+  // The guide email doesn't describe the sequence and isn't marked promotional; the follow-ups are.
+  assert.ok(!thanks.body.text.includes('2 short emails'))
+  assert.ok(!thanks.body.text.includes('This is a promotional email'))
+  const d2 = sentEmails().find((c) => c.body.tags?.some((t: any) => t.value === 'd2'))!
+  assert.ok(d2.body.text.includes('This is a promotional email from Threshold Health & Performance.'))
+  assert.ok(d2.body.html.includes('This is a promotional email from Threshold Health &amp; Performance.'))
   assert.ok(!('scheduled_at' in thanks.body))
   // The guide email's unsubscribe token cancels both follow-ups.
   const tok = decodeURIComponent(thanks.body.headers['List-Unsubscribe'].match(/t=([^>]+)/)[1])
@@ -94,11 +100,11 @@ async function main() {
   // 5. The Telegram message carries the consent record.
   const msg = formatGuideMessage(
     { firstName: 'Pat', email: 'pat@example.com' },
-    { at: now.toISOString(), version: CONSENT.version, page: '/', ip: '203.0.113.9', userAgent: 'test' },
+    { at: now.toISOString(), version: SIGNUP_FORM.version, page: '/', ip: '203.0.113.9', userAgent: 'test' },
     r,
     null,
   )
-  assert.ok(msg.includes(`wording v${CONSENT.version} on /`))
+  assert.ok(msg.includes(`form v${SIGNUP_FORM.version} on /`))
   assert.ok(msg.includes('IP 203.0.113.9'))
   assert.ok(msg.includes('NOT saved to the list'))
 

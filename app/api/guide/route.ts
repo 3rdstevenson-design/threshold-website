@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { CONSENT, formatGuideMessage, parseGuide, type ConsentRecord } from '@/lib/guide-lead'
+import { SIGNUP_FORM, formatGuideMessage, parseGuide, type ConsentRecord } from '@/lib/guide-lead'
 import { resendConfigured } from '@/lib/email/resend'
 import { startSequence, type SequenceResult } from '@/lib/email/start-sequence'
 import { sendMessage } from '@/lib/telegram'
@@ -7,8 +7,8 @@ import { SITE_URL } from '@/lib/site'
 
 // Same-origin endpoint for the guide signup.
 // 1. Saves the contact in Resend and queues the guide email + day 2 + day 5 (lib/email/start-sequence.ts).
-// 2. Pings Lars on Telegram with the signup and its consent record.
-// The PDF also downloads on /guide/thank-you, so the visitor gets it even if both of those fail.
+// 2. Pings Lars on Telegram with the signup and its record.
+// The guide goes out by email only; if email fails, Lars sends it by hand from the Telegram ping.
 
 export const runtime = 'nodejs'
 
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
   const consent: ConsentRecord = {
     at: new Date().toISOString(),
-    version: CONSENT.version,
+    version: SIGNUP_FORM.version,
     page: String(raw.page ?? '').slice(0, 200) || 'unknown',
     ip: clientIp(request),
     userAgent: (request.headers.get('user-agent') ?? 'unknown').slice(0, 160),

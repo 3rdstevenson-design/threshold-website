@@ -6,7 +6,7 @@
  *
  * Law (CAN-SPAM, checked 2026-11-14): the guide email is transactional; day 2, day 5 and the newsletter are
  * commercial, so every email carries the sender, the postal address, why the reader is getting it, and a
- * working unsubscribe. Signup consent covers all of it (lib/guide-lead.ts, CONSENT).
+ * working unsubscribe, and the commercial ones say they're promotional (the form carries no opt-in wording).
  *
  * Plain data only (no imports).
  */
@@ -25,12 +25,16 @@ export type EmailCopy = {
   /** Paragraphs after the link, before the sign-off. */
   after: string[]
   postscript?: string
+  /** Commercial (not the guide delivery itself): the footer adds PROMO_LINE. */
+  promotional?: boolean
 }
 
 export const SIGN_OFF = 'Be Good. Help Someone. Learn Lots.'
 export const SIGNATURE = ['Dr. Lars Stevenson, PT, DPT', 'Threshold Health & Performance']
 export const POSTAL_ADDRESS = 'Threshold Health & Performance, 1908 Reston Metro Plaza, Reston, VA 20190'
 export const WHY_LINE = "You're getting this because you asked for my Stretch Smarter guide on thresholdhp.com."
+/** CAN-SPAM: commercial email sent without opt-in wording on the form must say it's promotional. */
+export const PROMO_LINE = 'This is a promotional email from Threshold Health & Performance.'
 
 /** `{guideUrl}` is replaced with the PDF's absolute URL at send time. */
 export const SEQUENCE: EmailCopy[] = [
@@ -45,12 +49,13 @@ export const SEQUENCE: EmailCopy[] = [
       'Okay, where to start. Skip to page 6 (Breathing) and try the hip flexor check in the box at the bottom. It takes about a minute, and it\'s the fastest way to feel what the rest of the guide is talking about.',
       'Push the stretch as far as it goes while you hold your breath. Then reset, take 3 slow breaths through your nose, and ease back in at half the effort, letting each exhale take you a little deeper.',
       "You'll probably feel the difference on the first try.",
-      "Over the next week I'll send you 2 short emails on getting more out of it, and after that my occasional newsletter. If anything in the guide doesn't make sense, hit reply. It comes straight to me.",
+      "If anything in the guide doesn't make sense, hit reply. It comes straight to me.",
     ],
   },
   {
     step: 'd2',
     dayOffset: 2,
+    promotional: true,
     subject: 'Stretch at a 2 out of 10',
     preview: "It'll feel too easy. That's the point.",
     before: [
@@ -71,6 +76,7 @@ export const SEQUENCE: EmailCopy[] = [
   {
     step: 'd5',
     dayOffset: 5,
+    promotional: true,
     subject: 'What happens on the free call',
     preview: '30 minutes, on video, and you leave with a plan.',
     before: [

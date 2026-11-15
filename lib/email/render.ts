@@ -1,4 +1,4 @@
-import { POSTAL_ADDRESS, SIGN_OFF, SIGNATURE, WHY_LINE, type EmailCopy } from './sequence'
+import { POSTAL_ADDRESS, PROMO_LINE, SIGN_OFF, SIGNATURE, WHY_LINE, type EmailCopy } from './sequence'
 
 /** Turns one sequence email into the plain-text and HTML bodies Resend sends. Plain, personal layout on purpose. */
 
@@ -28,6 +28,7 @@ export function renderEmail(copy: EmailCopy, v: RenderVars): { subject: string; 
     [SIGN_OFF, ...SIGNATURE].join('\n'),
     ...(copy.postscript ? [copy.postscript] : []),
     '--',
+    ...(copy.promotional ? [PROMO_LINE] : []),
     WHY_LINE,
     POSTAL_ADDRESS,
     `Unsubscribe: ${v.unsubscribeUrl}`,
@@ -45,7 +46,7 @@ ${after.map(p).join('\n')}
 <p style="margin:24px 0 16px 0;">${esc(SIGN_OFF)}<br>${SIGNATURE.map(esc).join('<br>')}</p>
 ${copy.postscript ? p(copy.postscript) : ''}
 <hr style="border:none;border-top:1px solid #e5e5e5;margin:28px 0 12px 0;">
-<p style="margin:0;font-size:12px;line-height:1.5;color:#6b6b6b;">${esc(WHY_LINE)}<br>${esc(POSTAL_ADDRESS)}<br>
+<p style="margin:0;font-size:12px;line-height:1.5;color:#6b6b6b;">${copy.promotional ? `${esc(PROMO_LINE)}<br>` : ''}${esc(WHY_LINE)}<br>${esc(POSTAL_ADDRESS)}<br>
 <a href="${esc(v.unsubscribeUrl)}" style="color:#6b6b6b;">Unsubscribe</a></p>
 </div>
 </body></html>`

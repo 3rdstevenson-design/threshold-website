@@ -1,8 +1,7 @@
 /**
- * Guide signup (the Stretch Smarter / BAAD guide on thresholdhp.com): validation, the consent wording, and the
+ * Guide signup (the Stretch Smarter / BAAD guide on thresholdhp.com): validation, the signup record, and the
  * message Lars gets on Telegram for each signup. Emails go out through Resend (lib/email/start-sequence.ts):
- * the guide now, day 2 and day 5, then the newsletter. The visitor also gets the PDF on /guide/thank-you, so
- * the guide reaches them even if email fails.
+ * the guide now, day 2 and day 5, then the newsletter. The guide is delivered by email only.
  */
 
 import type { SequenceResult } from '@/lib/email/start-sequence'
@@ -10,26 +9,24 @@ import type { SequenceResult } from '@/lib/email/start-sequence'
 export const GUIDE = {
   title: 'Stretch Smarter',
   subtitle: 'the BAAD model',
-  pdfPath: '/guides/stretch-smarter-baad-model.pdf',
+  // Not linked from any page: the guide goes out by email only. robots.txt and an X-Robots-Tag keep it out of search.
+  pdfPath: '/guides/stretch-smarter-k7q2m9.pdf',
   thankYouPath: '/guide/thank-you',
 }
 
 /**
- * Shown under the button and copied into every signup's consent record. CAN-SPAM (US) is opt-out, so a clear
- * disclosure covers the guide, both follow-ups and the newsletter; bump `version` whenever `text` changes.
- * (Canada, the UK and the EU want a separate unticked newsletter box: Lars's call, docs/site-copy.md.)
+ * Version of the signup form, kept with each signup record. Since 2026-11-14b the form shows no wording about the
+ * follow-ups or the newsletter (Lars's call), so the day 2 and day 5 emails and the newsletter carry a
+ * "promotional email" line instead (CAN-SPAM's ad identification; lib/email/sequence.ts PROMO_LINE).
  */
-export const CONSENT = {
-  version: '2026-11-14',
-  text: "You'll get the guide on the next page and by email, then 2 short follow-up emails from me over the next 5 days and my occasional newsletter. Unsubscribe any time.",
-}
+export const SIGNUP_FORM = { version: '2026-11-14b' }
 
 export type GuideLead = {
   firstName: string
   email: string
 }
 
-/** What the visitor saw and did, kept as proof of consent (sent to Lars on Telegram with each signup). */
+/** When, where and how each signup happened (sent to Lars on Telegram with each signup). */
 export type ConsentRecord = {
   at: string
   version: string
@@ -98,8 +95,7 @@ export function formatGuideMessage(
     `Email: ${lead.email}`,
     `Guide: ${GUIDE.title} (${GUIDE.subtitle})`,
     emailLine(sequence, sequenceError),
-    `Consent: wording v${consent.version} on ${consent.page}, ${consent.at}, IP ${consent.ip}, ${consent.userAgent}`,
-    `Wording shown: "${CONSENT.text}"`,
+    `Signup: form v${consent.version} on ${consent.page}, ${consent.at}, IP ${consent.ip}, ${consent.userAgent}`,
     `Received: ${eastern(new Date(consent.at))} ET`,
   ].join('\n')
 }

@@ -1,10 +1,12 @@
-# thresholdhp.com copy, draft 2 (2026-11-14)
+# thresholdhp.com copy, draft 3 (2026-11-14)
 
 Every word that goes on the redesigned site. Nothing goes live until you approve it. Lines marked ⚑ need your call; the list is at the bottom. Reviews are quoted word for word.
 
 Rules applied: Voice DNA (first person, no em dashes, no "not X, Y", no "we"), your USP, "athletes and active adults", no CSCS (lapsed), no fixed recovery timelines, nothing invented.
 
-**Changed since draft 1:** online coaching now names rehab (the name stays "Online coaching"); the guide form carries the consent line the law review recommends; the 3 guide emails are below for your review; the homepage's closing section holds the booking widget itself, so its button is gone.
+**Changed since draft 2 (your calls, 2026-11-14):** the guide goes out by email only, with no download on the site, even when sending fails; nothing under the button explains the follow-ups or the newsletter, so the day 2 and day 5 emails say they're promotional instead; the guide email no longer mentions the follow-ups; the bench press photo keeps the bar and plates in color.
+
+**Changed in draft 2:** online coaching now names rehab (the name stays "Online coaching"); the 3 guide emails are below for your review; the homepage's closing section holds the booking widget itself, so its button is gone.
 
 ---
 
@@ -84,8 +86,6 @@ At 20 I started an apprenticeship under strength coach Justin Kavanaugh, and I'v
 Stretch Smarter is my 15-page guide to the BAAD model: the 4 things that decide whether a stretch changes anything (breathing, angle, amplitude and duration), with a body-region guide and a 4-week plan.
 
 First name · Email · **[Send me the guide]**
-
-You'll get the guide on the next page and by email, then 2 short follow-up emails from me over the next 5 days and my occasional newsletter. Unsubscribe any time. ⚑6
 
 ### Online coaching, wherever you train
 
@@ -217,31 +217,29 @@ Online coaching is coaching. If what you need is hands-on treatment, I'll tell y
 
 **Form labels:** First name · Email
 **Button:** Send me the guide
-**Under the button (consent, wording v2026-11-14):** "You'll get the guide on the next page and by email, then 2 short follow-up emails from me over the next 5 days and my occasional newsletter. Unsubscribe any time." · Privacy Policy
-**Errors:** "Add your first name." · "Check your email address. It needs an @ and a domain." · "Something went wrong on my end, so here's your guide anyway: Download the guide."
+**Under the button:** nothing (your call, 2026-11-14). Each signup's record (form v2026-11-14b, time, page, IP) goes to you on Telegram.
+**Errors:** "Add your first name." · "Check your email address. It needs an @ and a domain." · "Something went wrong on my end. Try again in a minute, or email me at dr.lars@thresholdhp.com and I'll send it to you."
 
 ### /guide/thank-you
 
-**Title tag:** Your Guide Is Ready | Threshold Health & Performance
+**Title tag:** Check Your Email | Threshold Health & Performance (kept out of search)
 
-# Your guide is ready
+# Check your email
 
-Stretch Smarter is yours. Download it now and save it somewhere you'll find it again.
-
-**[Download the guide (PDF)]**
+Your Stretch Smarter guide is on its way to your inbox. If you don't see it soon, check your spam folder, or email me at dr.lars@thresholdhp.com.
 
 Want a plan built around your body? **[Book a free call]**
 
 ### The 3 guide emails (from the Nov 12 build; links now say "free call")
 
-Every email ends with: "You're getting this because you asked for my Stretch Smarter guide on thresholdhp.com." · Threshold Health & Performance, 1908 Reston Metro Plaza, Reston, VA 20190 · Unsubscribe. Signed: Be Good. Help Someone. Learn Lots. / Dr. Lars Stevenson, PT, DPT / Threshold Health & Performance.
+Every email ends with: "You're getting this because you asked for my Stretch Smarter guide on thresholdhp.com." · Threshold Health & Performance, 1908 Reston Metro Plaza, Reston, VA 20190 · Unsubscribe. Day 2 and day 5 put "This is a promotional email from Threshold Health & Performance." first in that footer, because the form doesn't ask for consent. The guide link is a PDF no page links to, and search engines are told to skip it, so the guide only reaches people who gave their email. Signed: Be Good. Help Someone. Learn Lots. / Dr. Lars Stevenson, PT, DPT / Threshold Health & Performance.
 
 **Right away. Subject: Your stretching guide is here** (preview: "Start on page 6. It takes about a minute.")
 Hey {first name}, Here's your guide: [Download Stretch Smarter: The BAAD Model]
 Okay, where to start. Skip to page 6 (Breathing) and try the hip flexor check in the box at the bottom. It takes about a minute, and it's the fastest way to feel what the rest of the guide is talking about.
 Push the stretch as far as it goes while you hold your breath. Then reset, take 3 slow breaths through your nose, and ease back in at half the effort, letting each exhale take you a little deeper.
 You'll probably feel the difference on the first try.
-Over the next week I'll send you 2 short emails on getting more out of it, and after that my occasional newsletter. If anything in the guide doesn't make sense, hit reply. It comes straight to me.
+If anything in the guide doesn't make sense, hit reply. It comes straight to me.
 
 **Day 2, 9 AM ET. Subject: Stretch at a 2 out of 10** (preview: "It'll feel too easy. That's the point.")
 Hey {first name}, If you change one thing from the guide, make it this: stretch at a 2 or 3 out of 10.
@@ -258,7 +256,7 @@ By the end you'll know what I think is driving it and what the next step would b
 [Book your free call]
 P.S. Rather ask a question first? Hit reply. It comes straight to me.
 
-**Newsletter:** everyone who signed up stays on the list (Resend Contacts) and gets whatever you send as a Resend Broadcast; Resend adds its own unsubscribe link to broadcasts.
+**Newsletter:** everyone who signed up stays on the list (Resend Contacts) and gets whatever you send as a Resend Broadcast; Resend adds its own unsubscribe link to broadcasts. Each broadcast also needs the promotional line and the postal address in its footer.
 
 **Unsubscribe page:** "Unsubscribe? You'll stop getting emails from me: the guide follow-ups and the newsletter. [Unsubscribe me]" then "You're unsubscribed. You won't get any more emails from me. Thanks for reading the guide."
 
@@ -269,7 +267,7 @@ P.S. Rather ask a question first? Hit reply. It comes straight to me.
 3. **Names.** OK to name Coach Justin Kavanaugh, and your mentors (Ian King, Mai-Linh Dovan, Dr. Tom Roselle)? Want Jason Rogers named, or keep "an Olympic sprinter"?
 4. **Online coaching.** No price and no checkout link on the page (you didn't pick prices). Add "$299 every 4 weeks" and the Coach Catalyst checkout? And the copy now says I coach "the rest of your rehab" online: OK for clients outside Virginia, next to the "coaching, not treatment" line?
 5. **The call.** 30 minutes, matching Practice Better (the site said 20). Is it always a video call?
-6. **Newsletter consent.** As drafted, one clearly worded line covers the guide, both follow-ups and the newsletter, which US law allows. Canada, the UK and the EU want a separate unticked "also send me the newsletter" box. Keep one line (US audience), or add the box?
+6. **Newsletter consent.** Settled (you, 2026-11-14): nothing on the form; the follow-ups and the newsletter say they're promotional, which US law accepts. Signups from Canada, the UK or the EU wouldn't meet their consent rules.
 7. **Privacy Policy.** It still names GoHighLevel as your CRM and doesn't name Resend. Proposed change to section 7's provider sentence: "...including an email delivery service (Resend), scheduling tools, SMS delivery services, and analytics providers." Approve, or have the attorney look first?
 8. **Photos.** OK to show everyone pictured with you: the three in the boxing-gym shots (navy jacket, Beast Mode shirt, Ice Cube shirt), the lifter you're spotting and the lifter you're talking with at Exile Barbell Club, and the woman on the table in the treatment photo? And is that treatment room somewhere you can show (not a past employer's clinic)?
 9. **Animations.** Pick from the demo at localhost:3010 (words fill in, portrait develops, headline behind you). Photo chapters is out (Lars, 2026-11-14).

@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { CONSENT, GUIDE, GUIDE_ERRORS, type GuideField } from '@/lib/guide-lead'
+import { GUIDE, GUIDE_ERRORS, type GuideField } from '@/lib/guide-lead'
+import { BUSINESS } from '@/lib/site'
 
-type Status = 'idle' | 'sending' | 'fallback'
+// The guide goes out by email only (Lars, 2026-11-14): no download on the page, and none when the signup fails.
+
+type Status = 'idle' | 'sending' | 'error'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -47,22 +49,10 @@ export default function GuideSignup() {
         setStatus('idle')
         return
       }
-      setStatus('fallback')
+      setStatus('error')
     } catch {
-      setStatus('fallback')
+      setStatus('error')
     }
-  }
-
-  if (status === 'fallback') {
-    return (
-      <p role="status" className="text-body text-ink-soft">
-        Something went wrong on my end, so here&apos;s your guide anyway:{' '}
-        <a href={GUIDE.pdfPath} className="link font-semibold" download>
-          Download the guide
-        </a>
-        .
-      </p>
-    )
   }
 
   const errorId = (f: GuideField) => `guide-${f}-error`
@@ -114,16 +104,19 @@ export default function GuideSignup() {
         </div>
       </div>
 
+      {status === 'error' && (
+        <p role="alert" className="text-small text-[#b42318]">
+          Something went wrong on my end. Try again in a minute, or email me at{' '}
+          <a href={`mailto:${BUSINESS.email}`} className="underline underline-offset-2">
+            {BUSINESS.email}
+          </a>{' '}
+          and I&apos;ll send it to you.
+        </p>
+      )}
+
       <button type="submit" className="btn" disabled={status === 'sending'}>
         {status === 'sending' ? 'Sending…' : 'Send me the guide'}
       </button>
-
-      <p className="text-small text-muted">
-        {CONSENT.text}{' '}
-        <Link href="/privacy-policy" className="link">
-          Privacy Policy
-        </Link>
-      </p>
     </form>
   )
 }
