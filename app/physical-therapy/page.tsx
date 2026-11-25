@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 const WHO = [
   {
     title: 'Athletes who just got hurt.',
-    body: "High school and college athletes, football and lacrosse especially. Less pain isn't the finish line. The goal is a complete return to your sport, and we test for it before you go back.",
+    body: "High school and college athletes, football and lacrosse especially. The goal is a complete return to your sport, and we test for it before you go back.",
   },
   {
     title: 'Professionals who never got fully healthy.',
@@ -43,16 +43,16 @@ const WHO = [
   },
   {
     title: 'Athletes who still compete and want to stay that way.',
-    body: "Pickleball, golf, lifting, running and racquet sports. We find what's likely to break down and build it up, so you can trust your body instead of guessing.",
+    body: "Pickleball, golf, lifting, running and racquet sports. We find what's likely to break down and build it up, so you can trust your body.",
   },
 ]
 
 const FIRST_VISIT = [
   'Your history: what happened, what you have tried, and what you want to get back to.',
-  'A full evaluation, joint by joint, to find where things broke down and why. Not just the spot that hurts.',
+  'A full evaluation, joint by joint, that traces the spot that hurts back to where things broke down and why.',
   'Hands-on treatment that same day, and the first exercises that hold the change in place.',
   "A plan you understand. Every exercise has a place in the sequence, and you'll know why you're doing it.",
-  'Your baseline numbers, so we can retest them as you go instead of guessing at progress.',
+  'Your baseline numbers, so we can retest them as you go and measure your progress.',
 ]
 
 const STEPS = [
@@ -211,9 +211,12 @@ export default function PhysicalTherapyPage() {
               </p>
               <p>
                 That&rsquo;s the half I work on. I&rsquo;m a physical therapist with a background in strength and
-                conditioning and exercise, with a concentration in nutrition, so treatment and training sit on one plan, built from your own evaluation and changed
-                every time you retest.
+                conditioning and exercise, with a concentration in nutrition. Treatment and training sit on one plan, built
+                from your own evaluation and changed every time you retest.
               </p>
+              <Link href={BOOKING_URL} className="btn mt-8">
+                {DISCOVERY_CALL.label}
+              </Link>
             </div>
           </div>
         </section>
