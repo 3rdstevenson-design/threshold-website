@@ -4,13 +4,13 @@ import { BUSINESS, DISCOVERY_CALL } from '@/lib/site'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 import BookingWidget from '@/components/BookingWidget'
+import Faq from '@/components/Faq'
 
 export const metadata: Metadata = {
-  title: 'Book a Free Call in Reston, VA',
   ...pageMeta({
-    fullTitle: 'Book a Free Call in Reston, VA | Threshold Health & Performance',
+    fullTitle: 'Book a Free Call with Dr. Lars Stevenson, DPT | Reston, VA',
     description:
-      "Book a free 30-minute call with Dr. Lars Stevenson, PT, DPT. Talk through what's going on, what you've tried, and the next step.",
+      "Book a free 30-minute video call with Dr. Lars Stevenson, PT, DPT, a Doctor of Physical Therapy in Reston, VA. Tell me what's going on and what you've tried.",
     path: '/book',
   }),
 }
@@ -59,6 +59,8 @@ export default function BookPage() {
             <BookingWidget eager />
           </div>
         </section>
+
+        <Faq page="book" path="/book" heading="Questions about the free call" band />
       </main>
       <SiteFooter />
     </>

@@ -3,7 +3,7 @@ import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import StructuredData from '@/components/StructuredData'
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/site'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, HOME_TITLE } from '@/lib/site'
 
 // Brand fonts, self-hosted as latin woff2 subsets (SIL OFL, licenses beside the files in app/fonts).
 // Local files keep builds independent of Google Fonts and keep the type identical in every preview.
@@ -33,8 +33,6 @@ const nunitoSans = localFont({
   display: 'swap',
   fallback: ['system-ui', 'sans-serif'],
 })
-
-const HOME_TITLE = `${SITE_NAME} | Physical Therapy in Reston, VA`
 
 // metadataBase makes every relative canonical and OG URL resolve to www.
 // Pages set their own canonical; none is set here, so a page without one

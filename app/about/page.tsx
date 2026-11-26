@@ -7,13 +7,13 @@ import { BUSINESS, DISCOVERY_CALL } from '@/lib/site'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 import Develop from '@/components/moments/Develop'
+import Faq from '@/components/Faq'
 
 export const metadata: Metadata = {
-  title: 'About Dr. Lars Stevenson, PT, DPT',
   ...pageMeta({
-    fullTitle: 'About Dr. Lars Stevenson, PT, DPT | Threshold Health & Performance',
+    fullTitle: 'Dr. Lars Stevenson, Doctor of Physical Therapy in Reston, VA',
     description:
-      'Dr. Lars Stevenson, PT, DPT, is a physical therapist in Reston, VA with a background in strength and conditioning, exercise and nutrition, working with athletes and active adults.',
+      'Doctor of Physical Therapy (Marymount University) in Reston, VA, licensed in Virginia, with Precision Nutrition Level 1 and Fascial Stretch Therapy Level 1.',
     path: '/about',
   }),
 }
@@ -180,6 +180,8 @@ export default function AboutPage() {
             </p>
           </div>
         </section>
+
+        <Faq page="about" path="/about" heading="Questions about Dr. Stevenson" band />
       </main>
       <SiteFooter />
     </>

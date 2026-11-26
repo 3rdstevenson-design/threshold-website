@@ -6,6 +6,7 @@ import { BOOKING_URL } from '@/lib/booking'
 import { USP_LINE, DISCOVERY_CALL } from '@/lib/site'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
+import Faq from '@/components/Faq'
 
 // Remote Performance Care (wiki reference-threshold-offers): the plan built around the client,
 // coaching by messaging in the app, a call when it's needed, no scheduled live sessions.
@@ -14,11 +15,10 @@ import SiteFooter from '@/components/SiteFooter'
 // because practice happens where the client is and Lars is licensed in Virginia only.
 
 export const metadata: Metadata = {
-  title: 'Online Coaching for Athletes and Active Adults',
   ...pageMeta({
-    fullTitle: 'Online Coaching for Athletes and Active Adults | Threshold Health & Performance',
+    fullTitle: 'Online Strength Coaching After Rehab | Threshold Health & Performance',
     description:
-      'Online strength coaching for your return to training after rehab: a plan built around you, coaching in the app, and a call when you need one.',
+      'Online strength coaching for athletes and active adults after rehab: a plan built around you, coaching in the app, and a call when you need one.',
     path: '/online-coaching',
   }),
 }
@@ -132,6 +132,8 @@ export default function OnlineCoachingPage() {
             </div>
           </div>
         </section>
+
+        <Faq page="onlineCoaching" path="/online-coaching" heading="Questions about online coaching" band />
       </main>
       <SiteFooter />
     </>
