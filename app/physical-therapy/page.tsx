@@ -6,6 +6,7 @@ import { BOOKING_URL } from '@/lib/booking'
 import { DISCOVERY_CALL, SITE_URL, BUSINESS } from '@/lib/site'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
+import Faq from '@/components/Faq'
 
 // In-person physical therapy (Lars, 2026-11-15: the menu made it look like all he does is online coaching).
 // Every fact has a source: sessions at 1908 Reston Metro Plaza (Lars, 2026-11-15); 60 minutes, face to face
@@ -16,18 +17,18 @@ import SiteFooter from '@/components/SiteFooter'
 // gets its own title and sections. Sources: who I see = the three groups of the 3x3 matrix (wiki
 // concept-threshold-3x3-matrix, no age targeting); first visit = the homepage CROSS steps; "the other half" = the
 // 2026-11-12 USP; "six weeks and still not right" = the enemy's evidence (wiki concept-threshold-positioning).
+// 2026-11-25 (Lou Malmgren's SEO audit): the FAQ lives in lib/faqs.ts with every other page's, and "What I treat" names
+// the conditions Lars picked, with cases from threshold-coaching-brain/my-writing/proof.md.
 
-const ADDRESS = { street: '1908 Reston Metro Plaza', city: 'Reston, VA 20190' }
-
-// Distinct from the homepage title ("Threshold Health & Performance | Physical Therapy in Reston, VA").
-const PAGE_TITLE = 'One-on-One Physical Therapy in Reston, VA | Dr. Lars Stevenson, DPT'
+// Distinct from the homepage title (HOME_TITLE in lib/site.ts): this page targets "sports physical therapy" and the
+// conditions, the homepage "physical therapist" and the doctorate (docs/seo-keyword-map-2026-11.md).
+const PAGE_TITLE = 'Sports Physical Therapy in Reston, VA | One-on-One with a DPT'
 
 export const metadata: Metadata = {
-  title: { absolute: PAGE_TITLE },
   ...pageMeta({
     fullTitle: PAGE_TITLE,
     description:
-      'One-on-one physical therapy in Reston, VA for athletes and active adults: a full evaluation, hands-on treatment from the first visit, and 60-minute sessions with Dr. Lars Stevenson, PT, DPT. No referral needed.',
+      'One-on-one sports physical therapy in Reston, VA with Dr. Lars Stevenson, DPT: ACL and shoulder rehab, back, neck and hip pain. No referral needed to start.',
     path: '/physical-therapy',
   }),
 }
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
 const WHO = [
   {
     title: 'Athletes who just got hurt.',
-    body: "High school and college athletes, football and lacrosse especially. The goal is a complete return to your sport, and we test for it before you go back.",
+    body: "High school and college athletes, football and lacrosse especially. The goal is a complete return to your sport, and I test for it before you go back.",
   },
   {
     title: 'Professionals who never got fully healthy.',
@@ -43,7 +44,28 @@ const WHO = [
   },
   {
     title: 'Athletes who still compete and want to stay that way.',
-    body: "Pickleball, golf, lifting, running and racquet sports. We find what's likely to break down and build it up, so you can trust your body.",
+    body: "Pickleball, golf, lifting, running and racquet sports. I find what's likely to break down and build it up, so you can trust your body.",
+  },
+]
+
+// What I treat (Lars, 2026-11-25). Each case is from threshold-coaching-brain/my-writing/proof.md; neck pain has no case
+// on file, so none is claimed. No ages, and a timeline only inside a case.
+const TREAT = [
+  {
+    title: 'Knee: ACL and meniscus.',
+    body: 'Rehab after ACL and meniscus surgery, all the way through return-to-sport testing: strength side to side, hops and jumps, and change of direction. One Division I lacrosse player came back from ACL and meniscus surgery for his fifth year and now plays professionally.',
+  },
+  {
+    title: 'Shoulder: rotator cuff and shoulder replacement.',
+    body: "Rotator cuff repairs, shoulder replacements, and the shoulder that's fine doing dishes but gives out on a serve. One pickleball player was back on the court 12 weeks after her rotator cuff repair.",
+  },
+  {
+    title: 'Low back, neck and hip pain.',
+    body: 'The back that keeps flaring up, the neck that locks up after long days, and hips that limit your training. A high school football player had hip tightness that limited his training for years. He got back to training without restriction and went on to play Division I football.',
+  },
+  {
+    title: 'Hamstrings, ankles and running.',
+    body: 'Hamstring strains and tears, ankle sprains, and getting back to running, pickleball, golf or racquet sports. A high school baseball player with a torn hamstring was faster than before by the end of one summer and went on to play Division I.',
   },
 ]
 
@@ -70,60 +92,21 @@ const STEPS = [
   },
 ]
 
-const FAQ: { q: string; a: string; link?: { href: string; label: string } }[] = [
-  { q: 'Where are sessions?', a: `${ADDRESS.street}, ${ADDRESS.city}.` },
-  {
-    q: 'How long is a session?',
-    a: '60 minutes, and every session is with me, start to finish, with no techs or aides.',
-  },
-  { q: 'How often will I come in?', a: 'Weekly or every other week. I recommend one after your evaluation.' },
-  {
-    q: 'Do I need a referral from my doctor?',
-    a: "No. In Virginia, a physical therapist with a doctorate can evaluate and treat you without one. If another provider is already treating you for the same problem, I'll ask your OK to send them my evaluation.",
-  },
-  { q: 'What should I wear?', a: 'Clothes you can move and train in.' },
-  {
-    q: 'Who will I see each session?',
-    a: 'Me. I do your evaluation and every session after it, so the person who planned your care is the one checking it.',
-  },
-  {
-    q: "I already did physical therapy and I'm still not right. Is this different?",
-    a: "Often the first round stopped when the pain backed off. That's only halfway. Here we keep going until strength, speed and confidence are back, and we retest to prove it.",
-  },
-  {
-    q: 'Do I have to be an athlete?',
-    a: "No. If you train, compete, or just want to move the way you used to, you're who I work with.",
-  },
-]
-
 const h2 = 'font-cormorant text-h2 font-medium text-ink'
 
 // Page-level JSON-LD: the service this page offers (provider = the site-wide MedicalBusiness in
-// components/StructuredData.tsx) and its questions. No street address, matching the service-area profile.
+// components/StructuredData.tsx). <Faq> adds the FAQPage block. No street address, matching the service-area profile.
 const pageJsonLd = {
   '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Service',
-      '@id': `${SITE_URL}/physical-therapy#service`,
-      name: 'One-on-one physical therapy',
-      serviceType: 'Physical therapy',
-      url: `${SITE_URL}/physical-therapy`,
-      description:
-        'In-person physical therapy for athletes and active adults: a full evaluation, hands-on treatment from the first visit, and 60-minute one-on-one sessions with Dr. Lars Stevenson, PT, DPT.',
-      provider: { '@id': `${SITE_URL}/#business` },
-      areaServed: BUSINESS.areaServed.map((name) => ({ '@type': 'City', name: `${name}, ${BUSINESS.region}` })),
-    },
-    {
-      '@type': 'FAQPage',
-      '@id': `${SITE_URL}/physical-therapy#faq`,
-      mainEntity: FAQ.map((f) => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: f.a },
-      })),
-    },
-  ],
+  '@type': 'Service',
+  '@id': `${SITE_URL}/physical-therapy#service`,
+  name: 'One-on-one physical therapy',
+  serviceType: 'Physical therapy',
+  url: `${SITE_URL}/physical-therapy`,
+  description:
+    'In-person sports physical therapy for athletes and active adults: sports injuries, ACL and meniscus rehab, rotator cuff and shoulder replacement rehab, and low back, neck and hip pain. A full evaluation, hands-on treatment from the first visit, and 60-minute one-on-one sessions with Dr. Lars Stevenson, PT, DPT.',
+  provider: { '@id': `${SITE_URL}/#business` },
+  areaServed: BUSINESS.areaServed.map((name) => ({ '@type': 'City', name: `${name}, ${BUSINESS.region}` })),
 }
 
 export default function PhysicalTherapyPage() {
@@ -171,6 +154,26 @@ export default function PhysicalTherapyPage() {
                 <li key={w.title} className="border-t border-[#d9d9e1] py-7 first:border-t-0 first:pt-0">
                   <h3 className="font-nunito text-h3 font-bold text-ink">{w.title}</h3>
                   <p className="mt-2 text-body text-ink-soft">{w.body}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="border-t border-hairline">
+          <div className="mx-auto grid max-w-page gap-12 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">
+            <div className="md:col-span-5">
+              <h2 className={h2}>What I treat</h2>
+              <p className="mt-6 max-w-measure text-body text-ink-soft">
+                Sports injuries, surgery rehab and the pain that keeps active people out of training. If yours isn&rsquo;t
+                here, ask me on the free call.
+              </p>
+            </div>
+            <ul className="md:col-span-6 md:col-start-7">
+              {TREAT.map((t) => (
+                <li key={t.title} className="border-t border-[#d9d9e1] py-7 first:border-t-0 first:pt-0">
+                  <h3 className="font-nunito text-h3 font-bold text-ink">{t.title}</h3>
+                  <p className="mt-2 text-body text-ink-soft">{t.body}</p>
                 </li>
               ))}
             </ul>
@@ -251,28 +254,7 @@ export default function PhysicalTherapyPage() {
           </div>
         </section>
 
-        <section className="bg-band">
-          <div className="mx-auto grid max-w-page gap-12 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">
-            <h2 className={`${h2} md:col-span-5`}>Frequently asked questions</h2>
-            <dl className="md:col-span-6 md:col-start-7">
-              {FAQ.map((f) => (
-                <div key={f.q} className="border-t border-[#d9d9e1] py-7 first:border-t-0 first:pt-0">
-                  <dt className="font-nunito text-h3 font-bold text-ink">{f.q}</dt>
-                  <dd className="mt-2 text-body text-ink-soft">
-                    <p>{f.a}</p>
-                    {f.link && (
-                      <p className="mt-3">
-                        <Link href={f.link.href} className="link">
-                          {f.link.label}
-                        </Link>
-                      </p>
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </section>
+        <Faq page="physicalTherapy" path="/physical-therapy" heading="Questions about physical therapy" band />
 
         <section>
           <div className="mx-auto grid max-w-page items-center gap-12 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">

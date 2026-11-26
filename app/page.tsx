@@ -2,18 +2,19 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { pageMeta } from '@/lib/metadata'
-import { SITE_NAME, BUSINESS, USP_LINE, DISCOVERY_CALL } from '@/lib/site'
+import { HOME_TITLE, BUSINESS, USP_LINE, DISCOVERY_CALL } from '@/lib/site'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 import BookingWidget from '@/components/BookingWidget'
 import GuideSignup from '@/components/GuideSignup'
+import Faq from '@/components/Faq'
 import WordHighlight from '@/components/moments/WordHighlight'
 
 export const metadata: Metadata = {
   ...pageMeta({
-    fullTitle: `${SITE_NAME} | Physical Therapy in Reston, VA`,
+    fullTitle: HOME_TITLE,
     description:
-      "Physical therapy for athletes and active adults in Reston, VA. When the pain backs off, you're halfway there. I take you the rest of the way.",
+      'Doctor of Physical Therapy in Reston, VA. Dr. Lars Stevenson, PT, DPT, takes athletes and active adults the rest of the way after the pain backs off.',
     path: '/',
   }),
 }
@@ -48,11 +49,11 @@ const STEPS: { letter: string; title: string; body: string }[] = [
   },
 ]
 
-// Patient reviews, word for word.
+// Patient reviews, word for word. Words in [brackets] were added with each reviewer's OK (Lars, 2026-11-25).
 const REVIEWS = [
   {
     quote:
-      "Lars Stevenson is by far the best physical therapist I've ever worked with. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.",
+      "Lars Stevenson is by far the best physical therapist I've ever worked with [for my ankle injury]. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.",
     date: 'January 2025',
   },
   {
@@ -62,7 +63,7 @@ const REVIEWS = [
   },
   {
     quote:
-      'He has the exact right mix of treatment planning, diagnosis, communication skills, technical knowledge, and the ability to challenge patients to do their best.',
+      'He [treated my low back and] has the exact right mix of treatment planning, diagnosis, communication skills, technical knowledge, and the ability to challenge patients to do their best.',
     date: 'February 2025',
   },
 ]
@@ -86,9 +87,9 @@ export default function HomePage() {
           <div className="mt-10 grid gap-12 md:mt-14 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-5 md:row-start-1 lg:col-span-4">
               <p className="text-lede text-ink-soft">
-                I&apos;m a physical therapist with a background in strength and conditioning and exercise, with a
-                concentration in nutrition. I take athletes and active adults the rest of the way, on one plan built
-                for them and tested as they go.
+                I&apos;m Dr. Lars Stevenson, a Doctor of Physical Therapy with a background in strength and
+                conditioning and exercise, with a concentration in nutrition. I take athletes and active adults the rest
+                of the way, on one plan built for them and tested as they go.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <a href="#book" className="btn">
@@ -99,7 +100,7 @@ export default function HomePage() {
                 </a>
               </div>
               <p className="mt-6 text-small text-muted">
-                Free {DISCOVERY_CALL.minutes}-minute call. Based in {BUSINESS.city}, {BUSINESS.regionName}.
+                Free {DISCOVERY_CALL.minutes}-minute call. Licensed in {BUSINESS.regionName}, based in {BUSINESS.city}.
               </p>
             </div>
 
@@ -297,6 +298,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <Faq page="home" path="/" band />
       </main>
       <SiteFooter />
     </>

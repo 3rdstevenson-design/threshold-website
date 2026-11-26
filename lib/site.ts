@@ -8,7 +8,11 @@ export const SITE_URL = 'https://www.thresholdhp.com'
 export const SITE_NAME = 'Threshold Health & Performance'
 export const SITE_TAGLINE = "It's time to cross your threshold."
 export const SITE_DESCRIPTION =
-  "Physical therapy for athletes and active adults in Reston, Virginia. When the pain backs off, you're halfway there. Dr. Lars Stevenson takes you the rest of the way."
+  "Physical therapy for athletes and active adults in Reston, Virginia. When the pain backs off, you're halfway there. Dr. Lars Stevenson, PT, DPT, takes you the rest of the way."
+
+// The homepage title (the layout default and the home page's own metadata). Every page's title is unique and leads with
+// the phrase that page targets (docs/seo-keyword-map-2026-11.md).
+export const HOME_TITLE = 'Physical Therapist in Reston, VA | Dr. Lars Stevenson, DPT'
 
 // The 2026-11-12 USP (wiki concept-threshold-positioning), used as the homepage headline.
 export const USP_LINE = "When the pain backs off, you're halfway there."
@@ -16,9 +20,28 @@ export const USP_LINE = "When the pain backs off, you're halfway there."
 export const FOUNDER = {
   name: 'Dr. Lars Stevenson',
   jobTitle: 'Doctor of Physical Therapy',
-  // His CSCS lapsed: never cite it (Lars, 2026-11-14).
+  // His CSCS lapsed: never cite it (Lars, 2026-11-14). The rest is word for word from
+  // threshold-coaching-brain/my-writing/proof.md ("say these exactly").
   credentials: 'PT, DPT',
+  degree: { name: 'Doctor of Physical Therapy', school: 'Marymount University' },
+  licensedIn: 'Virginia',
+  certifications: ['Precision Nutrition Level 1', 'Fascial Stretch Therapy Level 1'],
+  alumniOf: ['Marymount University', 'St. Olaf College'],
 }
+
+// What Lars treats (Lars, 2026-11-25), for the Person schema's knowsAbout. The pages name them in their own words.
+export const CONDITIONS = [
+  'Sports injuries',
+  'ACL and meniscus surgery rehabilitation',
+  'Rotator cuff repair rehabilitation',
+  'Shoulder replacement rehabilitation',
+  'Low back pain',
+  'Neck pain',
+  'Hip pain',
+  'Hamstring strains and tears',
+  'Ankle sprains',
+  'Return to running',
+]
 
 // The free discovery call (Practice Better service "Discovery Call", 30 minutes, video).
 export const DISCOVERY_CALL = {
