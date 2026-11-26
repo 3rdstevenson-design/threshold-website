@@ -4,7 +4,7 @@ Every word that goes on the redesigned site. Nothing goes live until you approve
 
 Rules applied: Voice DNA (first person, no em dashes, no "not X, Y", no "we"), your USP, "athletes and active adults", no CSCS (lapsed), no fixed recovery timelines, nothing invented.
 
-**Added in draft 6 (2026-11-25, Lou Malmgren's SEO and AI-search audit, your calls the same day):** every page title leads with the phrase that page targets and carries "Dr. Lars Stevenson, DPT" (Online coaching excepted); new meta descriptions; the homepage lede names you as a Doctor of Physical Therapy and the line under the buttons says "Licensed in Virginia"; a "What I treat" section on the Physical therapy page; an FAQ on Home, Physical therapy, Online coaching, About and Book, shown as an accordion (your pick), with "physical therapy" in the questions (never on Online coaching outside its disclaimer); a new insurance answer (out of network with every plan, HSA and FSA cards for physical therapy visits, no prices); the referral answer now carries Virginia's 60-day limit; "How often" is your line, word for word; the Good Faith Estimate stays linked from the footer only. The site renders the FAQs from `lib/faqs.ts`; the FAQs section at the end of this file is the same text. The keyword research behind it: `docs/seo-keyword-map-2026-11.md`. The three reviews stay as they are until you send what reviewers 1 and 3 came in for (they've OK'd added words, which go in brackets).
+**Added in draft 6 (2026-11-25, Lou Malmgren's SEO and AI-search audit, your calls the same day):** every page title leads with the phrase that page targets and carries "Dr. Lars Stevenson, DPT" (Online coaching excepted); new meta descriptions; the homepage lede names you as a Doctor of Physical Therapy and the line under the buttons says "Licensed in Virginia"; a "What I treat" section on the Physical therapy page; an FAQ on Home, Physical therapy, Online coaching, About and Book, shown as an accordion (your pick), with "physical therapy" in the questions (never on Online coaching outside its disclaimer); a new insurance answer (out of network with every plan, HSA and FSA cards for physical therapy visits, no prices); the referral answer now carries Virginia's 60-day limit; "How often" is your line, word for word; the Good Faith Estimate stays linked from the footer only. The site renders the FAQs from `lib/faqs.ts`; the FAQs section at the end of this file is the same text. The keyword research behind it: `docs/seo-keyword-map-2026-11.md`. Reviews 1 and 3 carry the reviewers' OK'd condition words in brackets (ankle, low back).
 
 **Added in draft 5 (2026-11-15):** a Physical therapy page, now first in the menu ("How I work" moved to the footer), with a "Not near Reston?" section pointing to online coaching, and a Good Faith Estimate page linked in the footer.
 
@@ -70,13 +70,13 @@ Every patient goes through the same five parts, in this order. I call it the CRO
 
 A high school football player came in with hip tightness that had limited his training for years. He'd picked up advice from coaches and trainers, and nothing had fixed it. I evaluated him, found where the system had broken down, and started treatment that day, built around his body and his sport. He got back to training without restriction and went on to play Division I college football.
 
-“Lars Stevenson is by far the best physical therapist I've ever worked with. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.”
+“Lars Stevenson is by far the best physical therapist I've ever worked with [for my ankle injury]. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.”
 Patient review, January 2025
 
 “After one session I immediately felt relief from my back and hip pain. He was very detailed and clear, and gave me exercises to do at home before our next visit.”
 Patient review, January 2025
 
-“He has the exact right mix of treatment planning, diagnosis, communication skills, technical knowledge, and the ability to challenge patients to do their best.”
+“He [treated my low back and] has the exact right mix of treatment planning, diagnosis, communication skills, technical knowledge, and the ability to challenge patients to do their best.”
 Patient review, February 2025
 
 ### Dr. Lars Stevenson, PT, DPT
@@ -445,4 +445,4 @@ An accordion on each page (your pick, 2026-11-25). Every question is on one page
 10. **FAQs and keywords (Lou Malmgren's audit).** Settled (you, 2026-11-25): an FAQ on every marketing page, shown as an accordion; "physical therapy" in the questions except on Online coaching; place names plus one "near you" line; no other clinic's name ("Select" and "Professional" are physical therapy chains); conditions named: sports injuries, ACL and meniscus, rotator cuff and shoulder replacement, low back, neck and hip pain, hamstrings, ankle sprains, running and court sports.
 11. **Insurance.** Settled (you, 2026-11-25): out of network with every plan; HSA and FSA cards for physical therapy visits (Stripe confirmed the account takes them as set up); still no prices; the Good Faith Estimate stays linked from the footer only, never from an FAQ.
 12. **How often.** Settled (you, 2026-11-25, word for word): "The frequency and duration of your plan of care depends on a number of factors that are evaluated upon the initial examination."
-13. **Reviews with added words.** Open: the reviewers have OK'd condition words in brackets; waiting on what reviewer 1 (a sports injury) and reviewer 3 (low back, hip or neck) came in for.
+13. **Reviews with added words.** Settled (you, 2026-11-25): with the reviewers' OK, review 1 adds "[for my ankle injury]" and review 3 adds "[treated my low back and]". Brackets show the added words; everything else stays word for word.

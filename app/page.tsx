@@ -49,11 +49,11 @@ const STEPS: { letter: string; title: string; body: string }[] = [
   },
 ]
 
-// Patient reviews, word for word.
+// Patient reviews, word for word. Words in [brackets] were added with each reviewer's OK (Lars, 2026-11-25).
 const REVIEWS = [
   {
     quote:
-      "Lars Stevenson is by far the best physical therapist I've ever worked with. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.",
+      "Lars Stevenson is by far the best physical therapist I've ever worked with [for my ankle injury]. He's incredibly knowledgeable and eager to share what he knows. When I had questions between visits, he answered them promptly. I've recommended him to numerous people and will continue to do so.",
     date: 'January 2025',
   },
   {
@@ -63,7 +63,7 @@ const REVIEWS = [
   },
   {
     quote:
-      'He has the exact right mix of treatment planning, diagnosis, communication skills, technical knowledge, and the ability to challenge patients to do their best.',
+      'He [treated my low back and] has the exact right mix of treatment planning, diagnosis, communication skills, technical knowledge, and the ability to challenge patients to do their best.',
     date: 'February 2025',
   },
 ]
