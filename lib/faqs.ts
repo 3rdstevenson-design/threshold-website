@@ -11,6 +11,9 @@
 // - Lars, 2026-11-25: visit frequency is never promised (his line, word for word, answers "How often"), and the
 //   Good Faith Estimate link stays in the footer only, never in an FAQ answer.
 // - Lars, 2026-11-26: the 2026-11-12 USP line is rejected (not his words); lib/__tests__/rejected-lines.test.ts keeps it out.
+// - Lars, 2026-11-27 (Keyword Planner rounds): the PT page's "didn't work" question uses the searched wording and an answer
+//   in his own call framing (threshold-coaching-brain/campaigns/website-seo-2026-11/2026-11-27-pt-page-keyword-fixes.md);
+//   the home "what does it treat" answer names sciatica and tennis elbow.
 
 export type FaqItem = { q: string; a: string; link?: { href: string; label: string } }
 
@@ -24,7 +27,7 @@ export const FAQS: Record<FaqPage, FaqItem[]> = {
     },
     {
       q: 'What does physical therapy at Threshold treat?',
-      a: 'Sports injuries and the pain that keeps active people out of training: rehab after ACL and meniscus surgery, rotator cuff repairs and shoulder replacements, low back, neck and hip pain, hamstring tears, ankle sprains, and getting back to running, pickleball, golf or racquet sports.',
+      a: 'Sports injuries and the pain that keeps active people out of training: rehab after ACL and meniscus surgery, rotator cuff repairs and shoulder replacements, low back pain and sciatica, neck and hip pain, hamstring tears, ankle sprains, tennis elbow, and getting back to running, pickleball, golf or racquet sports.',
       link: { href: '/physical-therapy', label: 'See physical therapy in Reston' },
     },
     {
@@ -68,8 +71,8 @@ export const FAQS: Record<FaqPage, FaqItem[]> = {
       a: "Clothes you can move and train in. Shorts if it's your knee, hip or ankle, and a shirt that gives me room to work if it's your shoulder, neck or back.",
     },
     {
-      q: "I already did physical therapy and I'm still not right. Is this different?",
-      a: 'Every session is with me, start to finish. Treatment and training sit on one plan, and I retest as you go to prove it.',
+      q: 'What if physical therapy didn\'t work for me?',
+      a: "Then you're probably cleared, but not capable yet. A lot of clinics run a protocol, and you're discharged when it ends or when insurance stops covering it, whether or not you're back to what you want to do. That's not any one person's fault; a lot of PTs are overbooked and overworked. Every session is 60 minutes with me, start to finish, with no techs or aides, and treatment and training sit on one plan.",
     },
     {
       q: 'Do you take insurance for physical therapy?',

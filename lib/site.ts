@@ -38,10 +38,12 @@ export const CONDITIONS = [
   'Rotator cuff repair rehabilitation',
   'Shoulder replacement rehabilitation',
   'Low back pain',
+  'Sciatica',
   'Neck pain',
   'Hip pain',
   'Hamstring strains and tears',
   'Ankle sprains',
+  'Tennis elbow',
   'Return to running',
 ]
 
