@@ -23,6 +23,14 @@ emails it sent before then.
 4. `sendDue()` runs every 5 minutes, sends what's due, retries a failed send up to 3 times, drops a follow-up that's
    more than 2 days late, and writes any trouble in the row's **Problem** column.
 5. Unsubscribe links go to `/api/unsubscribe`, which marks the row Unsubscribed and cancels the queued follow-ups.
+6. **Daily cap (Lars, 2026-11-27):** the script sends at most 300 emails in any 24 hours, a safety net under Gmail's own
+   limit (2,000 a day for the whole dr.lars@ account; going over it stops all of its email for up to a day). Anything
+   over the cap is held, not dropped: the row's Problem column says so, and it goes out once the 24 hours have room.
+   Change the cap in Apps Script → Project Settings → Script Properties → `DAILY_CAP`.
+7. **Alerts:** the first time the cap holds emails in any 24 hours, and whenever an email fails three times, the script
+   posts to `/api/guide/alert`, which sends Lars a Telegram (`lib/guide-alert.ts` writes the text; the key is the same
+   `GUIDE_SCRIPT_KEY`). If the site can't be reached, the alert is emailed to dr.lars@ instead. Run `testAlert()` in
+   the editor to check the path.
 
 ## Changing the script
 1. Edit `Code.gs` here and run `node apps-script/guide-signups/check.mjs` (a fake Google; every path is checked).

@@ -203,3 +203,41 @@ describe('POST /api/unsubscribe for a Gmail-era link', () => {
     expect(await res.text()).toBe('Unsubscribed')
   })
 })
+
+describe('POST /api/guide/alert (the script telling Lars on Telegram)', () => {
+  const post = (body: unknown) =>
+    new Request('https://www.thresholdhp.com/api/guide/alert', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } })
+
+  it('refuses a request without the right key, and sends nothing', async () => {
+    const calls = mockFetch(() => ({ json: { ok: true } }))
+    const { POST } = await import('../../app/api/guide/alert/route')
+    expect((await POST(post({ kind: 'test' }))).status).toBe(403)
+    expect((await POST(post({ kind: 'test', key: 'x'.repeat(64) }))).status).toBe(403)
+    expect(calls).toHaveLength(0)
+  })
+
+  it('refuses a kind it does not know', async () => {
+    mockFetch(() => ({ json: { ok: true } }))
+    const { POST } = await import('../../app/api/guide/alert/route')
+    expect((await POST(post({ kind: 'hello', key: 'k'.repeat(64) }))).status).toBe(400)
+  })
+
+  it('sends the cap alert to Telegram with its numbers', async () => {
+    const calls = mockFetch(() => ({ json: { ok: true } }))
+    const { POST } = await import('../../app/api/guide/alert/route')
+    const res = await POST(post({ kind: 'cap', key: 'k'.repeat(64), cap: 300, sent: 300, held: 4 }))
+    expect(res.status).toBe(200)
+    const text = calls.find((c) => c.url.includes('api.telegram.org'))!.body.text
+    expect(text).toContain('Guide emails hit the daily cap: 300 sent in the last 24 hours (cap 300), 4 held.')
+    expect(text).toContain('raise DAILY_CAP')
+  })
+
+  it('sends the failure alert, and says 502 when Telegram is down', async () => {
+    const calls = mockFetch(() => ({ json: { ok: true } }))
+    const { POST } = await import('../../app/api/guide/alert/route')
+    await POST(post({ kind: 'failed', key: 'k'.repeat(64), step: 'Day 2', email: 'pat@example.com', error: 'Gmail is down' }))
+    expect(calls[0].body.text).toContain('Guide email FAILED 3 times: Day 2 email to pat@example.com (Gmail is down).')
+    mockFetch(() => ({ status: 500, text: 'oops' }))
+    expect((await POST(post({ kind: 'test', key: 'k'.repeat(64) }))).status).toBe(502)
+  })
+})

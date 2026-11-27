@@ -10,12 +10,17 @@
  *  - sends the guide right away through Gmail from this account, PDF attached, so every email shows in Sent,
  *  - queues day 2 and day 5 on the Outbox tab, which sendDue() (every 5 minutes) sends when they're due,
  *  - marks unsubscribes the site passes on (app/api/unsubscribe) and cancels the follow-ups still queued.
+ *  - never sends more than the daily cap (300 in any 24 hours; the DAILY_CAP script property changes it), so a flood of
+ *    fake signups can't run dr.lars@ into Gmail's own limit, which would stop all of its email for up to a day.
+ *    Anything over the cap is held, not dropped, and goes out once the last 24 hours have room.
+ *  - tells Lars on Telegram (through the website, which holds the bot) the first time the cap holds emails in any
+ *    24 hours, and when an email fails three times; if the website can't be reached, it emails dr.lars@ instead.
  *
  * Setup, once: run setup() and approve Google's permissions, then Deploy > New deployment > Web app
  * (Execute as: Me, Who has access: Anyone), then run showSiteKey() and paste the key into Vercel (GUIDE_SCRIPT_KEY).
  */
 
-const VERSION = '2026-11-27';
+const VERSION = '2026-11-27c';
 const TZ = 'America/New_York';
 const FROM_NAME = 'Dr. Lars Stevenson';
 const FROM_EMAIL = 'dr.lars@thresholdhp.com';
@@ -34,9 +39,12 @@ const FORMS = ['inline', 'popup', 'button'];
 const MAX_TRIES = 3;
 const LATE_LIMIT_MS = 2 * 24 * 3600 * 1000; // a follow-up more than 2 days late is dropped, not sent
 const BATCH = 20; // the most emails one sendDue() run sends
+const DEFAULT_DAILY_CAP = 300; // the most emails in any 24 hours unless the DAILY_CAP script property says otherwise (Lars, 2026-11-27)
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ATTACH_HOSTS = ['https://www.thresholdhp.com/', 'https://thresholdhp.com/'];
 const PDF_PATH = 'guides/stretch-smarter-k7q2m9.pdf';
+const ALERT_URL = 'https://www.thresholdhp.com/api/guide/alert'; // the site sends these on to Lars's Telegram
+const ALERT_EVERY_MS = { cap: 24 * 3600 * 1000, failed: 6 * 3600 * 1000 }; // at most one alert per kind in this window
 
 // ---------------------------------------------------------------- web app
 
@@ -131,8 +139,19 @@ function signup_(body) {
         'Subject': job.subject, 'Text': job.text, 'HTML': job.html, 'Unsubscribe URL': job.unsubscribeUrl,
         'Attach URL': job.attachUrl, 'Attach name': job.attachName,
       });
-      if (step === 'thanks') guide = sendJob_(book, job);
-      else queued.push({ step: step, due: due.toISOString() });
+      if (step !== 'thanks') {
+        queued.push({ step: step, due: due.toISOString() });
+        return;
+      }
+      const cap = dailyCap_();
+      if (sentInLastDay_(book.outbox, now) >= cap) {
+        // Held, not dropped: sendDue() sends it once the last 24 hours have room again.
+        patch_(book.signups, leadRow, { 'Problem': heldNote_(step, cap) });
+        alert_('cap', { cap: cap, sent: sentInLastDay_(book.outbox, now), held: 1 });
+        guide = { sent: false, held: true, retry: true, error: 'held: the daily cap of ' + cap + ' emails was reached; it goes out when there is room' };
+      } else {
+        guide = sendJob_(book, job);
+      }
     });
     setNextDue_();
     return { ok: true, version: VERSION, contact: contact, repeat: repeatToday, test: test, guide: guide, queued: queued };
@@ -222,7 +241,11 @@ function sendDue() {
     const book = book_();
     const o = book.outbox;
     const now = new Date();
+    const cap = dailyCap_();
+    const sentBefore = sentInLastDay_(o, now);
+    let room = cap - sentBefore;
     let sent = 0;
+    let held = 0;
     o.rows.forEach(function (r, i) {
       if (sent >= BATCH || String(r[o.col['Status']]) !== 'queued') return;
       const due = parseStamp_(text_(r[o.col['Due']]));
@@ -240,14 +263,23 @@ function sendDue() {
         if (lead) patch_(book.signups, lead.row, { 'Problem': STEP_LABEL[step] + ' email was more than 2 days late, so it was not sent' });
         return;
       }
-      sendJob_(book, {
+      if (room <= 0) {
+        held++;
+        if (lead && !/ email held: the daily cap /.test(cell_(book.signups, lead, 'Problem'))) {
+          patch_(book.signups, lead.row, { 'Problem': heldNote_(step, cap) });
+        }
+        return;
+      }
+      const result = sendJob_(book, {
         row: rowNumber, leadRow: lead ? lead.row : 0, email: email, step: step,
         subject: String(r[o.col['Subject']]), text: String(r[o.col['Text']]), html: String(r[o.col['HTML']]),
         unsubscribeUrl: String(r[o.col['Unsubscribe URL']]), attachUrl: String(r[o.col['Attach URL']]),
         attachName: String(r[o.col['Attach name']]), tries: Number(r[o.col['Tries']] || 0),
       });
       sent++;
+      if (result.sent) room--;
     });
+    if (held) alert_('cap', { cap: cap, sent: cap - room, held: held });
     setNextDue_();
   } finally {
     lock.releaseLock();
@@ -277,6 +309,7 @@ function sendJob_(book, job) {
     if (tries >= MAX_TRIES) {
       fields['Status'] = 'failed';
       if (job.leadRow) patch_(book.signups, job.leadRow, { 'Problem': STEP_LABEL[job.step] + ' email failed ' + tries + ' times: ' + error });
+      alert_('failed', { step: STEP_LABEL[job.step], email: job.email, error: error });
     }
     patch_(o, job.row, fields);
     console.error('send failed: ' + job.step + ': ' + error);
@@ -423,6 +456,73 @@ function patch_(t, rowNumber, fields) {
   });
 }
 
+// ---------------------------------------------------------------- the daily cap
+
+/** The most emails the script sends in any 24 hours: the DAILY_CAP script property, else 300. */
+function dailyCap_() {
+  const v = Math.floor(Number(PropertiesService.getScriptProperties().getProperty('DAILY_CAP')));
+  return v > 0 ? v : DEFAULT_DAILY_CAP;
+}
+
+/** Emails sent in the 24 hours before `now`. Sent times are Eastern "yyyy-MM-dd HH:mm", so they compare as text. */
+function sentInLastDay_(o, now) {
+  const since = stamp_(new Date(now.getTime() - 24 * 3600 * 1000));
+  let n = 0;
+  o.rows.forEach(function (r) {
+    if (String(r[o.col['Status']]) === 'sent' && text_(r[o.col['Sent']]) >= since) n++;
+  });
+  return n;
+}
+
+/** The Problem note for a held email. It starts "<Step> email", so sendJob_() clears it once that email goes out. */
+function heldNote_(step, cap) {
+  return STEP_LABEL[step] + ' email held: the daily cap of ' + cap + ' emails was reached; it goes out when there is room';
+}
+
+// ---------------------------------------------------------------- alerts to Lars
+
+/**
+ * Tells Lars on Telegram through the website (the script holds no bot token; the site checks the same key it uses to
+ * call this script), at most once per kind in ALERT_EVERY_MS. If the site can't be reached, it emails dr.lars@ instead,
+ * outside the daily cap. Never throws. Returns how the alert went out: 'telegram', 'email', 'skipped' or 'lost'.
+ */
+function alert_(kind, details) {
+  const props = PropertiesService.getScriptProperties();
+  const every = ALERT_EVERY_MS[kind] || 0;
+  if (every && Date.now() - Number(props.getProperty('ALERT_' + kind) || 0) < every) return 'skipped';
+  const body = Object.assign({ kind: kind }, details || {});
+  try {
+    const res = UrlFetchApp.fetch(ALERT_URL, {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true, followRedirects: true,
+      payload: JSON.stringify(Object.assign({ key: props.getProperty('SITE_KEY') }, body)),
+    });
+    if (res.getResponseCode() !== 200) throw new Error('the site answered ' + res.getResponseCode());
+    props.setProperty('ALERT_' + kind, String(Date.now()));
+    return 'telegram';
+  } catch (err) {
+    console.error('alert ' + kind + ' via the site failed: ' + errText_(err));
+  }
+  try {
+    const text = 'The guide signup script could not reach the website to send this to Telegram, so it is an email.\n\n' +
+      'Alert: ' + kind + '\n' + Object.keys(body).filter(function (k) { return k !== 'kind'; })
+        .map(function (k) { return k + ': ' + oneLine_(body[k], 300); }).join('\n') +
+      '\n\nDetails are in the Threshold guide signups Sheet (Problem column and the Outbox tab).';
+    sendMail_({ email: FROM_EMAIL, subject: 'Guide signups alert: ' + kind, text: text,
+      html: '<pre style="font-family:inherit;white-space:pre-wrap;">' + text.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</pre>',
+      unsubscribeUrl: '', attachUrl: '' });
+    props.setProperty('ALERT_' + kind, String(Date.now()));
+    return 'email';
+  } catch (err) {
+    console.error('alert ' + kind + ' by email failed too: ' + errText_(err));
+    return 'lost';
+  }
+}
+
+/** Run by hand to check that alerts reach Lars: sends one test alert (it skips the once-a-day limit). */
+function testAlert() {
+  console.log('Test alert went out by: ' + alert_('test', { note: 'If you got this, alerts work.' }));
+}
+
 // ---------------------------------------------------------------- small helpers
 
 /** "g-" plus the first 16 hex characters of the address's SHA-256 (Life HQ works it out the same way). */
@@ -475,6 +575,7 @@ function setup() {
   if (!hasTimer) ScriptApp.newTrigger('sendDue').timeBased().everyMinutes(5).create();
   const props = PropertiesService.getScriptProperties();
   if (!props.getProperty('SITE_KEY')) props.setProperty('SITE_KEY', (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, ''));
+  if (!props.getProperty('DAILY_CAP')) props.setProperty('DAILY_CAP', String(DEFAULT_DAILY_CAP));
   attachment_(ATTACH_HOSTS[0] + PDF_PATH);
   console.log('Setup done (' + VERSION + '). Next: Deploy > New deployment > Web app (Execute as: Me, Who has access: Anyone), then run showSiteKey.');
 }
