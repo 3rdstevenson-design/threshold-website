@@ -17,7 +17,8 @@
 // - The ACL page (2026-11-27, threshold-coaching-brain/campaigns/website-seo-2026-11/2026-11-27-acl-page-draft.md):
 //   questions from the searches people make; answers from his testing definition, a proof.md case, his own words on a
 //   Fathom call (2026-07-29) and lines already approved here; Lars approved them 2026-11-27 and gave the "fully recover"
-//   answer in his own words. His answers on surgery and on prevention programs come next.
+//   answer in his own words. The prevention answer is his too (2026-11-27; "we" became "I" per his voice
+//   rule), and he dropped "Do I need surgery for an ACL tear?": "that's not a real question. Let's not ask that."
 
 export type FaqItem = { q: string; a: string; link?: { href: string; label: string } }
 
@@ -101,6 +102,10 @@ export const FAQS: Record<FaqPage, FaqItem[]> = {
     {
       q: 'Why do people get hurt again after ACL surgery?',
       a: "A lot of times the return-to-sport milestones either aren't thorough enough or don't get done at all, so strength imbalances and range of motion problems get left over. The longer that gets delayed, the more compensations tend to build up, and re-injuries can happen.",
+    },
+    {
+      q: 'Do ACL injury prevention programs work?',
+      a: "Yes, they can. A lot of non-contact injuries are preventable due to asymmetries and imbalances that are present in the body, and if I reverse the tension that is exposing you to risk, then I can greatly reduce the risk of injury, save for a traumatic collision affecting the area. Somebody tackling you at knee height and your knee collapsing in would be an example of a traumatic collision.",
     },
     {
       q: 'What does ACL rehab with you look like?',

@@ -448,9 +448,12 @@ An accordion on each page (your pick, 2026-11-25). Every question is on one page
 
 **Why do people get hurt again after ACL surgery?** A lot of times the return-to-sport milestones either aren't thorough enough or don't get done at all, so strength imbalances and range of motion problems get left over. The longer that gets delayed, the more compensations tend to build up, and re-injuries can happen. *(Your words, Fathom call 2026-07-29 at 07:09, lightly cleaned.)*
 
+**Do ACL injury prevention programs work?** Yes, they can. A lot of non-contact injuries are preventable due to asymmetries and imbalances that are present in the body, and if I reverse the tension that is exposing you to risk, then I can greatly reduce the risk of injury, save for a traumatic collision affecting the area. Somebody tackling you at knee height and your knee collapsing in would be an example of a traumatic collision. *(Your words, 2026-11-27, with "we" as "I" per your voice rule.)*
+
 **What does ACL rehab with you look like?** Every session is 60 minutes with me, start to finish, with no techs or aides. Hands-on treatment and the exercises that hold the change in place sit on one plan that I retest as you go. Between sessions, your plan lives in the app. *(Lines already approved on the Physical therapy page.)*
 
-Still to come, in your words: "Do I need surgery for an ACL tear?" (surgery or not, and prehab) and "Do ACL injury prevention programs work?" Nothing on file from you covers either.
+*("Do I need surgery for an ACL tear?" is out, your call 2026-11-27: "that's not a real question. Let's not ask that.")*
+
 ### Online coaching
 
 **Is online coaching the same as physical therapy?** Online coaching is strength and fitness coaching for the stage after rehab. It doesn't include physical therapy, diagnosis or treatment, and it doesn't replace care from a licensed clinician in your state. If you need hands-on treatment, I'll tell you and help you get it, in person with me in Reston or with someone near you.
