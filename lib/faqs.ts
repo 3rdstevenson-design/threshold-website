@@ -14,10 +14,15 @@
 // - Lars, 2026-11-27 (Keyword Planner rounds): the PT page's "didn't work" question uses the searched wording and an answer
 //   in his own call framing (threshold-coaching-brain/campaigns/website-seo-2026-11/2026-11-27-pt-page-keyword-fixes.md);
 //   the home "what does it treat" answer names sciatica and tennis elbow.
+// - The ACL page (2026-11-27, threshold-coaching-brain/campaigns/website-seo-2026-11/2026-11-27-acl-page-draft.md):
+//   questions from the searches people make; answers from his testing definition, a proof.md case, his own words on a
+//   Fathom call (2026-07-29) and lines already approved here; Lars approved them 2026-11-27 and gave the "fully recover"
+//   answer in his own words. The prevention answer is his too (2026-11-27; "we" became "I" per his voice
+//   rule), and he dropped "Do I need surgery for an ACL tear?": "that's not a real question. Let's not ask that."
 
 export type FaqItem = { q: string; a: string; link?: { href: string; label: string } }
 
-export type FaqPage = 'home' | 'physicalTherapy' | 'onlineCoaching' | 'about' | 'book'
+export type FaqPage = 'home' | 'physicalTherapy' | 'acl' | 'onlineCoaching' | 'about' | 'book'
 
 export const FAQS: Record<FaqPage, FaqItem[]> = {
   home: [
@@ -81,6 +86,30 @@ export const FAQS: Record<FaqPage, FaqItem[]> = {
     {
       q: 'Do you do physical therapy after ACL surgery?',
       a: 'Yes. I take you from the early weeks after ACL or meniscus surgery through return-to-sport testing (strength side to side, hops and jumps, and change of direction under fatigue) before you go back to your sport.',
+      link: { href: '/acl-physical-therapy', label: 'See ACL physical therapy' },
+    },
+  ],
+
+  acl: [
+    {
+      q: 'When can I go back to my sport after an ACL tear?',
+      a: 'When you pass return-to-sport testing, not on a set date: strength side to side, hop and jump tests, change of direction under fatigue, movement quality and readiness.',
+    },
+    {
+      q: 'Can an athlete fully recover from an ACL tear?',
+      a: 'Yes, one Division I lacrosse player that I worked with came back from an ACL and meniscus surgery for his fifth year and went on to play professional lacrosse.',
+    },
+    {
+      q: 'Why do people get hurt again after ACL surgery?',
+      a: "A lot of times the return-to-sport milestones either aren't thorough enough or don't get done at all, so strength imbalances and range of motion problems get left over. The longer that gets delayed, the more compensations tend to build up, and re-injuries can happen.",
+    },
+    {
+      q: 'Do ACL injury prevention programs work?',
+      a: "Yes, they can. A lot of non-contact injuries are preventable due to asymmetries and imbalances that are present in the body, and if I reverse the tension that is exposing you to risk, then I can greatly reduce the risk of injury, save for a traumatic collision affecting the area. Somebody tackling you at knee height and your knee collapsing in would be an example of a traumatic collision.",
+    },
+    {
+      q: 'What does ACL rehab with you look like?',
+      a: 'Every session is 60 minutes with me, start to finish, with no techs or aides. Hands-on treatment and the exercises that hold the change in place sit on one plan that I retest as you go. Between sessions, your plan lives in the app.',
     },
   ],
 

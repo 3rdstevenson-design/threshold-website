@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: `${SITE_URL}/`, changeFrequency: 'monthly', priority: 1 },
     { url: `${SITE_URL}/physical-therapy`, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${SITE_URL}/acl-physical-therapy`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE_URL}/about`, changeFrequency: 'yearly', priority: 0.8 },
     { url: `${SITE_URL}/online-coaching`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE_URL}/book`, changeFrequency: 'yearly', priority: 0.8 },
