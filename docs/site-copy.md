@@ -46,7 +46,7 @@ I'm Dr. Lars Stevenson, a Doctor of Physical Therapy with a background in streng
 
 Free 30-minute call. Licensed in Virginia, based in Reston.
 
-*(Photo: you working hands-on on a client's wrist and forearm, gym grayed out.)*
+*(Photo: you stretching a client's hamstring, cut out. Swapped 2026-11-27, below.)*
 
 ### How I work with you
 
@@ -62,7 +62,7 @@ Every patient goes through the same five parts, in this order. I call it the CRO
 
 **S · Support.** I retest as you go and stay with you until you're back, in person and between sessions in the app.
 
-*(Photos: 3 or 4 shots of you working with clients, beside the steps.)*
+*(Photo: you examining a client's knee, beside the steps.)*
 
 ### Results and reviews
 
@@ -434,7 +434,7 @@ An accordion on each page (your pick, 2026-11-25). Every question is on one page
 5. **The call.** Settled (you, 2026-11-15): 30 minutes, on video.
 6. **Newsletter consent.** Settled (you, 2026-11-14): nothing on the form; the follow-ups and the newsletter say they're promotional, which US law accepts. Signups from Canada, the UK or the EU wouldn't meet their consent rules.
 7. **Privacy Policy.** Settled (you, 2026-11-15): Resend named as the email delivery service and GoHighLevel left off, in the Privacy Policy and the Terms; both effective dates are now November 15, 2026.
-8. **Photos.** Settled (you, 2026-11-15): "the photos are okay", so everyone pictured and the treatment room stay.
+8. **Photos.** Settled (you, 2026-11-15): "the photos are okay", so everyone pictured and the treatment room stay. Changed (you, 2026-11-27): "I don't want any from the boxing gym if we can help it." Your picks replaced the four boxing gym photos: the homepage top cut-out is now the hamstring stretch (the wide frame of your #17, straight-leg-raise-03, because #17 is a tall shot), the CROSS section the knee exam (#2), the Physical therapy page top the talk before a session (#1), the About coaching photo the knee rehab on the table (#10), and the strength photo on Physical therapy and About the athlete you're smiling with (#14: the boxing gym's heavy bags show behind you, and it stays because you picked it). The room stays grayed with the people in color (`scripts/photo-lift.swift`).
 9. **Animations.** Settled (you, 2026-11-15): words fill in, portrait develops and headline behind you stay; photo chapters is out. The demo panel is gone.
 10. **FAQs and keywords (Lou Malmgren's audit).** Settled (you, 2026-11-25): an FAQ on every marketing page, shown as an accordion; "physical therapy" in the questions except on Online coaching; place names plus one "near you" line; no other clinic's name ("Select" and "Professional" are physical therapy chains); conditions named: sports injuries, ACL and meniscus, rotator cuff and shoulder replacement, low back, neck and hip pain, hamstrings, ankle sprains, running and court sports.
 11. **Insurance.** Settled (you, 2026-11-25): out of network with every plan; HSA and FSA cards for physical therapy visits (Stripe confirmed the account takes them as set up); still no prices; the Good Faith Estimate stays linked from the footer only, never from an FAQ.

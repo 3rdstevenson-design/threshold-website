@@ -99,16 +99,18 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Headline behind you (Lars kept it, 2026-11-15): the cut-out stands over the headline's second line. */}
+            {/* Headline behind you (Lars kept it, 2026-11-15): the cut-out stands over the headline's second line.
+                The cut-out is trimmed to the two people, a tall shape (2026-11-27), so the frame is square on phones and
+                4:3 from md, and the people sit at the right edge on wide screens. */}
             <div className="relative z-[2] -mt-6 md:col-span-7 md:row-start-1 md:-mt-[clamp(3.25rem,5.6vw,5.75rem)] lg:col-span-8">
-              <div className="relative aspect-[3/2]">
+              <div className="relative aspect-square md:aspect-[4/3]">
                 <Image
-                  src="/photos/hands-on-forearm-cutout.png"
-                  alt="Dr. Lars Stevenson working hands-on on a client's wrist and forearm"
+                  src="/photos/hamstring-stretch-cutout.png"
+                  alt="Dr. Lars Stevenson stretching a client's hamstring"
                   fill
                   priority
-                  sizes="(min-width: 1024px) 62vw, (min-width: 768px) 58vw, 100vw"
-                  className="object-contain object-bottom"
+                  sizes="(min-width: 1024px) 40vw, (min-width: 768px) 37vw, 80vw"
+                  className="object-contain object-bottom md:object-right-bottom"
                 />
               </div>
             </div>
@@ -125,11 +127,11 @@ export default function HomePage() {
                 </p>
                 <div className="relative mt-10 aspect-[4/3] overflow-hidden bg-hairline">
                   <Image
-                    src="/photos/shoulder-assessment.jpg"
-                    alt="Dr. Lars Stevenson assessing a client's shoulder"
+                    src="/photos/knee-exam.jpg"
+                    alt="Dr. Lars Stevenson examining a client's knee"
                     fill
                     sizes="(min-width: 768px) 38vw, 100vw"
-                    className="object-cover object-[55%_35%]"
+                    className="object-cover object-[50%_40%]"
                   />
                 </div>
               </div>
