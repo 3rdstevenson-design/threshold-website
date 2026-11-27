@@ -19,6 +19,8 @@ const pad = (n) => String(n).padStart(2, '0')
 
 function makeGoogle() {
   const sent = []
+  const alerts = []
+  const alertStatus = { code: 200 }
   const triggers = []
   const props = {}
   let gmailFails = 0
@@ -72,7 +74,13 @@ function makeGoogle() {
       newTrigger: (fn) => ({ timeBased: () => ({ everyMinutes: () => ({ create: () => triggers.push(fn) }) }) }),
     },
     UrlFetchApp: {
-      fetch: (url) => ({ getResponseCode: () => 200, getHeaders: () => ({ 'Content-Type': 'application/pdf' }), getContent: () => pdf, url }),
+      fetch: (url, opts) => {
+        if (url.includes('/api/guide/alert')) {
+          alerts.push(JSON.parse(opts.payload))
+          return { getResponseCode: () => alertStatus.code, getHeaders: () => ({}), getContent: () => [] }
+        }
+        return { getResponseCode: () => 200, getHeaders: () => ({ 'Content-Type': 'application/pdf' }), getContent: () => pdf, url }
+      },
     },
     Gmail: {
       Users: {
@@ -123,7 +131,7 @@ function makeGoogle() {
     const head = s.data[0]
     return s.data.slice(1).filter((r) => r.some((v) => v !== '')).map((r) => Object.fromEntries(head.map((h, i) => [h, r[i] ?? ''])))
   }
-  return { ctx, sent, triggers, props, tab, sheets, failGmail: (n) => { gmailFails = n } }
+  return { ctx, sent, alerts, alertStatus, triggers, props, tab, sheets, failGmail: (n) => { gmailFails = n } }
 }
 
 // ---------- helpers
@@ -238,6 +246,8 @@ signup(E, 'Eli')
 ctx.sendDue()
 ctx.sendDue()
 eq([jobs(E)[0].Status, jobs(E)[0].Tries, lead(E).Problem], ['failed', 3, 'Guide email failed 3 times: Gmail is down'], 'three failures: failed, with a Problem')
+eq(g.alerts.map((a) => [a.kind, a.step, a.email, a.error]), [['failed', 'Guide', E, 'Gmail is down']], 'and Lars gets a Telegram alert')
+eq(g.alerts[0].key, g.props.SITE_KEY, 'the alert carries the site key')
 g.failGmail(0)
 
 // ---------- a follow-up that's more than 2 days late is dropped
@@ -260,5 +270,37 @@ eq(g.tab('Signups').length, rows, 'none of them were stored')
 r = post({ key: g.props.SITE_KEY, action: 'signup', lead: { firstName: 'Evil\r\nBcc: a@b.c', email: 'y@example.com' }, signup: { form: 'sidebar' }, emails: emails('y') })
 eq([r.ok, lead('y@example.com')['First name'], lead('y@example.com').Form], [true, 'Evil Bcc: a@b.c', 'inline'], 'line breaks are flattened; unknown form becomes inline')
 ok(!g.sent.at(-1).mime.includes('\r\nBcc:'), 'no header injection')
+
+// ---------- the daily cap: emails over it are held, not dropped, and go out once the last 24 hours have room
+eq(g.props.DAILY_CAP, '300', 'setup writes the default cap of 300')
+advance(10 * 24 * 60 * MIN)
+ctx.sendDue() // everything still queued from above is now days late: canceled, nothing sent
+g.props.DAILY_CAP = '2'
+const capBefore = g.sent.length
+signup('fay@example.com', 'Fay')
+signup('finn@example.com', 'Finn')
+eq(g.sent.length - capBefore, 2, 'two guides go out under a cap of 2')
+r = signup('flo@example.com', 'Flo')
+eq([r.ok, r.guide.sent, r.guide.held, r.guide.retry, g.sent.length - capBefore], [true, false, true, true, 2], 'the third guide is held at the cap')
+ok(lead('flo@example.com').Problem.startsWith('Guide email held: the daily cap of 2 emails'), 'and the Sheet says why')
+const capAlerts = () => g.alerts.filter((a) => a.kind === 'cap')
+eq(capAlerts().map((a) => [a.cap, a.sent, a.held]), [[2, 2, 1]], 'Lars gets one cap alert')
+advance(5 * MIN)
+ctx.sendDue()
+eq([g.sent.length - capBefore, jobs('flo@example.com')[0].Status], [2, 'queued'], 'still held while the last 24 hours are full')
+eq(capAlerts().length, 1, 'no second cap alert within 24 hours')
+advance(24 * 60 * MIN)
+ctx.sendDue()
+eq([jobs('flo@example.com')[0].Status, lead('flo@example.com').Problem], ['sent', ''], 'it goes out once there is room, and the note clears')
+// ---------- if the site can't take the alert, it comes as an email to dr.lars@ instead
+g.alertStatus.code = 500
+const mailsBefore = g.sent.length
+eq(ctx.alert_('test', { note: 'x' }), 'email', 'site down: the alert goes out by email')
+ok(g.sent.at(-1).mime.includes('To: dr.lars@thresholdhp.com') && g.sent.at(-1).mime.includes('Subject: Guide signups alert: test'), 'to dr.lars@, with a plain subject')
+eq(g.sent.length - mailsBefore, 1, 'one email')
+g.alertStatus.code = 200
+eq(ctx.alert_('test', {}), 'telegram', 'test alerts skip the once-a-day limit')
+g.props.DAILY_CAP = 'not a number'
+eq(ctx.dailyCap_(), 300, 'a bad DAILY_CAP falls back to 300')
 
 console.log(`guide-signups Code.gs: ${checks} checks passed`)
