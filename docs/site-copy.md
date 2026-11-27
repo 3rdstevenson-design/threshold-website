@@ -103,7 +103,7 @@ Tell me what's going on and what you've tried. If I'm the right person for it, t
 
 Rather call? (402) 536-0203
 
-*(Practice Better booking widget, right here on the homepage)*
+*(Practice Better booking widget, right here on the homepage, with the two booking tabs below)*
 
 *Be Good. Help Someone. Learn Lots.*
 Dr. Lars Stevenson
@@ -183,7 +183,12 @@ It's a video call with me. Tell me what's going on and what you've tried, and I'
 1. If it's a fit, you book your evaluation: a full assessment and your first treatment.
 2. Your plan is built from that evaluation, and it changes as you retest.
 
-*(Practice Better booking widget)*
+*(Practice Better booking widget, two tabs. Since 2026-11-27, at your ask: "They should be able to book a call or book an in-person evaluation on the website.")*
+
+- **Free call** · 30 minutes, by video (Discovery Call)
+- **In-person evaluation** · 60 minutes, in Reston (Initial Evaluation)
+
+Both bookings get the waiver and the General Intake automatically from Practice Better. /book#evaluation opens on the evaluation tab.
 
 Rather call? (402) 536-0203, or email dr.lars@thresholdhp.com.
 Booking runs on Practice Better, my patient portal.

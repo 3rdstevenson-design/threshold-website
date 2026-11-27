@@ -1,8 +1,9 @@
 // Single source of truth for the public booking URL.
-// Routes to /book on thresholdhp.com — that page embeds Practice Better's
-// official booking widget in Threshold-branded chrome so users never leave
-// the site. Submissions create real PB appointments same as the standalone
-// PB booking page.
+// Routes to /book on thresholdhp.com, which embeds Practice Better's booking
+// widget (components/BookingWidget.tsx) with two tabs: the free call and the
+// in-person evaluation (Lars, 2026-11-27). /book#evaluation opens on the
+// evaluation. Submissions create real PB appointments, the same as the
+// standalone PB booking page.
 export const BOOKING_URL = '/book'
 
 // Zoom Scheduler (Lars's Zoom, set up 2026-11-14) runs the non-patient
