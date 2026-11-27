@@ -15,8 +15,9 @@ import Faq from '@/components/Faq'
 // cost or insurance answer for now (Lars, 2026-11-15); the Good Faith Estimate notice is in the footer.
 // 2026-11-19 (Search Console: "Crawled - currently not indexed"): the page read as a thin copy of the homepage, so it
 // gets its own title and sections. Sources: who I see = the three groups of the 3x3 matrix (wiki
-// concept-threshold-3x3-matrix, no age targeting); first visit = the homepage CROSS steps; "the other half" = the
-// 2026-11-12 USP; "six weeks and still not right" = the enemy's evidence (wiki concept-threshold-positioning).
+// concept-threshold-3x3-matrix, no age targeting); first visit = the homepage CROSS steps.
+// 2026-11-26: the section built on the 2026-11-12 USP is gone (Lars rejected that line: not his words); its
+// credentials sentence stays under "Treatment and training on one plan".
 // 2026-11-25 (Lou Malmgren's SEO audit): the FAQ lives in lib/faqs.ts with every other page's, and "What I treat" names
 // the conditions Lars picked, with cases from threshold-coaching-brain/my-writing/proof.md.
 
@@ -201,21 +202,12 @@ export default function PhysicalTherapyPage() {
 
         <section>
           <div className="mx-auto grid max-w-page gap-12 px-5 py-24 sm:px-8 md:grid-cols-12 md:gap-8 md:py-32">
-            <h2 className={`${h2} md:col-span-5`}>When the pain backs off, you&rsquo;re halfway there</h2>
+            <h2 className={`${h2} md:col-span-5`}>Treatment and training on one plan</h2>
             <div className="max-w-measure space-y-5 text-body text-ink-soft md:col-span-6 md:col-start-7">
               <p>
-                A lot of care stops when the pain does. Everyone gets the same sheet of exercises, and you get
-                discharged at &ldquo;feeling better.&rdquo; If you did six weeks somewhere and you&rsquo;re still not
-                right, that&rsquo;s usually why.
-              </p>
-              <p>
-                Less pain is a milestone. The other half is getting your strength, speed and confidence back, so the
-                knee that&rsquo;s fine on the stairs holds up when you cut, land or sprint.
-              </p>
-              <p>
-                That&rsquo;s the half I work on. I&rsquo;m a physical therapist with a background in strength and
-                conditioning and exercise, with a concentration in nutrition. Treatment and training sit on one plan, built
-                from your own evaluation and changed every time you retest.
+                I&rsquo;m a physical therapist with a background in strength and conditioning and exercise, with a
+                concentration in nutrition. Treatment and training sit on one plan, built from your own evaluation and
+                changed every time you retest.
               </p>
               <Link href={BOOKING_URL} className="btn mt-8">
                 {DISCOVERY_CALL.label}

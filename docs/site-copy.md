@@ -1,8 +1,10 @@
-# thresholdhp.com copy, draft 6 (2026-11-25)
+# thresholdhp.com copy, draft 7 (2026-11-26)
 
 Every word that goes on the redesigned site. Nothing goes live until you approve it. All your calls are settled; the list is at the bottom. Reviews are quoted word for word.
 
 Rules applied: Voice DNA (first person, no em dashes, no "not X, Y", no "we"), your USP, "athletes and active adults", no CSCS (lapsed), no fixed recovery timelines, nothing invented.
+
+**Changed in draft 7 (your call, 2026-11-26):** the 2026-11-12 USP line ("When the pain backs off...") and its framing are gone, because they aren't your words and you never signed off on them. The homepage headline is now "Sports and performance physical therapy in Reston, VA"; the homepage description leads with the doctorate (Lou's point 1) and then your line with "I've helped" (your pick, "Doctor first"); the homepage and Physical therapy sections built on that line are gone, and the lede, About, Online coaching and two FAQ answers lost only the rejected words. You also dropped "Test it, then trust it" (another 2026-11-12 Claude draft), so the fifth CROSS step is titled "Measure your progress." from the How I work list. A test (`lib/__tests__/rejected-lines.test.ts`) keeps both lines from coming back.
 
 **Added in draft 6 (2026-11-25, Lou Malmgren's SEO and AI-search audit, your calls the same day):** every page title leads with the phrase that page targets and carries "Dr. Lars Stevenson, DPT" (Online coaching excepted); new meta descriptions; the homepage lede names you as a Doctor of Physical Therapy and the line under the buttons says "Licensed in Virginia"; a "What I treat" section on the Physical therapy page; an FAQ on Home, Physical therapy, Online coaching, About and Book, shown as an accordion (your pick), with "physical therapy" in the questions (never on Online coaching outside its disclaimer); a new insurance answer (out of network with every plan, HSA and FSA cards for physical therapy visits, no prices); the referral answer now carries Virginia's 60-day limit; "How often" is your line, word for word; the Good Faith Estimate stays linked from the footer only. The site renders the FAQs from `lib/faqs.ts`; the FAQs section at the end of this file is the same text. The keyword research behind it: `docs/seo-keyword-map-2026-11.md`. Reviews 1 and 3 carry the reviewers' OK'd condition words in brackets (ankle, low back).
 
@@ -23,32 +25,26 @@ Rules applied: Voice DNA (first person, no em dashes, no "not X, Y", no "we"), y
 **Footer:** Threshold Health & Performance · Reston, Virginia · (402) 536-0203 · dr.lars@thresholdhp.com · Instagram
 Links: How I work · Online coaching · About · Book a free call · Contact · Privacy Policy · Terms & Conditions · SMS Policy · © 2026 Threshold Health & Performance
 
-**Search and social description:** Physical therapy for athletes and active adults in Reston, Virginia. When the pain backs off, you're halfway there. Dr. Lars Stevenson, PT, DPT, takes you the rest of the way.
+**Search and social description:** Sports and performance physical therapy in Reston, Virginia, with Dr. Lars Stevenson, PT, DPT.
 
 ---
 
 ## Home ( / )
 
 **Title tag:** Physical Therapist in Reston, VA | Dr. Lars Stevenson, DPT
-**Meta description:** Doctor of Physical Therapy in Reston, VA. Dr. Lars Stevenson, PT, DPT, takes athletes and active adults the rest of the way after the pain backs off.
+**Meta description:** Doctor of Physical Therapy in Reston, VA. I've helped everyone from middle school athletes all the way up to the Olympic stage.
 
 ### First screen
 
-# When the pain backs off, you're halfway there.
+# Sports and performance physical therapy in Reston, VA
 
-I'm Dr. Lars Stevenson, a Doctor of Physical Therapy with a background in strength and conditioning and exercise, with a concentration in nutrition. I take athletes and active adults the rest of the way, on one plan built for them and tested as they go.
+I'm Dr. Lars Stevenson, a Doctor of Physical Therapy with a background in strength and conditioning and exercise, with a concentration in nutrition.
 
 **[Book a free call]** · Call (402) 536-0203
 
 Free 30-minute call. Licensed in Virginia, based in Reston.
 
 *(Photo: you working hands-on on a client's wrist and forearm, gym grayed out.)*
-
-### The other half of recovery
-
-Less pain is a milestone. The other half is getting your strength, speed and confidence back, so the shoulder that's fine doing dishes holds up on a serve.
-
-That half is what I work on. Your plan starts from your own evaluation and changes every time you retest.
 
 ### How I work with you
 
@@ -62,7 +58,7 @@ Every patient goes through the same five parts, in this order. I call it the CRO
 
 **S · Follow a plan with a reason.** Every exercise has a place in the sequence, and you'll always know why you're doing it.
 
-**S · Test it, then trust it.** I retest as you go and stay with you until you're back, in person and between sessions in the app.
+**S · Measure your progress.** I retest as you go and stay with you until you're back, in person and between sessions in the app.
 
 *(Photos: 3 or 4 shots of you working with clients, beside the steps.)*
 
@@ -123,7 +119,7 @@ Dr. Lars Stevenson
 
 # Dr. Lars Stevenson, PT, DPT
 
-Physical therapist in Reston, Virginia. My background is in strength and conditioning and exercise, with a concentration in nutrition. I opened Threshold to take people the rest of the way after rehab.
+Physical therapist in Reston, Virginia. My background is in strength and conditioning and exercise, with a concentration in nutrition.
 
 **[Book a free call]**
 
@@ -203,7 +199,7 @@ Booking runs on Practice Better, my patient portal.
 
 # Online coaching for athletes and active adults
 
-When the pain backs off, you're halfway there. Online, I coach the rest of the way after rehab, back to your sport and your training: a plan built around you, coaching through the app, and a call when you need one.
+Online, I coach you after rehab, back to your sport and your training: a plan built around you, coaching through the app, and a call when you need one.
 
 **[Book a free call]**
 
@@ -269,13 +265,9 @@ Your first visit is 60 minutes with me. You leave knowing what's going on and wh
 - A plan you understand. Every exercise has a place in the sequence, and you'll know why you're doing it.
 - Your baseline numbers, so we can retest them as you go and measure your progress.
 
-### When the pain backs off, you're halfway there
+### Treatment and training on one plan
 
-A lot of care stops when the pain does. Everyone gets the same sheet of exercises, and you get discharged at "feeling better." If you did six weeks somewhere and you're still not right, that's usually why.
-
-Less pain is a milestone. The other half is getting your strength, speed and confidence back, so the knee that's fine on the stairs holds up when you cut, land or sprint.
-
-That's the half I work on. I'm a physical therapist with a background in strength and conditioning and exercise, with a concentration in nutrition. Treatment and training sit on one plan, built from your own evaluation and changed every time you retest.
+I'm a physical therapist with a background in strength and conditioning and exercise, with a concentration in nutrition. Treatment and training sit on one plan, built from your own evaluation and changed every time you retest.
 
 **[Book a free call]**
 
@@ -367,7 +359,7 @@ An accordion on each page (your pick, 2026-11-25). Every question is on one page
 
 ### Home
 
-**What is performance physical therapy?** Physical therapy that keeps going after the pain backs off. Treatment and training sit on one plan, so you get your strength, speed and confidence back for the sport or training you love, and I retest as you go to prove it.
+**What is performance physical therapy?** Physical therapy where treatment and training sit on one plan, so you get your strength, speed and confidence back for the sport or training you love, and I retest as you go to prove it.
 
 **What does physical therapy at Threshold treat?** Sports injuries and the pain that keeps active people out of training: rehab after ACL and meniscus surgery, rotator cuff repairs and shoulder replacements, low back, neck and hip pain, hamstring tears, ankle sprains, and getting back to running, pickleball, golf or racquet sports.
 
@@ -391,7 +383,7 @@ An accordion on each page (your pick, 2026-11-25). Every question is on one page
 
 **What should I wear to physical therapy?** Clothes you can move and train in. Shorts if it's your knee, hip or ankle, and a shirt that gives me room to work if it's your shoulder, neck or back.
 
-**I already did physical therapy and I'm still not right. Is this different?** Often the first round stopped when the pain backed off, which is only halfway. I keep going until your strength, speed and confidence are back, and I retest to prove it.
+**I already did physical therapy and I'm still not right. Is this different?** Every session is with me, start to finish. Treatment and training sit on one plan, and I retest as you go to prove it.
 
 **Do you take insurance for physical therapy?** Threshold is out of network with every insurance plan, so you pay for each visit directly. You can pay for physical therapy with an HSA or FSA card. Check with your plan about what it covers.
 

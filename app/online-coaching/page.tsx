@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { pageMeta } from '@/lib/metadata'
 import { BOOKING_URL } from '@/lib/booking'
-import { USP_LINE, DISCOVERY_CALL } from '@/lib/site'
+import { DISCOVERY_CALL } from '@/lib/site'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 import Faq from '@/components/Faq'
@@ -48,8 +48,8 @@ export default function OnlineCoachingPage() {
               Online coaching for athletes and active adults
             </h1>
             <p className="mt-8 max-w-[44ch] text-lede text-ink-soft">
-              {USP_LINE} Online, I coach the rest of the way after rehab, back to your sport and your training: a plan
-              built around you, coaching through the app, and a call when you need one.
+              Online, I coach you after rehab, back to your sport and your training: a plan built around you, coaching
+              through the app, and a call when you need one.
             </p>
             <Link href={BOOKING_URL} className="btn mt-8">
               {DISCOVERY_CALL.label}

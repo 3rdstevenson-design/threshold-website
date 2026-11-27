@@ -8,14 +8,16 @@ export const SITE_URL = 'https://www.thresholdhp.com'
 export const SITE_NAME = 'Threshold Health & Performance'
 export const SITE_TAGLINE = "It's time to cross your threshold."
 export const SITE_DESCRIPTION =
-  "Physical therapy for athletes and active adults in Reston, Virginia. When the pain backs off, you're halfway there. Dr. Lars Stevenson, PT, DPT, takes you the rest of the way."
+  'Sports and performance physical therapy in Reston, Virginia, with Dr. Lars Stevenson, PT, DPT.'
 
 // The homepage title (the layout default and the home page's own metadata). Every page's title is unique and leads with
 // the phrase that page targets (docs/seo-keyword-map-2026-11.md).
 export const HOME_TITLE = 'Physical Therapist in Reston, VA | Dr. Lars Stevenson, DPT'
 
-// The 2026-11-12 USP (wiki concept-threshold-positioning), used as the homepage headline.
-export const USP_LINE = "When the pain backs off, you're halfway there."
+// The homepage headline. Lars rejected the 2026-11-12 USP line on 2026-11-26 (he never said it or signed off on it), so
+// the headline is the plain phrase from the homepage description he approved. Copy in his name uses only his own words
+// or lines he approved word for word; lib/__tests__/rejected-lines.test.ts keeps the old line out.
+export const HOME_HEADLINE = 'Sports and performance physical therapy in Reston, VA'
 
 export const FOUNDER = {
   name: 'Dr. Lars Stevenson',

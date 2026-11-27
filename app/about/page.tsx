@@ -39,8 +39,7 @@ export default function AboutPage() {
             <h1 className="font-cormorant text-display font-medium text-ink">Dr. Lars Stevenson, PT, DPT</h1>
             <p className="mt-8 max-w-[44ch] text-lede text-ink-soft">
               Physical therapist in {BUSINESS.city}, {BUSINESS.regionName}. My background is in strength and
-              conditioning and exercise, with a concentration in nutrition. I opened Threshold to take people the
-              rest of the way after rehab.
+              conditioning and exercise, with a concentration in nutrition.
             </p>
             <Link href={BOOKING_URL} className="btn mt-8">
               {DISCOVERY_CALL.label}

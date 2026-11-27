@@ -163,7 +163,7 @@
 }
 
 /* ---------- Moments (Lars kept these three on 2026-11-15; photo chapters were dropped) ----------
-   Words fill in: components/moments/WordHighlight.tsx ("The other half" on the homepage).
+   Words fill in: components/moments/WordHighlight.tsx (unused since 2026-11-26, when the line it animated was rejected).
    Headline behind you: the hero's cut-out stands over the headline (app/page.tsx); layout only, no motion.
    Portrait develops: the About portrait, below. Every moment is off for people who turn motion off.
    The `js` class comes from the inline script in app/layout.tsx; without JavaScript the photo simply stands. */
