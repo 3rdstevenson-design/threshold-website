@@ -112,8 +112,7 @@ async function main() {
   const msg = formatGuideMessage(
     { firstName: 'Pat', email: 'pat@example.com' },
     { at: now.toISOString(), version: SIGNUP_FORM.version, page: '/', ip: '203.0.113.9', userAgent: 'test' },
-    r,
-    null,
+    { via: 'resend', sequence: r, error: null },
   )
   assert.ok(msg.includes(`form v${SIGNUP_FORM.version} on /`))
   assert.ok(msg.includes('IP 203.0.113.9'))

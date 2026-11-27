@@ -7,6 +7,7 @@ import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 import BookingWidget from '@/components/BookingWidget'
 import GuideSignup from '@/components/GuideSignup'
+import { GUIDE_PITCH } from '@/lib/guide-lead'
 import Faq from '@/components/Faq'
 
 export const metadata: Metadata = {
@@ -215,12 +216,8 @@ export default function HomePage() {
         <section id="guide" className="mx-auto max-w-page px-5 py-24 sm:px-8 md:py-32">
           <div className="grid gap-12 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-5">
-              <h2 className={h2}>A free guide to stretching smarter</h2>
-              <p className="mt-5 max-w-measure text-lede text-ink-soft">
-                Stretch Smarter is my 15-page guide to the BAAD model: the 4 things that decide whether a stretch
-                changes anything (breathing, angle, amplitude and duration), with a body-region guide and a 4&#8209;week
-                plan.
-              </p>
+              <h2 className={h2}>{GUIDE_PITCH.heading}</h2>
+              <p className="mt-5 max-w-measure text-lede text-ink-soft">{GUIDE_PITCH.blurb}</p>
             </div>
             <div className="md:col-span-6 md:col-start-7 md:pt-2">
               <GuideSignup />

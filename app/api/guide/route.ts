@@ -1,16 +1,22 @@
 import { NextResponse } from 'next/server'
-import { SIGNUP_FORM, formatGuideMessage, parseGuide, type ConsentRecord } from '@/lib/guide-lead'
+import { SIGNUP_FORM, formatGuideMessage, parseForm, parseGuide, type ConsentRecord, type GuideDelivery } from '@/lib/guide-lead'
+import { scriptConfigured } from '@/lib/email/guide-script'
 import { resendConfigured } from '@/lib/email/resend'
-import { startSequence, type SequenceResult } from '@/lib/email/start-sequence'
+import { startSheetSequence } from '@/lib/email/sheet-sequence'
+import { startSequence } from '@/lib/email/start-sequence'
 import { sendMessage } from '@/lib/telegram'
 import { SITE_URL } from '@/lib/site'
 
-// Same-origin endpoint for the guide signup.
-// 1. Saves the contact in Resend and queues the guide email + day 2 + day 5 (lib/email/start-sequence.ts).
-// 2. Pings Lars on Telegram with the signup and its record.
+// Same-origin endpoint for the guide signup (the form in the homepage, the slide-in and the "free guide" button).
+// 1. Logs the signup in the "Threshold guide signups" Sheet, whose script sends the guide from Gmail now and queues
+//    day 2 + day 5 (lib/email/sheet-sequence.ts, apps-script/guide-signups). Life HQ's Leads tab reads that Sheet.
+//    Resend (lib/email/start-sequence.ts) is only the fallback while GUIDE_SCRIPT_URL/GUIDE_SCRIPT_KEY aren't set.
+// 2. Pings Lars on Telegram with the signup and how the emails went.
 // The guide goes out by email only; if email fails, Lars sends it by hand from the Telegram ping.
 
 export const runtime = 'nodejs'
+// Apps Script can take a few seconds to wake up, then sends the guide before it answers.
+export const maxDuration = 30
 
 /** Links in emails point at the live site in production, and at the preview or local host everywhere else. */
 function baseUrl(request: Request): string {
@@ -21,6 +27,8 @@ function clientIp(request: Request): string {
   const fwd = request.headers.get('x-forwarded-for')
   return (fwd?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown').trim()
 }
+
+const message = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
 export async function POST(request: Request) {
   let body: unknown
@@ -49,31 +57,43 @@ export async function POST(request: Request) {
     userAgent: (request.headers.get('user-agent') ?? 'unknown').slice(0, 160),
   }
 
-  let sequence: SequenceResult | null = null
-  let sequenceError: string | null = null
-  if (resendConfigured()) {
+  let delivery: GuideDelivery
+  let emailed = false
+  if (scriptConfigured()) {
+    const form = parseForm(raw.form)
     try {
-      sequence = await startSequence(parsed.lead, baseUrl(request))
+      const result = await startSheetSequence(parsed.lead, { page: consent.page, form, version: consent.version }, baseUrl(request))
+      // A failed guide is retried by the script within 5 minutes, so it still counts as on its way.
+      emailed = result.guide.sent || result.repeat || Boolean(result.guide.retry)
+      delivery = { via: 'sheet', form, result, error: null }
     } catch (e) {
-      sequenceError = e instanceof Error ? e.message : String(e)
-      console.error('guide: email sequence failed:', sequenceError)
+      console.error('guide: signup script failed:', message(e))
+      delivery = { via: 'sheet', form, result: null, error: message(e) }
+    }
+  } else if (resendConfigured()) {
+    try {
+      const sequence = await startSequence(parsed.lead, baseUrl(request))
+      emailed = sequence.sent.some((s) => s.step === 'thanks')
+      delivery = { via: 'resend', sequence, error: null }
+    } catch (e) {
+      console.error('guide: email sequence failed:', message(e))
+      delivery = { via: 'resend', sequence: null, error: message(e) }
     }
   } else {
-    sequenceError = 'RESEND_API_KEY not set'
+    delivery = { via: 'sheet', form: parseForm(raw.form), result: null, error: 'GUIDE_SCRIPT_URL/GUIDE_SCRIPT_KEY not set' }
   }
 
   let telegramOk = true
   try {
-    await sendMessage(formatGuideMessage(parsed.lead, consent, sequence, sequenceError))
+    await sendMessage(formatGuideMessage(parsed.lead, consent, delivery))
   } catch (e) {
     telegramOk = false
-    console.error('guide: Telegram hand-off failed:', e instanceof Error ? e.message : e)
+    console.error('guide: Telegram hand-off failed:', message(e))
   }
 
-  const emailed = Boolean(sequence?.sent.some((s) => s.step === 'thanks'))
   if (!emailed && !telegramOk) {
     return NextResponse.json({ ok: false, error: 'delivery' }, { status: 502 })
   }
-  console.log(`guide: signup saved (email ${emailed ? 'sent' : 'not sent'}, telegram ${telegramOk ? 'ok' : 'failed'})`)
+  console.log(`guide: signup via ${delivery.via} (email ${emailed ? 'on its way' : 'not sent'}, telegram ${telegramOk ? 'ok' : 'failed'})`)
   return NextResponse.json({ ok: true })
 }

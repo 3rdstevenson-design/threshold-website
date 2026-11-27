@@ -1,9 +1,13 @@
-import { cancelEmail, createContact, ResendError, updateContact } from '@/lib/email/resend'
-import { readToken } from '@/lib/email/unsubscribe-token'
+import { callScript, scriptConfigured } from '@/lib/email/guide-script'
+import { cancelEmail, createContact, resendConfigured, ResendError, updateContact } from '@/lib/email/resend'
+import { readToken, type UnsubscribePayload } from '@/lib/email/unsubscribe-token'
 import { sendMessage } from '@/lib/telegram'
 
 // GET shows a confirm button (mail scanners prefetch links, so a GET must never unsubscribe anyone).
 // POST does it: from that button, or from the mail app's one-click unsubscribe (RFC 8058, List-Unsubscribe-Post).
+// Since 2026-11-27 the guide emails go out from Gmail and the "Threshold guide signups" Sheet is the list: a POST marks
+// the address unsubscribed there (its script cancels the queued follow-ups). Links in the Resend emails sent before
+// then (no src in the token) also cancel their queued Resend emails and mark the Resend contact, as before.
 // Ported 2026-11-14 from pdf-lead-magnets/threshold-baad-guide with the CAN-SPAM review fixes: a queued email
 // that can't be canceled now alerts Lars instead of failing silently, and an address with no contact gets a
 // suppression record.
@@ -69,13 +73,22 @@ async function cancel(id: string): Promise<string | null> {
   return null
 }
 
-export async function POST(request: Request) {
-  const t = new URL(request.url).searchParams.get('t') ?? ''
-  const payload = read(t)
-  if (!payload) return invalid()
+type SheetUnsubscribe = { found: boolean; already: boolean; canceled: number }
 
+/** The Sheet side: null when it worked, else the reason. */
+async function unsubscribeInSheet(email: string): Promise<{ error: string | null; note: string }> {
+  try {
+    const r = await callScript<SheetUnsubscribe>('unsubscribe', { email })
+    const what = r.already ? 'already unsubscribed' : r.found ? 'marked unsubscribed' : 'added as unsubscribed'
+    return { error: null, note: `Sheet: ${what}, ${r.canceled} queued email(s) canceled` }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : String(e), note: '' }
+  }
+}
+
+/** The Resend side, for links in emails sent through Resend (before 2026-11-27). */
+async function unsubscribeInResend(payload: UnsubscribePayload): Promise<{ error: string | null; note: string }> {
   const failedCancels = (await Promise.all(payload.ids.map(cancel))).filter((x): x is string => Boolean(x))
-
   try {
     await updateContact(payload.e, { unsubscribed: true })
   } catch (e) {
@@ -83,25 +96,56 @@ export async function POST(request: Request) {
       // No contact yet: create one marked unsubscribed, so a later broadcast can't reach them.
       await createContact(payload.e, '', true).catch(() => undefined)
     } else {
-      console.error('unsubscribe: contact update failed:', e instanceof Error ? e.message : e)
-      await sendMessage(
-        `Unsubscribe FAILED for ${payload.e}: ${e instanceof Error ? e.message : e}. Mark them unsubscribed in Resend by hand (Contacts).`,
-      ).catch(() => undefined)
-      return page(
-        'Something went wrong',
-        p("I couldn't update your preferences just now. Please try again, or reply to any of my emails."),
-        502,
-      )
+      return { error: e instanceof Error ? e.message : String(e), note: '' }
     }
   }
-
   const note = failedCancels.length
-    ? ` These queued emails could NOT be canceled, cancel them in Resend by hand (Emails): ${failedCancels.join(', ')}`
-    : ''
-  await sendMessage(`Guide emails: ${payload.e} unsubscribed (${payload.ids.length} queued email(s) handled).${note}`).catch(
-    () => undefined,
-  )
-  console.log('unsubscribe: done', { failedCancels: failedCancels.length })
+    ? `Resend: ${payload.ids.length} queued email(s); these could NOT be canceled, cancel them in Resend by hand (Emails): ${failedCancels.join(', ')}`
+    : `Resend: ${payload.ids.length} queued email(s) handled`
+  return { error: null, note }
+}
+
+export async function POST(request: Request) {
+  const t = new URL(request.url).searchParams.get('t') ?? ''
+  const payload = read(t)
+  if (!payload) return invalid()
+
+  const gmailEra = payload.src === 'g'
+  const notes: string[] = []
+  const failures: string[] = []
+
+  // The Sheet is the list from 2026-11-27: always mark it, so a Resend-era reader can't be emailed from Gmail later.
+  if (scriptConfigured()) {
+    const r = await unsubscribeInSheet(payload.e)
+    if (r.error) failures.push(`Sheet (${r.error}): mark them Unsubscribed in the Threshold guide signups Sheet by hand`)
+    else notes.push(r.note)
+  } else if (gmailEra) {
+    failures.push('Sheet (the signup script is not configured): mark them Unsubscribed in the Sheet by hand')
+  }
+  if (!gmailEra && resendConfigured()) {
+    const r = await unsubscribeInResend(payload)
+    if (r.error) failures.push(`Resend (${r.error}): mark them unsubscribed in Resend by hand (Contacts)`)
+    else notes.push(r.note)
+  }
+
+  // The list that sends this email must be updated; if it wasn't, the reader sees an error and Lars gets the fix.
+  const listFailed = gmailEra ? failures.length > 0 : failures.some((f) => f.startsWith('Resend')) || notes.length === 0
+  if (failures.length) {
+    console.error('unsubscribe: failed:', failures.join(' | '))
+    await sendMessage(`Unsubscribe FAILED for ${payload.e}. ${failures.join('. ')}.${notes.length ? ` Done: ${notes.join('; ')}.` : ''}`).catch(
+      () => undefined,
+    )
+  } else {
+    await sendMessage(`Guide emails: ${payload.e} unsubscribed. ${notes.join('; ')}.`).catch(() => undefined)
+  }
+  if (listFailed) {
+    return page(
+      'Something went wrong',
+      p("I couldn't update your preferences just now. Please try again, or reply to any of my emails."),
+      502,
+    )
+  }
+  console.log('unsubscribe: done', { gmailEra, notes: notes.length })
 
   // One-click requests from mail apps don't need a page.
   const isOneClick = (await request.text().catch(() => '')).includes('List-Unsubscribe=One-Click')
