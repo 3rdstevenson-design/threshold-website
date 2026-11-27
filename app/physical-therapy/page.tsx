@@ -10,8 +10,8 @@ import Faq from '@/components/Faq'
 
 // In-person physical therapy (Lars, 2026-11-15: the menu made it look like all he does is online coaching).
 // Every fact has a source: sessions at 1908 Reston Metro Plaza (Lars, 2026-11-15); 60 minutes, face to face
-// (Practice Better service "Threshold Performance Care - In-Person Session"); weekly or every other week (wiki
-// reference-threshold-offers); no referral needed for a DPT (Code of Virginia § 54.1-3482(B)). No prices, and no
+// (Practice Better service "Threshold Performance Care - In-Person Session"); no visit frequency anywhere in the copy
+// (Lars, 2026-11-25 and 2026-11-27); no referral needed for a DPT (Code of Virginia § 54.1-3482(B)). No prices, and no
 // cost or insurance answer for now (Lars, 2026-11-15); the Good Faith Estimate notice is in the footer.
 // 2026-11-19 (Search Console: "Crawled - currently not indexed"): the page read as a thin copy of the homepage, so it
 // gets its own title and sections. Sources: who I see = the three groups of the 3x3 matrix (wiki
@@ -88,7 +88,7 @@ const STEPS = [
     body: "A full evaluation, joint by joint, and your first treatment. You leave knowing what's going on.",
   },
   {
-    title: 'Weekly or every other week after that.',
+    title: 'Your sessions after that.',
     body: 'Hands-on treatment and the exercises that hold the change in place, on one plan I retest as you go. Between sessions, your plan lives in the app.',
   },
 ]
