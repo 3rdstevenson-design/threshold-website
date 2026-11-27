@@ -2,19 +2,18 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { pageMeta } from '@/lib/metadata'
-import { HOME_TITLE, BUSINESS, USP_LINE, DISCOVERY_CALL } from '@/lib/site'
+import { HOME_TITLE, BUSINESS, HOME_HEADLINE, DISCOVERY_CALL } from '@/lib/site'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 import BookingWidget from '@/components/BookingWidget'
 import GuideSignup from '@/components/GuideSignup'
 import Faq from '@/components/Faq'
-import WordHighlight from '@/components/moments/WordHighlight'
 
 export const metadata: Metadata = {
   ...pageMeta({
     fullTitle: HOME_TITLE,
     description:
-      'Doctor of Physical Therapy in Reston, VA. Dr. Lars Stevenson, PT, DPT, takes athletes and active adults the rest of the way after the pain backs off.',
+      "Doctor of Physical Therapy in Reston, VA. I've helped everyone from middle school athletes all the way up to the Olympic stage.",
     path: '/',
   }),
 }
@@ -44,7 +43,7 @@ const STEPS: { letter: string; title: string; body: string }[] = [
   },
   {
     letter: 'S',
-    title: 'Test it, then trust it.',
+    title: 'Measure your progress.',
     body: "I retest as you go and stay with you until you're back, in person and between sessions in the app.",
   },
 ]
@@ -68,11 +67,6 @@ const REVIEWS = [
   },
 ]
 
-const OTHER_HALF = [
-  "Less pain is a milestone. The other half is getting your strength, speed and confidence back, so the shoulder that's fine doing dishes holds up on a serve.",
-  'That half is what I work on. Your plan starts from your own evaluation and changes every time you retest.',
-]
-
 const tel = `tel:${BUSINESS.phone.replace(/-/g, '')}`
 const h2 = 'font-cormorant text-h2 font-medium text-ink'
 
@@ -83,13 +77,12 @@ export default function HomePage() {
       <main id="main" className="overflow-x-clip">
         {/* First screen: the headline, what this is, the action, one photograph of the work. */}
         <section className="mx-auto max-w-page px-5 pb-20 pt-12 sm:px-8 md:pb-28 md:pt-20">
-          <h1 className="relative z-[1] max-w-[24ch] font-cormorant text-display font-medium text-ink">{USP_LINE}</h1>
+          <h1 className="relative z-[1] max-w-[24ch] font-cormorant text-display font-medium text-ink">{HOME_HEADLINE}</h1>
           <div className="mt-10 grid gap-12 md:mt-14 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-5 md:row-start-1 lg:col-span-4">
               <p className="text-lede text-ink-soft">
                 I&apos;m Dr. Lars Stevenson, a Doctor of Physical Therapy with a background in strength and
-                conditioning and exercise, with a concentration in nutrition. I take athletes and active adults the rest
-                of the way, on one plan built for them and tested as they go.
+                conditioning and exercise, with a concentration in nutrition.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <a href="#book" className="btn">
@@ -117,16 +110,6 @@ export default function HomePage() {
                 />
               </div>
             </div>
-          </div>
-        </section>
-
-        <section className="border-t border-hairline">
-          <div className="mx-auto grid max-w-page gap-8 px-5 py-24 sm:px-8 md:grid-cols-12 md:py-32">
-            <h2 className={`${h2} md:col-span-5`}>The other half of recovery</h2>
-            <WordHighlight
-              paragraphs={OTHER_HALF}
-              className="max-w-measure space-y-5 text-lede text-ink-soft md:col-span-6 md:col-start-7"
-            />
           </div>
         </section>
 

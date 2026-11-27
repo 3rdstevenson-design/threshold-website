@@ -10,6 +10,7 @@
 //   referral (SB 1187, 2021).
 // - Lars, 2026-11-25: visit frequency is never promised (his line, word for word, answers "How often"), and the
 //   Good Faith Estimate link stays in the footer only, never in an FAQ answer.
+// - Lars, 2026-11-26: the 2026-11-12 USP line is rejected (not his words); lib/__tests__/rejected-lines.test.ts keeps it out.
 
 export type FaqItem = { q: string; a: string; link?: { href: string; label: string } }
 
@@ -19,7 +20,7 @@ export const FAQS: Record<FaqPage, FaqItem[]> = {
   home: [
     {
       q: 'What is performance physical therapy?',
-      a: "Physical therapy that keeps going after the pain backs off. Treatment and training sit on one plan, so you get your strength, speed and confidence back for the sport or training you love, and I retest as you go to prove it.",
+      a: 'Physical therapy where treatment and training sit on one plan, so you get your strength, speed and confidence back for the sport or training you love, and I retest as you go to prove it.',
     },
     {
       q: 'What does physical therapy at Threshold treat?',
@@ -68,7 +69,7 @@ export const FAQS: Record<FaqPage, FaqItem[]> = {
     },
     {
       q: "I already did physical therapy and I'm still not right. Is this different?",
-      a: "Often the first round stopped when the pain backed off, which is only halfway. I keep going until your strength, speed and confidence are back, and I retest to prove it.",
+      a: 'Every session is with me, start to finish. Treatment and training sit on one plan, and I retest as you go to prove it.',
     },
     {
       q: 'Do you take insurance for physical therapy?',
