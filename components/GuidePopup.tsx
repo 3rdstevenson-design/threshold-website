@@ -27,6 +27,15 @@ function read(key: string): number {
   }
 }
 
+/** Whether the page's own guide section is on screen right now. Checked directly, because the observer below reports a
+ *  frame late: a visitor who lands on /#guide or scrolls fast would otherwise get the slide-in over the form. */
+function inlineFormOnScreen(): boolean {
+  const section = document.getElementById('guide')
+  if (!section) return false
+  const r = section.getBoundingClientRect()
+  return r.top < window.innerHeight && r.bottom > 0
+}
+
 function write(key: string, value: number) {
   try {
     localStorage.setItem(key, String(value))
@@ -55,7 +64,7 @@ export default function GuidePopup() {
 
   const autoOpen = useCallback(() => {
     const s = live.current
-    if (!s.eligible || s.signedUp || s.open || s.inlineVisible) return
+    if (!s.eligible || s.signedUp || s.open || s.inlineVisible || inlineFormOnScreen()) return
     if (Date.now() - read(SHOWN_KEY) < QUIET_MS) return
     write(SHOWN_KEY, Date.now())
     setOpen({ via: 'popup', full: window.matchMedia('(min-width: 640px)').matches })

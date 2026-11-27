@@ -43,7 +43,7 @@ describe('buildEmails', () => {
     expect(emails.map((e) => e.step)).toEqual(['thanks', 'd2', 'd5'])
     const links = new Set(emails.map((e) => e.unsubscribeUrl))
     expect(links.size).toBe(1)
-    const [link] = [...links]
+    const [link] = Array.from(links)
     expect(link.startsWith('https://www.thresholdhp.com/api/unsubscribe?t=')).toBe(true)
     expect(readToken(new URL(link).searchParams.get('t')!)).toEqual({ e: 'pat@example.com', ids: [], src: 'g' })
     for (const e of emails) {
