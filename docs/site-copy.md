@@ -299,6 +299,54 @@ I coach your return to training online, after rehab: a plan built around you, co
 
 ---
 
+## ACL physical therapy ( /acl-physical-therapy, new 2026-11-27, DRAFT for your word-for-word OK )
+
+*(Title: "Physical Therapy for ACL Tears and Surgery in Reston, VA". Description: "Physical therapy for ACL tears and ACL surgery in Reston, VA with Dr. Lars Stevenson, DPT: from the early weeks to return-to-sport testing. No referral needed.")*
+
+# Physical therapy for ACL tears in Reston
+
+I take you from the early weeks after an ACL tear or ACL surgery through return-to-sport testing, before you go back to your sport. Every session is with me, start to finish.
+
+**[Book a free call]**
+
+*(Photo: your hands on a client's knee, room grayed. treatment-1/hands-on-knee-01.)*
+
+### Cleared is not capable.
+
+Cleared and capable are two different things. Once people are out of pain and hit the numbers they're looking for, like 120 degrees of range of motion and strength within 80 to 85% of the other leg, they tend to get distracted. If you're lucky, you'll do a hop test to see where you're at functionally. A lot of times, even that gets skipped.
+
+So I test for it before you go back.
+
+### What return-to-sport testing looks like
+
+You go back when you pass, not when a date on the calendar comes up.
+
+- Strength side to side.
+- Hop and jump tests.
+- Change of direction under fatigue.
+- Movement quality and readiness.
+
+### One plan, from the first week to your sport
+
+Treatment and training sit on one plan, and I retest as you go to prove it. Between sessions, your plan lives in the app.
+
+One Division I lacrosse player came back from ACL and meniscus surgery for his fifth year and now plays professionally, with no injuries since.
+
+[See physical therapy in Reston]
+
+### Questions about ACL physical therapy
+(In the FAQs section below.)
+
+### Start with a free call
+Tell me what's going on and what you've tried. If I'm not the right person for it, I'll point you to who is. **[Book a free call]**
+
+### Not near Reston?
+I coach your return to training online, after rehab: a plan built around you, coaching in the app, and a call when you need one. [See online coaching]
+
+*(Sources: "Cleared is not capable." is your quote-bank line; the paragraph under it is your own words on a Fathom call (2026-07-29, 02:45 and 05:04), lightly cleaned; the testing list is your definition in voice-dna.md; the case is from proof.md; "Every session is with me, start to finish", the one-plan lines, the free-call lines and the online coaching lines are already approved on the site. New lines for your OK: the H1, the first intro sentence, "So I test for it before you go back.", "You go back when you pass, not when a date on the calendar comes up.", and the two section headings that aren't your quote.)*
+
+---
+
 ## Good Faith Estimate ( /good-faith-estimate, new in draft 5, linked in the footer )
 
 CMS's model notice word for word ("You have the right to receive a 'Good Faith Estimate' explaining how much your health care will cost" and its three points), with CMS's current link (www.cms.gov/medical-bill-rights), its email and its phone number. Then:
@@ -363,7 +411,7 @@ An accordion on each page (your pick, 2026-11-25). Every question is on one page
 
 **What is performance physical therapy?** Physical therapy where treatment and training sit on one plan, so you get your strength, speed and confidence back for the sport or training you love, and I retest as you go to prove it.
 
-**What does physical therapy at Threshold treat?** Sports injuries and the pain that keeps active people out of training: rehab after ACL and meniscus surgery, rotator cuff repairs and shoulder replacements, low back, neck and hip pain, hamstring tears, ankle sprains, and getting back to running, pickleball, golf or racquet sports.
+**What does physical therapy at Threshold treat?** Sports injuries and the pain that keeps active people out of training: rehab after ACL and meniscus surgery, rotator cuff repairs and shoulder replacements, low back pain and sciatica, neck and hip pain, hamstring tears, ankle sprains, tennis elbow, and getting back to running, pickleball, golf or racquet sports.
 
 **Where is Threshold Health & Performance?** In Reston, Virginia. I see athletes and active adults in person, one-on-one, from Reston, Herndon, Tysons, Fairfax, McLean and Great Falls.
 
@@ -385,12 +433,24 @@ An accordion on each page (your pick, 2026-11-25). Every question is on one page
 
 **What should I wear to physical therapy?** Clothes you can move and train in. Shorts if it's your knee, hip or ankle, and a shirt that gives me room to work if it's your shoulder, neck or back.
 
-**I already did physical therapy and I'm still not right. Is this different?** Every session is with me, start to finish. Treatment and training sit on one plan, and I retest as you go to prove it.
+**What if physical therapy didn't work for me?** Then you're probably cleared, but not capable yet. A lot of clinics run a protocol, and you're discharged when it ends or when insurance stops covering it, whether or not you're back to what you want to do. That's not any one person's fault; a lot of PTs are overbooked and overworked. Every session is 60 minutes with me, start to finish, with no techs or aides, and treatment and training sit on one plan. *(PR #26, 2026-11-27: the searched wording and your call framing.)*
 
 **Do you take insurance for physical therapy?** Threshold is out of network with every insurance plan, so you pay for each visit directly. You can pay for physical therapy with an HSA or FSA card. Check with your plan about what it covers.
 
 **Do you do physical therapy after ACL surgery?** Yes. I take you from the early weeks after ACL or meniscus surgery through return-to-sport testing (strength side to side, hops and jumps, and change of direction under fatigue) before you go back to your sport.
 
+
+### ACL physical therapy (new 2026-11-27, DRAFT for your OK)
+
+**When can I go back to my sport after an ACL tear?** When you pass return-to-sport testing, not on a set date: strength side to side, hop and jump tests, change of direction under fatigue, movement quality and readiness.
+
+**Can an athlete fully recover from an ACL tear?** Yes. One Division I lacrosse player came back from ACL and meniscus surgery for his fifth year and now plays professionally.
+
+**Why do people get hurt again after ACL surgery?** A lot of times the return-to-sport milestones either aren't thorough enough or don't get done at all, so strength imbalances and range of motion problems get left over. The longer that gets delayed, the more compensations tend to build up, and re-injuries can happen. *(Your words, Fathom call 2026-07-29 at 07:09, lightly cleaned.)*
+
+**What does ACL rehab with you look like?** Every session is 60 minutes with me, start to finish, with no techs or aides. Hands-on treatment and the exercises that hold the change in place sit on one plan that I retest as you go. Between sessions, your plan lives in the app. *(Lines already approved on the Physical therapy page.)*
+
+Still to come, in your words: "Do I need surgery for an ACL tear?" (surgery or not, and prehab) and "Do ACL injury prevention programs work?" Nothing on file from you covers either.
 ### Online coaching
 
 **Is online coaching the same as physical therapy?** Online coaching is strength and fitness coaching for the stage after rehab. It doesn't include physical therapy, diagnosis or treatment, and it doesn't replace care from a licensed clinician in your state. If you need hands-on treatment, I'll tell you and help you get it, in person with me in Reston or with someone near you.
