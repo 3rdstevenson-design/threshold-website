@@ -86,11 +86,11 @@ export default function AboutPage() {
             <div className="md:col-span-5 md:col-start-8 md:pt-24">
               <div className="relative aspect-[4/3] overflow-hidden bg-band">
                 <Image
-                  src="/photos/coaching-athlete.jpg"
-                  alt="Dr. Lars Stevenson coaching a client through a wrist exercise"
+                  src="/photos/knee-rehab.jpg"
+                  alt="Dr. Lars Stevenson with a client in rehab after knee surgery"
                   fill
                   sizes="(min-width: 768px) 38vw, 100vw"
-                  className="object-cover object-[45%_40%]"
+                  className="object-cover object-[50%_57%]"
                 />
               </div>
             </div>
@@ -135,11 +135,11 @@ export default function AboutPage() {
             <div className="md:order-1 md:col-span-5 md:pt-24">
               <div className="relative aspect-[4/3] overflow-hidden bg-band">
                 <Image
-                  src="/photos/strength-test.jpg"
-                  alt="Dr. Lars Stevenson testing a client's forearm strength"
+                  src="/photos/smiling-athlete.jpg"
+                  alt="Dr. Lars Stevenson and an athlete smiling during a session"
                   fill
                   sizes="(min-width: 768px) 38vw, 100vw"
-                  className="object-cover object-[40%_40%]"
+                  className="object-cover object-[12%_50%]"
                 />
               </div>
             </div>

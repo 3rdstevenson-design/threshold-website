@@ -1,6 +1,9 @@
 // Subject lift with Apple's Vision framework (the same engine as "Lift subject" in Photos), all local.
 // Usage: swift scripts/photo-lift.swift <in.jpg> <outDir> <name> [maxEdge]
 // Used for the site photos (2026-11-14): the *-muted.jpg output is the "room grayed" look in public/photos.
+// 2026-11-27 (no boxing gym photos): knee-exam, consult-before-session, smiling-athlete and knee-rehab are the -muted.jpg
+// of Photos for Carousels treatment-4/knee-exam-hands-01, treatment-4/consult-before-treatment-01, misc/gym-smiling-athlete
+// and misc/treatment-knee-table; hamstring-stretch-cutout.png is the -cutout.png of treatment-4/straight-leg-raise-03, trimmed to the people.
 // Writes <name>-cutout.png (alpha), <name>-mask.png, <name>-onlight.jpg (subject on #F5F5F5),
 // and <name>-muted.jpg (real room kept, background turned soft gray, subject in color).
 import AppKit

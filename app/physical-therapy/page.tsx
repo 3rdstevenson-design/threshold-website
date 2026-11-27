@@ -130,12 +130,12 @@ export default function PhysicalTherapyPage() {
           <div className="md:col-span-5">
             <div className="relative aspect-[4/5] overflow-hidden bg-band">
               <Image
-                src="/photos/shoulder-assessment.jpg"
-                alt="Dr. Lars Stevenson assessing a client's shoulder"
+                src="/photos/consult-before-session.jpg"
+                alt="Dr. Lars Stevenson talking with a client before a session"
                 fill
                 priority
                 sizes="(min-width: 768px) 40vw, 100vw"
-                className="object-cover object-[55%_35%]"
+                className="object-cover object-[57%_50%]"
               />
             </div>
           </div>
@@ -271,11 +271,11 @@ export default function PhysicalTherapyPage() {
             <div className="md:col-span-5 md:col-start-8">
               <div className="relative aspect-[4/3] overflow-hidden bg-band">
                 <Image
-                  src="/photos/strength-test.jpg"
-                  alt="Dr. Lars Stevenson testing a client's forearm strength"
+                  src="/photos/smiling-athlete.jpg"
+                  alt="Dr. Lars Stevenson and an athlete smiling during a session"
                   fill
                   sizes="(min-width: 768px) 38vw, 100vw"
-                  className="object-cover object-[40%_40%]"
+                  className="object-cover object-[12%_50%]"
                 />
               </div>
             </div>
