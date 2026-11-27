@@ -4,6 +4,8 @@ Every word that goes on the redesigned site. Nothing goes live until you approve
 
 Rules applied: Voice DNA (first person, no em dashes, no "not X, Y", no "we"), your USP, "athletes and active adults", no CSCS (lapsed), no fixed recovery timelines, nothing invented.
 
+**Changed 2026-11-27 (your call):** each CROSS letter now carries what it stands for (Clinical assessment, Reconditioning, Ownership, Systematic, Support; the brand's names), with the same descriptions; the in-person step 3 title no longer gives a visit frequency ("Your sessions after that.").
+
 **Changed in draft 7 (your call, 2026-11-26):** the 2026-11-12 USP line ("When the pain backs off...") and its framing are gone, because they aren't your words and you never signed off on them. The homepage headline is now "Sports and performance physical therapy in Reston, VA"; the homepage description leads with the doctorate (Lou's point 1) and then your line with "I've helped" (your pick, "Doctor first"); the homepage and Physical therapy sections built on that line are gone, and the lede, About, Online coaching and two FAQ answers lost only the rejected words. You also dropped "Test it, then trust it" (another 2026-11-12 Claude draft), so the fifth CROSS step is titled "Measure your progress." from the How I work list. A test (`lib/__tests__/rejected-lines.test.ts`) keeps both lines from coming back.
 
 **Added in draft 6 (2026-11-25, Lou Malmgren's SEO and AI-search audit, your calls the same day):** every page title leads with the phrase that page targets and carries "Dr. Lars Stevenson, DPT" (Online coaching excepted); new meta descriptions; the homepage lede names you as a Doctor of Physical Therapy and the line under the buttons says "Licensed in Virginia"; a "What I treat" section on the Physical therapy page; an FAQ on Home, Physical therapy, Online coaching, About and Book, shown as an accordion (your pick), with "physical therapy" in the questions (never on Online coaching outside its disclaimer); a new insurance answer (out of network with every plan, HSA and FSA cards for physical therapy visits, no prices); the referral answer now carries Virginia's 60-day limit; "How often" is your line, word for word; the Good Faith Estimate stays linked from the footer only. The site renders the FAQs from `lib/faqs.ts`; the FAQs section at the end of this file is the same text. The keyword research behind it: `docs/seo-keyword-map-2026-11.md`. Reviews 1 and 3 carry the reviewers' OK'd condition words in brackets (ankle, low back).
@@ -50,15 +52,15 @@ Free 30-minute call. Licensed in Virginia, based in Reston.
 
 Every patient goes through the same five parts, in this order. I call it the CROSS method.
 
-**C · Assess every joint.** A full evaluation, joint by joint, to find where things broke down and why. You leave the first visit knowing what's going on.
+**C · Clinical assessment.** A full evaluation, joint by joint, to find where things broke down and why. You leave the first visit knowing what's going on.
 
-**R · Treat from the first session.** Hands-on treatment starts that day, along with the exercises that hold the change in place.
+**R · Reconditioning.** Hands-on treatment starts that day, along with the exercises that hold the change in place.
 
-**O · Rebuild your confidence.** Pain changes what you believe your body can handle. Part of the work is proving to yourself that it can.
+**O · Ownership.** Pain changes what you believe your body can handle. Part of the work is proving to yourself that it can.
 
-**S · Follow a plan with a reason.** Every exercise has a place in the sequence, and you'll always know why you're doing it.
+**S · Systematic.** Every exercise has a place in the sequence, and you'll always know why you're doing it.
 
-**S · Measure your progress.** I retest as you go and stay with you until you're back, in person and between sessions in the app.
+**S · Support.** I retest as you go and stay with you until you're back, in person and between sessions in the app.
 
 *(Photos: 3 or 4 shots of you working with clients, beside the steps.)*
 
@@ -277,7 +279,7 @@ I'm a physical therapist with a background in strength and conditioning and exer
 
 1. **Book a free call.** Tell me what's going on and what you've tried. If I'm not the right person for it, I'll point you to who is.
 2. **Your first visit.** A full evaluation, joint by joint, and your first treatment. You leave knowing what's going on.
-3. **Weekly or every other week after that.** Hands-on treatment and the exercises that hold the change in place, on one plan I retest as you go. Between sessions, your plan lives in the app.
+3. **Your sessions after that.** Hands-on treatment and the exercises that hold the change in place, on one plan I retest as you go. Between sessions, your plan lives in the app.
 
 ### Questions about physical therapy
 

@@ -20,31 +20,32 @@ export const metadata: Metadata = {
 }
 
 // The CROSS method, in the order a patient goes through it (copy for Lars's approval: docs/site-copy.md).
-// The letters spell the method's name, so they stand in for list numbers.
+// The letters spell the method's name, so they stand in for list numbers, and each title is what its letter stands for
+// (Lars, 2026-11-27; the names are the brand's, wiki threshold-brand "CROSS methodology").
 const STEPS: { letter: string; title: string; body: string }[] = [
   {
     letter: 'C',
-    title: 'Assess every joint.',
+    title: 'Clinical assessment.',
     body: "A full evaluation, joint by joint, to find where things broke down and why. You leave the first visit knowing what's going on.",
   },
   {
     letter: 'R',
-    title: 'Treat from the first session.',
+    title: 'Reconditioning.',
     body: 'Hands-on treatment starts that day, along with the exercises that hold the change in place.',
   },
   {
     letter: 'O',
-    title: 'Rebuild your confidence.',
+    title: 'Ownership.',
     body: 'Pain changes what you believe your body can handle. Part of the work is proving to yourself that it can.',
   },
   {
     letter: 'S',
-    title: 'Follow a plan with a reason.',
+    title: 'Systematic.',
     body: "Every exercise has a place in the sequence, and you'll always know why you're doing it.",
   },
   {
     letter: 'S',
-    title: 'Measure your progress.',
+    title: 'Support.',
     body: "I retest as you go and stay with you until you're back, in person and between sessions in the app.",
   },
 ]
