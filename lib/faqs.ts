@@ -16,7 +16,8 @@
 //   the home "what does it treat" answer names sciatica and tennis elbow.
 // - The ACL page (2026-11-27, threshold-coaching-brain/campaigns/website-seo-2026-11/2026-11-27-acl-page-draft.md):
 //   questions from the searches people make; answers from his testing definition, a proof.md case, his own words on a
-//   Fathom call (2026-07-29) and lines already approved here. His answers on surgery and on prevention programs come next.
+//   Fathom call (2026-07-29) and lines already approved here; Lars approved them 2026-11-27 and gave the "fully recover"
+//   answer in his own words. His answers on surgery and on prevention programs come next.
 
 export type FaqItem = { q: string; a: string; link?: { href: string; label: string } }
 
@@ -95,7 +96,7 @@ export const FAQS: Record<FaqPage, FaqItem[]> = {
     },
     {
       q: 'Can an athlete fully recover from an ACL tear?',
-      a: 'Yes. One Division I lacrosse player came back from ACL and meniscus surgery for his fifth year and now plays professionally.',
+      a: 'Yes, one Division I lacrosse player that I worked with came back from an ACL and meniscus surgery for his fifth year and went on to play professional lacrosse.',
     },
     {
       q: 'Why do people get hurt again after ACL surgery?',

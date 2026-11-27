@@ -12,8 +12,8 @@ import Faq from '@/components/Faq'
 // Planner rounds). It targets "physical therapy for acl", "...acl tear", "...acl injury" and "acl tear treatment physical
 // therapy", 100 to 1K a month each in Northern Virginia (marketing-agent/agent/seo/2026-11-27-condition-pages-targets.md);
 // the Physical therapy page keeps "physical therapy in Reston, VA" (docs/seo-keyword-map-2026-11.md).
-// Copy: threshold-coaching-brain/campaigns/website-seo-2026-11/2026-11-27-acl-page-draft.md (coach-copy). Every line is
-// Lars's own words, a line already approved on the site, or a draft for his word-for-word OK:
+// Copy: threshold-coaching-brain/campaigns/website-seo-2026-11/2026-11-27-acl-page-draft.md (coach-copy), approved by Lars
+// 2026-11-27 ("Those look good there"). Every line is his own words, a line already approved on the site, or a new line he OKd:
 // - "Cleared is not capable." is his quote-bank line. The paragraph under it is his own words from a Fathom call
 //   (2026-07-29, at 02:45 and 05:04), lightly cleaned.
 // - The testing list is his return-to-sport testing definition (coach/voice-dna.md).

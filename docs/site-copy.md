@@ -299,7 +299,7 @@ I coach your return to training online, after rehab: a plan built around you, co
 
 ---
 
-## ACL physical therapy ( /acl-physical-therapy, new 2026-11-27, DRAFT for your word-for-word OK )
+## ACL physical therapy ( /acl-physical-therapy, new 2026-11-27, approved by you the same day )
 
 *(Title: "Physical Therapy for ACL Tears and Surgery in Reston, VA". Description: "Physical therapy for ACL tears and ACL surgery in Reston, VA with Dr. Lars Stevenson, DPT: from the early weeks to return-to-sport testing. No referral needed.")*
 
@@ -343,7 +343,7 @@ Tell me what's going on and what you've tried. If I'm not the right person for i
 ### Not near Reston?
 I coach your return to training online, after rehab: a plan built around you, coaching in the app, and a call when you need one. [See online coaching]
 
-*(Sources: "Cleared is not capable." is your quote-bank line; the paragraph under it is your own words on a Fathom call (2026-07-29, 02:45 and 05:04), lightly cleaned; the testing list is your definition in voice-dna.md; the case is from proof.md; "Every session is with me, start to finish", the one-plan lines, the free-call lines and the online coaching lines are already approved on the site. New lines for your OK: the H1, the first intro sentence, "So I test for it before you go back.", "You go back when you pass, not when a date on the calendar comes up.", and the two section headings that aren't your quote.)*
+*(Sources: "Cleared is not capable." is your quote-bank line; the paragraph under it is your own words on a Fathom call (2026-07-29, 02:45 and 05:04), lightly cleaned; the testing list is your definition in voice-dna.md; the case is from proof.md; "Every session is with me, start to finish", the one-plan lines, the free-call lines and the online coaching lines are already approved on the site. You approved (2026-11-27: "Those look good there") the new lines: the H1, the first intro sentence, "So I test for it before you go back.", "You go back when you pass, not when a date on the calendar comes up.", and the two section headings that aren't your quote.)*
 
 ---
 
@@ -440,11 +440,11 @@ An accordion on each page (your pick, 2026-11-25). Every question is on one page
 **Do you do physical therapy after ACL surgery?** Yes. I take you from the early weeks after ACL or meniscus surgery through return-to-sport testing (strength side to side, hops and jumps, and change of direction under fatigue) before you go back to your sport.
 
 
-### ACL physical therapy (new 2026-11-27, DRAFT for your OK)
+### ACL physical therapy (new 2026-11-27, approved by you the same day)
 
 **When can I go back to my sport after an ACL tear?** When you pass return-to-sport testing, not on a set date: strength side to side, hop and jump tests, change of direction under fatigue, movement quality and readiness.
 
-**Can an athlete fully recover from an ACL tear?** Yes. One Division I lacrosse player came back from ACL and meniscus surgery for his fifth year and now plays professionally.
+**Can an athlete fully recover from an ACL tear?** Yes, one Division I lacrosse player that I worked with came back from an ACL and meniscus surgery for his fifth year and went on to play professional lacrosse. *(Your words, 2026-11-27.)*
 
 **Why do people get hurt again after ACL surgery?** A lot of times the return-to-sport milestones either aren't thorough enough or don't get done at all, so strength imbalances and range of motion problems get left over. The longer that gets delayed, the more compensations tend to build up, and re-injuries can happen. *(Your words, Fathom call 2026-07-29 at 07:09, lightly cleaned.)*
 
