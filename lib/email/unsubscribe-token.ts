@@ -3,12 +3,12 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 /**
  * Signed unsubscribe token, so no database is needed.
  *
- * It carries the email plus the IDs of the emails still queued *after* the one it sits in. The sequence is
- * scheduled last-first (day 5, then day 2, then the thank-you), so each email's token already knows the IDs of
- * the ones that follow it, and unsubscribing from any email cancels everything still to come.
+ * Resend-era tokens (2026-11-14 to 2026-11-27) carry the email plus the IDs of the Resend emails still queued *after*
+ * the one they sit in, so unsubscribing from any email cancels everything still to come. Tokens in the Gmail emails
+ * (src "g", since 2026-11-27) carry no IDs: the signup Sheet is the list, and its script cancels what's queued.
  */
 
-export type UnsubscribePayload = { e: string; ids: string[] };
+export type UnsubscribePayload = { e: string; ids: string[]; src?: "g" };
 
 /**
  * Signing keys, preferred first. New tokens use UNSUBSCRIBE_SECRET when it's set, otherwise a key derived from
@@ -49,6 +49,7 @@ export function readToken(token: string): UnsubscribePayload | null {
   try {
     const p = JSON.parse(Buffer.from(data, "base64url").toString("utf8")) as UnsubscribePayload;
     if (typeof p.e !== "string" || !Array.isArray(p.ids) || !p.ids.every((i) => typeof i === "string")) return null;
+    if (p.src !== undefined && p.src !== "g") return null;
     return p;
   } catch {
     return null;

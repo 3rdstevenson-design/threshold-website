@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import StructuredData from '@/components/StructuredData'
+import GuidePopup from '@/components/GuidePopup'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, HOME_TITLE } from '@/lib/site'
 
 // Brand fonts, self-hosted as latin woff2 subsets (SIL OFL, licenses beside the files in app/fonts).
@@ -84,6 +85,8 @@ export default function RootLayout({
         </a>
         <StructuredData />
         {children}
+        {/* The guide's slide-in and button, on the reading pages only (components/GuidePopup.tsx). */}
+        <GuidePopup />
         {/* Vercel Web Analytics (free on Hobby). Replaced Plausible, whose trial lapsed in June 2026. */}
         <Analytics />
       </body>
